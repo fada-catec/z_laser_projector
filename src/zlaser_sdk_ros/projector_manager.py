@@ -49,13 +49,13 @@ class ProjectorManager:
 
     def getCoordinateSystems(self):
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
-        self.showCoordinateSystem(5)
         return available_coordinate_systems
 
     def showCoordinateSystem(self,secs):
         module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
         self.thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","1")
         time.sleep(secs)
+        self.thrift_client.deactivate_projector(self.projector_id)
 
     def setCoordinateSystem(self,coord_sys):
         self.coordinate_system = coord_sys
@@ -107,11 +107,11 @@ class ProjectorManager:
 
     ## NO FUNCIONA:
     def defineCoordinateSystem(self):
-        reference_object = zlp.create_reference_object()
-        reference_object_name = "RefObject"
+        self.reference_object = zlp.create_reference_object()
+        self.reference_object_name = "RefObject"
         print("Create the reference object...")
-        reference_object.name = reference_object_name
-        reference_object.refPointList = [zlp.create_reference_point("T1", 0, 0),
+        self.reference_object.name = self.reference_object_name
+        self.reference_object.refPointList = [zlp.create_reference_point("T1", 0, 0),
                                         zlp.create_reference_point("T2", 1000, 0),
                                         zlp.create_reference_point("T3", 0, 1000),
                                         zlp.create_reference_point("T4", 1000, 1000)]
@@ -120,34 +120,34 @@ class ProjectorManager:
         # - define coordinates in system of factory calibration wall [mm]
         # - activate reference point to use for transformation
         # - set cross size to set search area
-        reference_object.refPointList[0].tracePoint.x = 0
-        reference_object.refPointList[0].tracePoint.y = 0
-        reference_object.refPointList[0].distance = 3533.4
-        reference_object.refPointList[0].activated = True
-        reference_object.refPointList[0].crossSize = crossSize
+        self.reference_object.refPointList[0].tracePoint.x = 0
+        self.reference_object.refPointList[0].tracePoint.y = 0
+        self.reference_object.refPointList[0].distance = 3533.4
+        self.reference_object.refPointList[0].activated = True
+        self.reference_object.refPointList[0].crossSize = crossSize
 
-        reference_object.refPointList[1].tracePoint.x = 1000
-        reference_object.refPointList[1].tracePoint.y = 0
-        reference_object.refPointList[1].distance = 3533.4
-        reference_object.refPointList[1].activated = True
-        reference_object.refPointList[1].crossSize = crossSize
+        self.reference_object.refPointList[1].tracePoint.x = 1000
+        self.reference_object.refPointList[1].tracePoint.y = 0
+        self.reference_object.refPointList[1].distance = 3533.4
+        self.reference_object.refPointList[1].activated = True
+        self.reference_object.refPointList[1].crossSize = crossSize
 
-        reference_object.refPointList[2].tracePoint.x = 0
-        reference_object.refPointList[2].tracePoint.y = 1000
-        reference_object.refPointList[2].distance = 3533.4
-        reference_object.refPointList[2].activated = True
-        reference_object.refPointList[2].crossSize = crossSize
+        self.reference_object.refPointList[2].tracePoint.x = 0
+        self.reference_object.refPointList[2].tracePoint.y = 1000
+        self.reference_object.refPointList[2].distance = 3533.4
+        self.reference_object.refPointList[2].activated = True
+        self.reference_object.refPointList[2].crossSize = crossSize
 
-        reference_object.refPointList[3].tracePoint.x = 1000
-        reference_object.refPointList[3].tracePoint.y = 1000
-        reference_object.refPointList[3].distance = 3533.4
-        reference_object.refPointList[3].activated = True
-        reference_object.refPointList[3].crossSize = crossSize
+        self.reference_object.refPointList[3].tracePoint.x = 1000
+        self.reference_object.refPointList[3].tracePoint.y = 1000
+        self.reference_object.refPointList[3].distance = 3533.4
+        self.reference_object.refPointList[3].activated = True
+        self.reference_object.refPointList[3].crossSize = crossSize
 
-        reference_object.coordinateSystem = "DefinedCoordinateSystem"
-        reference_object.projectorID = self.projector_id
-        self.coordinate_system = reference_object
-        self.thrift_client.SetReferenceobject(reference_object)
+        self.reference_object.coordinateSystem = "DefinedCoordinateSystem"
+        self.reference_object.projectorID = self.projector_id
+        self.coordinate_system = self.reference_object
+        self.thrift_client.SetReferenceobject(self.reference_object)
         if self.do_register_coordinate_system: 
             self.registerCoordinateSystem()
     ## NO FUNCIONA:
@@ -181,7 +181,7 @@ class ProjectorManager:
             self.thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
             print("Register projector to coordinate system...")
             cv.acquire()
-            print("Calculate transformation..")
+            print("Calculate transformation...")
             self.thrift_client.FunctionModuleRun(module_id)
             cv.wait()
             cv.release()
@@ -190,16 +190,17 @@ class ProjectorManager:
                 print("Function module is not in idle state, hence an error has occured.")
                 # sys.exit(1)
             else:
-                res = self.thrift_client.FunctionModuleGetProperty(module_id, "result.averageDistance");
+                res = self.thrift_client.FunctionModuleGetProperty(module_id, "result.averageDistance")
                 #Activate reference object only if the calculated transformation was succesfully
-                reference_object = self.thrift_client.GetReferenceobject(reference_object_name)
-                reference_object.activated = True
-                self.thrift_client.SetReferenceobject(reference_object)
+                self.reference_object = self.thrift_client.GetReferenceobject(self.reference_object_name)
+                self.reference_object.activated = True
+                self.thrift_client.SetReferenceobject(self.reference_object)
                 print("Finished to register projector (aveDist:",res,")\n")
-                allCoordinateSystems = self.thrift_client.GetCoordinatesystemList()
-                print("Available coordinate systems:", allCoordinateSystems)
-                print("Show result of point search for 5 seconds\n")
-                thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","1")
+                # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
+                # self.thrift_client.FunctionModuleRelease(module_id)
+                # self.thrift_client.deactivate_projector(self.projector_id)
+
+
     ## NO FUNCIONA:
     def searchTargets(self):
         print("Do point search...")
@@ -219,9 +220,9 @@ class ProjectorManager:
             sys.exit(1)
         print("Finished point search")
         # Check if all points were found
-        reference_object = self.thrift_client.GetReferenceobject(reference_object_name)
+        self.reference_object = self.thrift_client.GetReferenceobject(self.reference_object_name)
         found_all = True
-        for i in range(0, len(reference_object.refPointList)):
+        for i in range(0, len(self.reference_object.refPointList)):
             resultPath = "result.tracePoints." + str(i)
             if self.thrift_client.FunctionModuleGetProperty(module_id, resultPath + ".found") != "true":
                 found_all = False

@@ -26,7 +26,8 @@ class ProjectionNode:
         self.discnt_srv = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnectionCb)
         self.lic_srv = rospy.Service('/projector_srv/load_license', Trigger, self.transferLicenseCb)
         self.setup_srv = rospy.Service('/projector_srv/setup', Trigger, self.setupCb)
-
+        self.cs_srv = rospy.Service('/projector_srv/cs', Trigger, self.defineCoordSysCb)
+        
         # License to projector
         
 
@@ -59,19 +60,28 @@ class ProjectionNode:
         rospy.loginfo(e)
         # check license
         if not self.proyector.checkLicense():
-            rospy.logwarn("License is not valid. Load a new one")            
+            rospy.logwarn("License is not valid. Load a new one")      
+            return TriggerResponse(False,"end setup")    
         else:
-            rospy.loginfo("License is valid")
-            # define coordinate system
+            rospy.loginfo("License is valid...")
+            # check coordinate system
             cs = self.proyector.getCoordinateSystems()
-            rospy.loginfo(cs)
+            rospy.loginfo("Available coordinate systems: {}".format(cs))
         return TriggerResponse(True,"end setup")
 
     def transferLicenseCb(self,req):        
         self.proyector.license_path = self.lic_path
-        print (self.lic_path)
         e = self.proyector.transferLicense()
         rospy.loginfo(e)
+        return TriggerResponse(True,"license loaded")
+
+    def defineCoordSysCb(self,req):
+        self.proyector.do_register_coordinate_system = True
+        self.proyector.defineCoordinateSystem()
+        cs = self.proyector.getCoordinateSystems()
+        rospy.loginfo("Available coordinate systems: {}".format(cs))
+        rospy.loginfo("Projecting coordinate system")
+        self.proyector.showCoordinateSystem(5)
 
 def main():
     ProjectionNode()
