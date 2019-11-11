@@ -6,8 +6,11 @@ This packages is used to control Laser Projector ZLP1 via ROS using ZLASER SDK.
 Once the setup is done it is possible to use libraries from this repo to manage the projector.
 
 Import projector manager on your script and feel free to use it:
+```
+#!/usr/bin/env python3
 
-`from zlaser_sdk_ros.projector_manager import ProjectorManager`
+from zlaser_sdk_ros.projector_manager import ProjectorManager
+```
 
 ### Setup ###
 

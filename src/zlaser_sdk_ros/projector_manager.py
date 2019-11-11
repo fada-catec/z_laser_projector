@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-# import sys
+import sys
 import os
 import threading
-from zlaser_sdk_ros import zlp
+import time
+#from zlaser_sdk_ros import zlp
+import zlp
 
 class ProjectorManager:
     def __init__(self):
@@ -12,13 +14,13 @@ class ProjectorManager:
         self.projector_IP = "192.168.10.10"
         self.server_IP = "192.168.10.11"
         self.connection_port = 9090
-        self.license_path = "/home"
+        self.license_path = "Pendrive_ZLaser/1900027652.lic"
         self.projection_group = "my_group"
         self.do_register_coordinate_system = False
         self.do_target_search = False
 
         # Create client object
-        self.thrift_client = zlp.ThriftClient(event_handler=None)
+        self.thrift_client = zlp.ThriftClient()
 
 
     def clientServerConnect(self):
@@ -28,64 +30,82 @@ class ProjectorManager:
         except Exception as e:
             return e
 
-    def activateProjector(self):
+    def activate(self):
         try:
             projectors = self.thrift_client.scan_projectors(self.projector_IP)
             self.projector_id = projectors[0]
             self.thrift_client.activate_projector(self.projector_id)
+            return "Projector activated. You can start the projection now"
         except Exception as e:
-            rospy.logerr("Exception: ",e)
+            return e
 
-    def deactivateProjector(self):
+    def deactivate(self):
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
             self.thrift_client.disconnect()
+            return "Projector deactivated. End of connection"
         except Exception as e:
-            rospy.logerr("Exception: ",e)
+            return e
+
+    def getCoordinateSystems(self):
+        available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
+        self.showCoordinateSystem(5)
+        return available_coordinate_systems
+
+    def showCoordinateSystem(self,secs):
+        module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
+        self.thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","1")
+        time.sleep(secs)
+
+    def setCoordinateSystem(self,coord_sys):
+        self.coordinate_system = coord_sys
+
+    def checkLicense(self):
+        return self.thrift_client.CheckLicense()
 
     def transferLicense(self):
         try:
-            print("Transferring license file...")
             license_path = os.path.abspath(self.license_path)
             license_file = os.path.basename(license_path)
             self.thrift_client.transfer_file(license_path, license_file, True)
         except zlp.thrift_interface.CantWriteFile as e:
-            print(e.why, e.fileName)
+            return e
         except FileNotFoundError:
-            print("File not found!")
+            return "File not found!"
+        self.thrift_client.LoadLicense(license_file)
+        return "License transfered"
 
-        self.thrift_client.LoadLicense(license_file);
+        # # set callback for property changed event TODO
+        # cv = threading.Condition()
+        # def property_changed_callback(prop, value):
+        #     cv.acquire()
+        #     print("Property changed: %s = %s" % (prop, value))
+        #     cv.notify()
+        #     cv.release()
 
-        # set callback for property changed event TODO
-        cv = threading.Condition()
-        def property_changed_callback(prop, value):
-            cv.acquire()
-            print("Property changed: %s = %s" % (prop, value))
-            cv.notify()
-            cv.release()
+        # self.thrift_client.set_property_changed_callback(property_changed_callback)
+        # self.thrift_client.RegisterForChangedProperty("config.licenseState.IsValid")
+        # # activate projector and wait for callback
+        # cv.acquire()
+        # self.activate()
+        # cv.wait()
+        # cv.release()
+        # # obtain license information
+        # valid = self.thrift_client.GetProperty("config.licenseState.IsValid")
+        # if valid == "true":
+        #     print("The license is valid.")
+        #     customer_name = self.thrift_client.GetProperty("license.Customer.Name")
+        #     grantor_name = self.thrift_client.GetProperty("license.Grantor.Name")
+        #     print("Customer: " + customer_name)
+        #     print("Grantor: " + grantor_name)
+        #     modules = self.thrift_client.GetPropChildren("config.licenseState.Modules")
+        #     for m in modules:
+        #         status = self.thrift_client.GetProperty("config.licenseState.Modules." + m)
+        #         print("Function module: " + m + ", licensed: " + status)
+        # else:
+        #     print("The license is invalid")
 
-        self.thrift_client.set_property_changed_callback(property_changed_callback)
-        self.thrift_client.RegisterForChangedProperty("config.licenseState.IsValid")
-        # activate projector and wait for callback
-        cv.acquire()
-        self.activateProjector()
-        cv.wait()
-        cv.release()
-        # obtain license information
-        valid = self.thrift_client.GetProperty("config.licenseState.IsValid")
-        if valid == "true":
-            print("The license is valid.")
-            customer_name = self.thrift_client.GetProperty("license.Customer.Name")
-            grantor_name = self.thrift_client.GetProperty("license.Grantor.Name")
-            print("Customer: " + customer_name)
-            print("Grantor: " + grantor_name)
-            modules = self.thrift_client.GetPropChildren("config.licenseState.Modules")
-            for m in modules:
-                status = self.thrift_client.GetProperty("config.licenseState.Modules." + m)
-                print("Function module: " + m + ", licensed: " + status)
-        else:
-            print("The license is invalid")
-
+    ## NO FUNCIONA:
     def defineCoordinateSystem(self):
         reference_object = zlp.create_reference_object()
         reference_object_name = "RefObject"
@@ -100,37 +120,37 @@ class ProjectorManager:
         # - define coordinates in system of factory calibration wall [mm]
         # - activate reference point to use for transformation
         # - set cross size to set search area
-        reference_object.refPointList[0].tracePoint.x = 143.2
-        reference_object.refPointList[0].tracePoint.y = -283.9
+        reference_object.refPointList[0].tracePoint.x = 0
+        reference_object.refPointList[0].tracePoint.y = 0
         reference_object.refPointList[0].distance = 3533.4
         reference_object.refPointList[0].activated = True
         reference_object.refPointList[0].crossSize = crossSize
 
-        reference_object.refPointList[1].tracePoint.x = 151.1
-        reference_object.refPointList[1].tracePoint.y = 264.8
+        reference_object.refPointList[1].tracePoint.x = 1000
+        reference_object.refPointList[1].tracePoint.y = 0
         reference_object.refPointList[1].distance = 3533.4
         reference_object.refPointList[1].activated = True
         reference_object.refPointList[1].crossSize = crossSize
 
-        reference_object.refPointList[2].tracePoint.x = -351.0
-        reference_object.refPointList[2].tracePoint.y = -283.9
+        reference_object.refPointList[2].tracePoint.x = 0
+        reference_object.refPointList[2].tracePoint.y = 1000
         reference_object.refPointList[2].distance = 3533.4
         reference_object.refPointList[2].activated = True
         reference_object.refPointList[2].crossSize = crossSize
 
-        reference_object.refPointList[3].tracePoint.x = -339.7
-        reference_object.refPointList[3].tracePoint.y = 278.3
+        reference_object.refPointList[3].tracePoint.x = 1000
+        reference_object.refPointList[3].tracePoint.y = 1000
         reference_object.refPointList[3].distance = 3533.4
         reference_object.refPointList[3].activated = True
         reference_object.refPointList[3].crossSize = crossSize
 
         reference_object.coordinateSystem = "DefinedCoordinateSystem"
-        reference_object.projectorID = projector
+        reference_object.projectorID = self.projector_id
         self.coordinate_system = reference_object
         self.thrift_client.SetReferenceobject(reference_object)
         if self.do_register_coordinate_system: 
             self.registerCoordinateSystem()
-
+    ## NO FUNCIONA:
     def registerCoordinateSystem(self):
         module_id = ""
         try:
@@ -180,7 +200,7 @@ class ProjectorManager:
                 print("Available coordinate systems:", allCoordinateSystems)
                 print("Show result of point search for 5 seconds\n")
                 thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","1")
-
+    ## NO FUNCIONA:
     def searchTargets(self):
         print("Do point search...")
         # set up reflector point search
@@ -213,9 +233,8 @@ class ProjectorManager:
 
     def setUpProjector(self):
         self.clientServerConnect()
-        self.activateProjector()
+        self.activate()
         self.transferLicense()
-        self.defineCoordinateSystem()
 
     def createCircle(self,x,y,r):
         name = self.projection_group + "/my_circle"

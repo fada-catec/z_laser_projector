@@ -1,4 +1,4 @@
-#! python3
+#! python
 # -*- coding: utf-8 -*-
 """Helper module for python thrift interface to ZLP Service.
 
