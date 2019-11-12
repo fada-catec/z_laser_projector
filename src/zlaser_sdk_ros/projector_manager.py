@@ -207,8 +207,8 @@ class ProjectorManager:
         self.activate()
         self.transferLicense()
 
-    def createCircle(self,x,y,r):
-        name = self.projection_group + "/my_circle"
+    def createCircle(self,x,y,r,id):
+        name = self.projection_group + "/my_circle" + id
         circle = zlp.create_circle(x, y, r, name)
         circle.activated = True
         circle.coordinateSystemList = self.coordinate_system

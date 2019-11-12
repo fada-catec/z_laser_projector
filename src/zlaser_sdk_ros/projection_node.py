@@ -17,26 +17,20 @@ class ProjectionNode:
         rospy.loginfo("main")
         rospack = rospkg.RosPack()
         self.pkg_path = rospack.get_path('zlaser_sdk_ros')
-        self.setup_path = self.pkg_path + "/scripts/set_up_projector.py"
+        self.setup_path = self.pkg_path + "/scripts/set_up_projector.py" #not used
         self.lic_path = self.pkg_path + "/lic/1900027652.lic"
 
         # Create projector object
         self.proyector = ProjectorManager()
 
-        # Open connection service
-        self.cnt_srv = rospy.Service('/projector_srv/connect', Trigger, self.connectionCb)
-        self.discnt_srv = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnectionCb)
-        self.lic_srv = rospy.Service('/projector_srv/load_license', Trigger, self.transferLicenseCb)
-        self.setup_srv = rospy.Service('/projector_srv/setup', Trigger, self.setupCb)
-        self.cs_srv = rospy.Service('/projector_srv/cs', Trigger, self.defineCoordSysCb)
+        # Open services
+        self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connectionCb)
+        self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnectionCb)
+        self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transferLicenseCb)
+        self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setupCb)
+        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.defineCoordSysCb)
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projectionCb)
-        self.stopproject_srv = rospy.Service('/projector_srv/stop', Trigger, self.projectionStopCb)
-        
-        # License to projector
-        
-
-        # Define coordinate system
-        # os.system("python3 " + self.setup_path + " &")
+        self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projectionStopCb)
 
         rospy.spin()
 
@@ -64,7 +58,7 @@ class ProjectionNode:
         rospy.loginfo(e)
         # check license
         if not self.proyector.checkLicense():
-            rospy.logwarn("License is not valid. Load a new one")      
+            rospy.logwarn("License is not valid. Load a new one: \n\n rosservice call /projector_srv/load_license")      
             return TriggerResponse(False,"end setup")    
         else:
             rospy.loginfo("License is valid...")
@@ -99,14 +93,17 @@ class ProjectionNode:
     
     def projectionCb(self,req):
         rospy.loginfo("Received request to project")
+        # get values from service call and pass to projector manager
         x = req.x.data 
         y = req.y.data 
         r = req.r.data
+        id = str(req.id.data)
         shape = req.shape.data 
         if shape == "circle":
             rospy.loginfo("Creating circle shape")
-            e = self.proyector.createCircle(x,y,r)
+            e = self.proyector.createCircle(x,y,r,id)
             rospy.loginfo(e)
+            # start projection until stop service is called
             rospy.loginfo(" - Projecting - ")
             self.proyector.startProjection()
         else: 
@@ -114,6 +111,7 @@ class ProjectionNode:
         return ProjectionShapeResponse(Bool(True))
 
     def projectionStopCb(self,req):
+        # stop projection when service is called 
         self.proyector.stopProjection()
         return TriggerResponse(True,"Stopped")
 
