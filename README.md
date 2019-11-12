@@ -1,6 +1,6 @@
 # zlaser_sdk_ros
 
-This packages is used to control Laser Projector ZLP1 via ROS using ZLASER SDK.
+This package is used to control Laser Projector ZLP1 via ROS using ZLASER SDK.
 
 ### Usage ###
 Once the setup is done it is possible to use libraries from this repo to manage the projector.
@@ -17,11 +17,13 @@ Or launch the ros node included in this package to connect to projector
         roslaunch zlaser_sdk_ros projector_zlp1.launch
 
 Available services:
-- `/projector_srv/connect`: connect to service and active projector  
-- `/projector_srv/disconnect`:  disconnect from service and deactive projector
-- `/projector_srv/setup`: connect to service, active projector, check license and show available coordinate systems
-- `/projector_srv/load_license`: send to service a different license  ## TODO
-- `/projector_srv/cs`: define a new coordinate system
+- `/projector_srv/connect`: connect to service and active projector.  
+- `/projector_srv/disconnect`:  disconnect from service and deactive projector.
+- `/projector_srv/setup`: connect to service, active projector, check license and show available coordinate systems.
+- `/projector_srv/load_license`: send to service a different license.  ## TODO
+- `/projector_srv/cs`: define a new coordinate system.
+- `/projector_srv/project`: define a shape to project and start projection.
+- `/projector_srv/stop`: stop projection.
 
 ### Setup ###
 
