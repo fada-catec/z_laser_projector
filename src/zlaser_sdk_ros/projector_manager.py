@@ -18,7 +18,7 @@ class ProjectorManager:
         self.projection_group = "my_group"
         self.do_register_coordinate_system = False
         self.do_target_search = False
-
+        # self.coordinate_system = ""
         # Create client object
         self.thrift_client = zlp.ThriftClient()
 
@@ -58,7 +58,8 @@ class ProjectorManager:
         self.thrift_client.deactivate_projector(self.projector_id)
 
     def setCoordinateSystem(self,coord_sys):
-        self.coordinate_system = coord_sys
+        self.coordinate_system = [coord_sys]
+        return self.coordinate_system
 
     def checkLicense(self):
         return self.thrift_client.CheckLicense()
@@ -75,37 +76,6 @@ class ProjectorManager:
         self.thrift_client.LoadLicense(license_file)
         return "License transfered"
 
-        # # set callback for property changed event TODO
-        # cv = threading.Condition()
-        # def property_changed_callback(prop, value):
-        #     cv.acquire()
-        #     print("Property changed: %s = %s" % (prop, value))
-        #     cv.notify()
-        #     cv.release()
-
-        # self.thrift_client.set_property_changed_callback(property_changed_callback)
-        # self.thrift_client.RegisterForChangedProperty("config.licenseState.IsValid")
-        # # activate projector and wait for callback
-        # cv.acquire()
-        # self.activate()
-        # cv.wait()
-        # cv.release()
-        # # obtain license information
-        # valid = self.thrift_client.GetProperty("config.licenseState.IsValid")
-        # if valid == "true":
-        #     print("The license is valid.")
-        #     customer_name = self.thrift_client.GetProperty("license.Customer.Name")
-        #     grantor_name = self.thrift_client.GetProperty("license.Grantor.Name")
-        #     print("Customer: " + customer_name)
-        #     print("Grantor: " + grantor_name)
-        #     modules = self.thrift_client.GetPropChildren("config.licenseState.Modules")
-        #     for m in modules:
-        #         status = self.thrift_client.GetProperty("config.licenseState.Modules." + m)
-        #         print("Function module: " + m + ", licensed: " + status)
-        # else:
-        #     print("The license is invalid")
-
-    ## NO FUNCIONA:
     def defineCoordinateSystem(self):
         self.reference_object = zlp.create_reference_object()
         self.reference_object_name = "RefObject"
@@ -150,7 +120,7 @@ class ProjectorManager:
         self.thrift_client.SetReferenceobject(self.reference_object)
         if self.do_register_coordinate_system: 
             self.registerCoordinateSystem()
-    ## NO FUNCIONA:
+
     def registerCoordinateSystem(self):
         module_id = ""
         try:
@@ -242,7 +212,11 @@ class ProjectorManager:
         circle = zlp.create_circle(x, y, r, name)
         circle.activated = True
         circle.coordinateSystemList = self.coordinate_system
-        self.thrift_client.SetCircleSegment(circle)
+        try:
+            self.thrift_client.SetCircleSegment(circle)
+            return "Defined a circle segment to project"
+        except Exception as e:
+            return e
     
     def createPolyline(self):
         name = self.projection_group + "/my_polyline"
@@ -277,7 +251,10 @@ class ProjectorManager:
         self.thrift_client.SetTextElement(text)
 
     def startProjection(self):
-        self.thrift_client.TriggerProjection()
+        self.thrift_client.TriggerProjection(self.projector_id)
+
+    def stopProjection(self):
+        self.thrift_client.deactivate_projector(self.projector_id)
 
     def cleanProjection(self):
         circle.activated   = False

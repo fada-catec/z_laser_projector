@@ -12,6 +12,17 @@ Import projector manager on your script and feel free to use it:
 from zlaser_sdk_ros.projector_manager import ProjectorManager
 ```
 
+Or launch the ros node included in this package to connect to projector
+
+        roslaunch zlaser_sdk_ros projector_zlp1.launch
+
+Available services:
+- `/projector_srv/connect`: connect to service and active projector  
+- `/projector_srv/disconnect`:  disconnect from service and deactive projector
+- `/projector_srv/setup`: connect to service, active projector, check license and show available coordinate systems
+- `/projector_srv/load_license`: send to service a different license  ## TODO
+- `/projector_srv/cs`: define a new coordinate system
+
 ### Setup ###
 
 * Install dependencies
@@ -35,6 +46,10 @@ from zlaser_sdk_ros.projector_manager import ProjectorManager
 * thriftpy:
 
         pip3 install thriftpy
+
+### Known issues ###
+* Error processing request: FunctionModuleNotExistent(fModUID=''): this means that license could not have registered zFunctModRegister3d
+* Error processing request: 'ProjectorManager' object has no attribute 'projector_id': this means that projector instance has not been created. Call to `connect or setup service` to create it first.
 
 ### Help ###
 
