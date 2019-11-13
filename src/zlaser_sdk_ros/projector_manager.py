@@ -18,9 +18,11 @@ class ProjectorManager:
         self.projection_group = "my_group"
         self.do_register_coordinate_system = False
         self.do_target_search = False
-        # self.coordinate_system = ""
+        self.geo_tree_elements = []
+
         # Create client object
         self.thrift_client = zlp.ThriftClient()
+
 
     def clientServerConnect(self):
         try:
@@ -41,8 +43,7 @@ class ProjectorManager:
     def deactivate(self):
         if hasattr(self,'reference_object_name'):
             self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
-        if hasattr(self,'reference_object_name'):
-            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
+        self.clearGeoTree()
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
             self.thrift_client.disconnect()
@@ -55,6 +56,11 @@ class ProjectorManager:
 
     def stopProjection(self):
         self.thrift_client.deactivate_projector(self.projector_id)
+
+    def clearGeoTree(self):
+        for name in self.geo_tree_elements:
+            self.thrift_client.RemoveGeoTreeElem(name)
+        self.geo_tree_elements.clear()
 
     def getCoordinateSystems(self):
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
@@ -208,6 +214,8 @@ class ProjectorManager:
 
     def createCircle(self,x,y,r,id):
         name = self.projection_group + "/my_circle" + id
+        self.geo_tree_elements.append(name)
+        print (self.geo_tree_elements)
         circle = zlp.create_circle(x, y, r, name)
         circle.activated = True
         circle.coordinateSystemList = self.coordinate_system
