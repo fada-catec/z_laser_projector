@@ -79,45 +79,33 @@ class ProjectorManager:
         self.thrift_client.LoadLicense(license_file)
         return "License transfered"
 
-    def defineCoordinateSystem(self):
+    def __defineReferencePoint(self,crossSize,n,d,x,y):
+        self.reference_object.refPointList[n].tracePoint.x = x
+        self.reference_object.refPointList[n].tracePoint.y = y
+        self.reference_object.refPointList[n].distance = d
+        self.reference_object.refPointList[n].activated = True
+        self.reference_object.refPointList[n].crossSize = crossSize
+
+    def defineCoordinateSystem(self,cs_name):
         self.reference_object = zlp.create_reference_object()
         self.reference_object_name = "RefObject"
         #print("Create the reference object...")
         self.reference_object.name = self.reference_object_name
-        self.reference_object.refPointList = [zlp.create_reference_point("T1", 0, 0),
-                                        zlp.create_reference_point("T2", 1000, 0),
-                                        zlp.create_reference_point("T3", 0, 1000),
-                                        zlp.create_reference_point("T4", 1000, 1000)]
+        self.reference_object.refPointList = [  zlp.create_reference_point("T1", 0, 0),
+                                                zlp.create_reference_point("T2", 100, 0),
+                                                zlp.create_reference_point("T3", 0, 100),
+                                                zlp.create_reference_point("T4", 100, 100)  ]
         # set global crosssize for all reference points
         crossSize = zlp.create_2d_point(50,50)
         # - define coordinates in system of factory calibration wall [mm]
         # - activate reference point to use for transformation
         # - set cross size to set search area
-        self.reference_object.refPointList[0].tracePoint.x = 0
-        self.reference_object.refPointList[0].tracePoint.y = 0
-        self.reference_object.refPointList[0].distance = 3533.4
-        self.reference_object.refPointList[0].activated = True
-        self.reference_object.refPointList[0].crossSize = crossSize
+        self.__defineReferencePoint(crossSize,0,3533.4,-1000,0)
+        self.__defineReferencePoint(crossSize,1,3533.4,1000,0)
+        self.__defineReferencePoint(crossSize,2,3533.4,-1000,2000)
+        self.__defineReferencePoint(crossSize,3,3533.4,1000,2000)
 
-        self.reference_object.refPointList[1].tracePoint.x = 1000
-        self.reference_object.refPointList[1].tracePoint.y = 0
-        self.reference_object.refPointList[1].distance = 3533.4
-        self.reference_object.refPointList[1].activated = True
-        self.reference_object.refPointList[1].crossSize = crossSize
-
-        self.reference_object.refPointList[2].tracePoint.x = 0
-        self.reference_object.refPointList[2].tracePoint.y = 1000
-        self.reference_object.refPointList[2].distance = 3533.4
-        self.reference_object.refPointList[2].activated = True
-        self.reference_object.refPointList[2].crossSize = crossSize
-
-        self.reference_object.refPointList[3].tracePoint.x = 1000
-        self.reference_object.refPointList[3].tracePoint.y = 1000
-        self.reference_object.refPointList[3].distance = 3533.4
-        self.reference_object.refPointList[3].activated = True
-        self.reference_object.refPointList[3].crossSize = crossSize
-
-        self.reference_object.coordinateSystem = "DefinedCoordinateSystem"
+        self.reference_object.coordinateSystem = cs_name
         self.reference_object.projectorID = self.projector_id
         self.coordinate_system = self.reference_object
         self.thrift_client.SetReferenceobject(self.reference_object)

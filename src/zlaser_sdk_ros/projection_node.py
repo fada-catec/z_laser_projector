@@ -82,7 +82,7 @@ class ProjectionNode:
         rospy.loginfo("Received request to create new coordinate system. Please wait for the system to indicate the end")
         # define and register coordinate system
         self.proyector.do_register_coordinate_system = True
-        e = self.proyector.defineCoordinateSystem()
+        e = self.proyector.defineCoordinateSystem("small_pieza")
         rospy.loginfo(e)
         # show created coordinate system
         cs = self.proyector.getCoordinateSystems()
@@ -90,7 +90,7 @@ class ProjectionNode:
         if len(cs)>1:
             new_cs = self.proyector.setCoordinateSystem(cs[-1])
             rospy.loginfo("Projecting {} coordinate system".format(new_cs))
-            self.proyector.showCoordinateSystem(5)
+            self.proyector.showCoordinateSystem(25)
             # save new coordinate system as default
             rospy.loginfo("Setting {} as default coordinate system".format(new_cs))
         return TriggerResponse(True,"Created coordinate system")            
