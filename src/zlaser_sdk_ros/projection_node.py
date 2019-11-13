@@ -48,6 +48,11 @@ class ProjectionNode:
         rospy.loginfo(e)
         return TriggerResponse(True,str(e))
     
+    def setNewCoordSystem(self,cs):
+        if len(cs)>1:
+            rospy.loginfo("Setting {} as default coordinate system".format(cs[-1]))
+            self.proyector.setCoordinateSystem(cs[-1])
+
     def setupCb(self,req):
         rospy.loginfo("Received request to setup projector")
         # connect to service
@@ -66,10 +71,7 @@ class ProjectionNode:
             cs = self.proyector.getCoordinateSystems()
             rospy.loginfo("Available coordinate systems: {}".format(cs))
             # save coordinate system as default
-            # TODO poner como el ultimo q sehaya creado
-            if len(cs)>3:
-                rospy.loginfo("Setting {} as default coordinate system".format(cs[3]))
-                self.proyector.setCoordinateSystem(cs[3])
+            self.setNewCoordSystem(cs)
         return TriggerResponse(True,"end setup")
 
     def transferLicenseCb(self,req):        
@@ -87,12 +89,10 @@ class ProjectionNode:
         # show created coordinate system
         cs = self.proyector.getCoordinateSystems()
         rospy.loginfo("Available coordinate systems: {}".format(cs))
-        if len(cs)>1:
-            new_cs = self.proyector.setCoordinateSystem(cs[-1])
-            rospy.loginfo("Projecting {} coordinate system".format(new_cs))
-            self.proyector.showCoordinateSystem(25)
-            # save new coordinate system as default
-            rospy.loginfo("Setting {} as default coordinate system".format(new_cs))
+        rospy.loginfo("Projecting {} coordinate system".format(cs[-1]))
+        self.proyector.showCoordinateSystem(5)
+        # save new coordinate system as default
+        self.setNewCoordSystem(cs)
         return TriggerResponse(True,"Created coordinate system")            
     
     def projectionCb(self,req):

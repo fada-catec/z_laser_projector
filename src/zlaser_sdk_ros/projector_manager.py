@@ -22,7 +22,6 @@ class ProjectorManager:
         # Create client object
         self.thrift_client = zlp.ThriftClient()
 
-
     def clientServerConnect(self):
         try:
             self.thrift_client.connect(self.server_IP, self.connection_port)
@@ -42,13 +41,20 @@ class ProjectorManager:
     def deactivate(self):
         if hasattr(self,'reference_object_name'):
             self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
-            #self.thrift_client.FunctionModuleRelease(module_id)
+        if hasattr(self,'reference_object_name'):
+            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
             self.thrift_client.disconnect()
             return "Projector deactivated. End of connection"
         except Exception as e:
             return e
+
+    def startProjection(self):
+        self.thrift_client.TriggerProjection(self.projector_id)
+
+    def stopProjection(self):
+        self.thrift_client.deactivate_projector(self.projector_id)
 
     def getCoordinateSystems(self):
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
@@ -92,9 +98,9 @@ class ProjectorManager:
         #print("Create the reference object...")
         self.reference_object.name = self.reference_object_name
         self.reference_object.refPointList = [  zlp.create_reference_point("T1", 0, 0),
-                                                zlp.create_reference_point("T2", 100, 0),
-                                                zlp.create_reference_point("T3", 0, 100),
-                                                zlp.create_reference_point("T4", 100, 100)  ]
+                                                zlp.create_reference_point("T2", 1000, 0),
+                                                zlp.create_reference_point("T3", 0, 1000),
+                                                zlp.create_reference_point("T4", 1000, 1000)  ]
         # set global crosssize for all reference points
         crossSize = zlp.create_2d_point(50,50)
         # - define coordinates in system of factory calibration wall [mm]
@@ -242,12 +248,6 @@ class ProjectorManager:
         text.activated = True
         text.coordinateSystemList = self.coordinate_system
         self.thrift_client.SetTextElement(text)
-
-    def startProjection(self):
-        self.thrift_client.TriggerProjection(self.projector_id)
-
-    def stopProjection(self):
-        self.thrift_client.deactivate_projector(self.projector_id)
 
     def cleanProjection(self):
         circle.activated   = False
