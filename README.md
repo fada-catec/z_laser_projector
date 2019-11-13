@@ -21,9 +21,9 @@ Available services:
 * `/projector_srv/connect`: connect to service and active projector.  
 * `/projector_srv/disconnect`:  disconnect from service and deactive projector.
 * `/projector_srv/setup`: connect to service, active projector, check license and show available coordinate systems.
-* `/projector_srv/load_license`: send to service a different license.  ## TODO
+* `/projector_srv/load_license`: send license to service.
 * `/projector_srv/cs`: define a new coordinate system.
-* `/projector_srv/project`: define a shape to project and start projection.
+* `/projector_srv/project`: define a shape to project and start projection. Currently, only circle is implemented.
 * `/projector_srv/stop`: stop projection.
 
 ### Setup ###
