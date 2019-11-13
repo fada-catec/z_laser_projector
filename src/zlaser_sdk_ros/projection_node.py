@@ -14,7 +14,7 @@ class ProjectionNode:
     def __init__(self):
         self.node_name = 'projection_node'
         rospy.init_node(self.node_name)
-        rospy.loginfo("main")
+        rospy.loginfo("MAIN")
         rospack = rospkg.RosPack()
         self.pkg_path = rospack.get_path('zlaser_sdk_ros')
         self.setup_path = self.pkg_path + "/scripts/set_up_projector.py" #not used
@@ -66,6 +66,7 @@ class ProjectionNode:
             cs = self.proyector.getCoordinateSystems()
             rospy.loginfo("Available coordinate systems: {}".format(cs))
             # save coordinate system as default
+            # TODO poner como el ultimo q sehaya creado
             if len(cs)>3:
                 rospy.loginfo("Setting {} as default coordinate system".format(cs[3]))
                 self.proyector.setCoordinateSystem(cs[3])
@@ -78,18 +79,21 @@ class ProjectionNode:
         return TriggerResponse(True,"license loaded")
 
     def defineCoordSysCb(self,req):
+        rospy.loginfo("Received request to create new coordinate system. Please wait for the system to indicate the end")
         # define and register coordinate system
         self.proyector.do_register_coordinate_system = True
-        self.proyector.defineCoordinateSystem()
+        e = self.proyector.defineCoordinateSystem()
+        rospy.loginfo(e)
         # show created coordinate system
         cs = self.proyector.getCoordinateSystems()
         rospy.loginfo("Available coordinate systems: {}".format(cs))
-        rospy.loginfo("Projecting coordinate system")
-        self.proyector.showCoordinateSystem(5)
-        # save new coordinate system as default
         if len(cs)>1:
-            new_cs = self.proyector.setCoordinateSystem(cs[1])
-            rospy.loginfo("Setting {} as default coordinate system".format(new_cs))            
+            new_cs = self.proyector.setCoordinateSystem(cs[-1])
+            rospy.loginfo("Projecting {} coordinate system".format(new_cs))
+            self.proyector.showCoordinateSystem(5)
+            # save new coordinate system as default
+            rospy.loginfo("Setting {} as default coordinate system".format(new_cs))
+        return TriggerResponse(True,"Created coordinate system")            
     
     def projectionCb(self,req):
         rospy.loginfo("Received request to project")

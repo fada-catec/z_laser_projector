@@ -51,7 +51,8 @@ Available services:
         pip3 install thriftpy
 
 ### Known issues ###
-* Error processing request: FunctionModuleNotExistent(fModUID=''): this means that license could not have registered zFunctModRegister3d
+* RecursionError: maximum recursion depth exceeded while calling a Python object: this means that ethernet connection have not been stablished. Restart projector, wait for green LED's and connect again.
+* Error processing request: FunctionModuleNotExistent(fModUID=''): this means that license could not have registered zFunctModRegister3d or that you are trying to create a coordinate system that already exists.
 * Error processing request: 'ProjectorManager' object has no attribute 'projector_id': this means that projector instance has not been created. Call to `connect or setup service` to create it first.
 
 ### Help ###

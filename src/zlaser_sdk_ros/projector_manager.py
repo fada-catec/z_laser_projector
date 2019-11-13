@@ -40,6 +40,9 @@ class ProjectorManager:
             return e
 
     def deactivate(self):
+        if hasattr(self,'reference_object_name'):
+            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
+            #self.thrift_client.FunctionModuleRelease(module_id)
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
             self.thrift_client.disconnect()
@@ -79,7 +82,7 @@ class ProjectorManager:
     def defineCoordinateSystem(self):
         self.reference_object = zlp.create_reference_object()
         self.reference_object_name = "RefObject"
-        print("Create the reference object...")
+        #print("Create the reference object...")
         self.reference_object.name = self.reference_object_name
         self.reference_object.refPointList = [zlp.create_reference_point("T1", 0, 0),
                                         zlp.create_reference_point("T2", 1000, 0),
@@ -118,8 +121,10 @@ class ProjectorManager:
         self.reference_object.projectorID = self.projector_id
         self.coordinate_system = self.reference_object
         self.thrift_client.SetReferenceobject(self.reference_object)
+        res = "Created reference object. Coordinate system is not registered."
         if self.do_register_coordinate_system: 
-            self.registerCoordinateSystem()
+            res = self.registerCoordinateSystem()
+        return res
 
     def registerCoordinateSystem(self):
         module_id = ""
@@ -139,7 +144,7 @@ class ProjectorManager:
         def function_module_changed_callback(module_id, old_state, new_state):
             if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
                 cv.acquire()
-                print("Function module stopped running.")
+                #print("Function module stopped running.")
                 print("Module", module_id, ":", old_state, "->", new_state)
                 cv.notify()
                 cv.release()
@@ -149,27 +154,27 @@ class ProjectorManager:
         else: 
             # register projector to coordinate system
             self.thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
-            print("Register projector to coordinate system...")
+            #print("Register projector to coordinate system...")
             cv.acquire()
-            print("Calculate transformation...")
+            #print("Calculate transformation...")
             self.thrift_client.FunctionModuleRun(module_id)
-            cv.wait()
-            cv.release()
+            time.sleep(2)
+            # cv.wait()
+            # cv.release()
             state = self.thrift_client.FunctionModuleGetProperty(module_id, "state")
             if state != "1":  # idle
-                print("Function module is not in idle state, hence an error has occured.")
-                # sys.exit(1)
+                return "Function module is not in idle state, hence an error has occured."
             else:
                 res = self.thrift_client.FunctionModuleGetProperty(module_id, "result.averageDistance")
                 #Activate reference object only if the calculated transformation was succesfully
                 self.reference_object = self.thrift_client.GetReferenceobject(self.reference_object_name)
                 self.reference_object.activated = True
                 self.thrift_client.SetReferenceobject(self.reference_object)
-                print("Finished to register projector (aveDist:",res,")\n")
+                # print("Finished to register projector (aveDist:",res,")\n")
                 # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
                 # self.thrift_client.FunctionModuleRelease(module_id)
                 # self.thrift_client.deactivate_projector(self.projector_id)
-
+                return "Finished to register coordinate system on projector"
 
     ## NO FUNCIONA:
     def searchTargets(self):
