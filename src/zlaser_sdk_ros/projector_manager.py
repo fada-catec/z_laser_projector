@@ -9,7 +9,6 @@ import zlp
 
 class ProjectorManager:
     def __init__(self):
-
         # Define default values
         self.projector_IP = "192.168.10.10"
         self.server_IP = "192.168.10.11"
@@ -104,9 +103,9 @@ class ProjectorManager:
         #print("Create the reference object...")
         self.reference_object.name = self.reference_object_name
         self.reference_object.refPointList = [  zlp.create_reference_point("T1", 0, 0),
-                                                zlp.create_reference_point("T2", 1000, 0),
-                                                zlp.create_reference_point("T3", 0, 1000),
-                                                zlp.create_reference_point("T4", 1000, 1000)  ]
+                                                zlp.create_reference_point("T2", 1500, 0),
+                                                zlp.create_reference_point("T3", 0, 1500),
+                                                zlp.create_reference_point("T4", 1500, 1500)  ]
         # set global crosssize for all reference points
         crossSize = zlp.create_2d_point(50,50)
         # - define coordinates in system of factory calibration wall [mm]
@@ -145,7 +144,7 @@ class ProjectorManager:
             if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
                 cv.acquire()
                 #print("Function module stopped running.")
-                print("Module", module_id, ":", old_state, "->", new_state)
+                # print("Module", module_id, ":", old_state, "->", new_state)
                 cv.notify()
                 cv.release()
         self.thrift_client.set_function_module_state_changed_callback(function_module_changed_callback)
@@ -215,7 +214,6 @@ class ProjectorManager:
     def createCircle(self,x,y,r,id):
         name = self.projection_group + "/my_circle" + id
         self.geo_tree_elements.append(name)
-        print (self.geo_tree_elements)
         circle = zlp.create_circle(x, y, r, name)
         circle.activated = True
         circle.coordinateSystemList = self.coordinate_system
@@ -225,9 +223,10 @@ class ProjectorManager:
         except Exception as e:
             return e
     
-    def createPolyline(self):
-        name = self.projection_group + "/my_polyline"
+    def createPolyline(self,id):
+        name = self.projection_group + "/my_polyline" + id
         polyline = zlp.create_polyline(name)
+        self.geo_tree_elements.append(name)
         linestringA = [ zlp.create_3d_point(-100, -100),
                         zlp.create_3d_point(+100, -100),
                         zlp.create_3d_point(+100, +100) ]
@@ -237,7 +236,30 @@ class ProjectorManager:
         polyline.polylineList = [linestringA, linestringB]
         polyline.activated = True
         polyline.coordinateSystemList = self.coordinate_system
-        self.thrift_client.SetPolyLine(polyline)
+        try:
+            self.thrift_client.SetPolyLine(polyline)
+            return "Defined a cross segment to project"
+        except Exception as e:
+            return e
+
+    def createCross(self,x,y,r,id):
+        name = self.projection_group + "/my_cross" + id
+        polyline = zlp.create_polyline(name)
+        self.geo_tree_elements.append(name)
+        k = r/2*0.70710678119 # apply angle 45º
+        # x and y are cross center 
+        lineVertical = [ zlp.create_3d_point(x-k, y+k),
+                         zlp.create_3d_point(x+k, y-k)]
+        lineHorizont = [ zlp.create_3d_point(x+k, y+k),
+                         zlp.create_3d_point(x-k, y-k)]
+        polyline.polylineList = [lineVertical, lineHorizont]
+        polyline.activated = True
+        polyline.coordinateSystemList = self.coordinate_system
+        try:
+            self.thrift_client.SetPolyLine(polyline)
+            return "Defined a cross segment to project"
+        except Exception as e:
+            return e
 
     def createArc(self,x,y,r,startAngle,endAngle):
         name = self.projection_group + "/my_arc"

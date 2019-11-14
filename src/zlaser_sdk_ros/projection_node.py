@@ -110,6 +110,14 @@ class ProjectionNode:
             # start projection until stop service is called
             rospy.loginfo(" - Projecting - ")
             self.proyector.startProjection()
+
+        elif shape == "cross":
+            rospy.loginfo("Creating cross shape")
+            e = self.proyector.createCross(x,y,r,id)
+            rospy.loginfo(e)
+            # start projection until stop service is called
+            rospy.loginfo(" - Projecting - ")
+            self.proyector.startProjection()  
         else: 
             return ProjectionShapeResponse(Bool(False))
         return ProjectionShapeResponse(Bool(True))
