@@ -31,6 +31,7 @@ class ProjectionNode:
         self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.defineCoordSysCb)
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projectionCb)
         self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projectionStopCb)
+        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.showCb)
 
         rospy.spin()
 
@@ -47,7 +48,10 @@ class ProjectionNode:
         e = self.proyector.deactivate()
         rospy.loginfo(e)
         return TriggerResponse(True,str(e))
-    
+
+    def showCb(self,cs):
+        self.projector.showCoordinateSystem(10)
+
     def setNewCoordSystem(self,cs):
         if len(cs)>1:
             rospy.loginfo("Setting {} as default coordinate system".format(cs[-1]))
