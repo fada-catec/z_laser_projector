@@ -175,8 +175,7 @@ class ProjectorManager:
                 # self.thrift_client.deactivate_projector(self.projector_id)
                 return "Finished to register coordinate system on projector"
 
-    ## NO FUNCIONA:
-    def searchTargets(self):
+
         print("Do point search...")
         # set up reflector point search
         self.thrift_client.FunctionModuleSetProperty(module_id, "runMode", "0")
@@ -211,7 +210,6 @@ class ProjectorManager:
         self.activate()
         self.transferLicense()
 
-    def createCircle(self,x,y,r,id):
         name = self.projection_group + "/my_circle" + id
         self.geo_tree_elements.append(name)
         circle = zlp.create_circle(x, y, r, name)
@@ -242,35 +240,7 @@ class ProjectorManager:
         except Exception as e:
             return e
 
-    def createCross(self,x,y,r,id):
-        name = self.projection_group + "/my_cross" + id
-        polyline = zlp.create_polyline(name)
-        self.geo_tree_elements.append(name)
-        k = r/2*0.70710678119 # apply angle 45º
-        # x and y are cross center 
-        lineVertical = [ zlp.create_3d_point(x-k, y+k),
-                         zlp.create_3d_point(x+k, y-k)]
-        lineHorizont = [ zlp.create_3d_point(x+k, y+k),
-                         zlp.create_3d_point(x-k, y-k)]
-        polyline.polylineList = [lineVertical, lineHorizont]
-        polyline.activated = True
-        polyline.coordinateSystemList = self.coordinate_system
-        try:
-            self.thrift_client.SetPolyLine(polyline)
-            return "Defined a cross segment to project"
-        except Exception as e:
-            return e
 
-    def createArc(self,x,y,r,startAngle,endAngle):
-        name = self.projection_group + "/my_arc"
-        arc = zlp.create_circle(x, y, r, name)
-        arc.startAngle = startAngle
-        arc.endAngle = endAngle
-        arc.activated = True
-        arc.coordinateSystemList = self.coordinate_system
-        self.thrift_client.SetCircleSegment(arc)
-
-    def createText(self,x,y,text):
         name = self.projection_group + "/my_text"
         text = zlp.create_text_element(x, y, text, name, 100)
         text.charSpacing = 100
