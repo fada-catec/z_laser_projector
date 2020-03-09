@@ -78,7 +78,7 @@ class ProjectionNode:
             self.setNewCoordSystem(cs)
         return TriggerResponse(True,"end setup")
 
-    def transferLicenseCb(self,req):        
+    def transferLicenseCb(self,req):
         self.proyector.license_path = self.lic_path
         e = self.proyector.transferLicense()
         rospy.loginfo(e)
