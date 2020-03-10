@@ -9,6 +9,7 @@ import zlp
 
 class ProjectorManager:
     def __init__(self):
+        
         # Define default values
         self.projector_IP = "192.168.10.10"
         self.server_IP = "192.168.10.11"
