@@ -12,6 +12,7 @@ from zlaser_sdk_ros.srv import ProjectionShape, ProjectionShapeResponse
 
 class ProjectionNode:
     def __init__(self):
+
         self.node_name = 'projection_node'
         rospy.init_node(self.node_name)
         rospy.loginfo("MAIN")
@@ -24,15 +25,15 @@ class ProjectionNode:
         self.projector = ProjectorManager()
 
         # Open services
-        self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connectionCb)
-        self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transferLicenseCb)
-        self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnectionCb)
+        self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_Cb)
+        self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_Cb)
+        self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnection_Cb)
         
-        self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setupCb)
-        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.defineCoordSysCb)
-        self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projectionCb)
-        self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projectionStopCb)
-        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.showCb)
+        self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_Cb)
+        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.define_coord_sys_Cb)
+        self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_Cb)
+        self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_Cb)
+        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.show_Cb)
 
         rospy.spin()
 
