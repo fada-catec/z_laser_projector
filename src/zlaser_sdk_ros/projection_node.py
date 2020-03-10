@@ -25,19 +25,19 @@ class ProjectionNode:
         self.projector = ProjectorManager()
 
         # Open services
-        self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_Cb)
-        self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_Cb)
-        self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnection_Cb)
+        self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_cb)
+        self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
+        self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnection_cb)
         
-        self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_Cb)
-        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.define_coord_sys_Cb)
-        self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_Cb)
-        self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_Cb)
-        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.show_Cb)
+        self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
+        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.define_coord_sys_cb)
+        self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
+        self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_cb)
+        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.show_cb)
 
         rospy.spin()
 
-    def connection_Cb(self,req):
+    def connection_cb(self,req):
         rospy.loginfo("Received request to start projector")
         e = self.projector.client_server_connect()
         rospy.loginfo(e)
@@ -45,19 +45,19 @@ class ProjectionNode:
         rospy.loginfo(e)
         return TriggerResponse(True,str(e))
     
-    def transfer_license_Cb(self,req):
+    def transfer_license_cb(self,req):
         self.projector.license_path = self.lic_path
         e = self.projector.transfer_license()
         rospy.loginfo(e)
         return TriggerResponse(True,"license loaded")
 
-    def disconnection_Cb(self,req):
+    def disconnection_cb(self,req):
         rospy.loginfo("Received request to stop projector")
         e = self.projector.deactivate()
         rospy.loginfo(e)
         return TriggerResponse(True,str(e))
 
-    def setup_Cb(self,req):
+    def setup_cb(self,req):
         rospy.loginfo("Received request to setup projector")
         # connect to service
         e = self.projector.client_server_connect()
@@ -78,7 +78,7 @@ class ProjectionNode:
             self.set_new_coord_system(cs)
         return TriggerResponse(True,"end setup")
 
-    def show_Cb(self,cs):
+    def show_cb(self,cs):
         self.projector.show_coordinate_system(10)
 
     def set_new_coord_system(self,cs):
@@ -86,7 +86,7 @@ class ProjectionNode:
             rospy.loginfo("Setting {} as default coordinate system".format(cs[-1]))
             self.projector.set_coordinate_system(cs[-1])
 
-    def define_coord_sys_Cb(self,req):
+    def define_coord_sys_cb(self,req):
         rospy.loginfo("Received request to create new coordinate system. Please wait for the system to indicate the end")
         # define and register coordinate system
         self.projector.do_register_coordinate_system = True
@@ -101,7 +101,7 @@ class ProjectionNode:
         self.set_new_coord_system(cs)
         return TriggerResponse(True,"Created coordinate system")            
     
-    def projection_Cb(self,req):
+    def projection_cb(self,req):
         rospy.loginfo("Received request to project")
         # get values from service call and pass to projector manager
         x = req.x.data 
@@ -128,7 +128,7 @@ class ProjectionNode:
             return ProjectionShapeResponse(Bool(False))
         return ProjectionShapeResponse(Bool(True))
 
-    def projection_stop_Cb(self,req):
+    def projection_stop_cb(self,req):
         # stop projection when service is called 
         self.projector.stop_projection()
         return TriggerResponse(True,"Stopped")

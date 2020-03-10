@@ -9,7 +9,7 @@ import zlp
 
 class ProjectorManager:
     def __init__(self):
-        
+
         # Define default values
         self.projector_IP = "192.168.10.10"
         self.server_IP = "192.168.10.11"
@@ -44,7 +44,7 @@ class ProjectorManager:
     def deactivate(self):
         if hasattr(self,'reference_object_name'):
             self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
-        self.clearGeoTree()
+        self.clear_geo_tree()
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
             self.thrift_client.disconnect()
