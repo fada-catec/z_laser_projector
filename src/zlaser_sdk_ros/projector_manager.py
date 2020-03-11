@@ -31,11 +31,18 @@ class ProjectorManager:
         except Exception as e:
             return e
 
+    def client_server_disconnect(self):
+        try:
+            self.thrift_client.disconnect()
+            return "Disconnected to server. End of connection"
+        except Exception as e:
+            return e
+
     def activate(self):
         try:
             projectors = self.thrift_client.scan_projectors(self.projector_IP)
             self.projector_id = projectors[0]
-            print(self.projector_id) # ????
+            print(self.projector_id) # mostrar por pantalla ????
             self.thrift_client.activate_projector(self.projector_id)
             return "Projector activated. You can start the projection now"
         except Exception as e:
@@ -43,14 +50,28 @@ class ProjectorManager:
 
     def deactivate(self):
         if hasattr(self,'reference_object_name'):
-            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
+            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario?
         self.clear_geo_tree()
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
-            self.thrift_client.disconnect()
-            return "Projector deactivated. End of connection"
+            return "Projector deactivated."
         except Exception as e:
             return e
+
+    def transfer_license(self):
+        try:
+            license_path = os.path.abspath(self.license_path)
+            license_file = os.path.basename(license_path)
+            self.thrift_client.transfer_file(license_path, license_file, True)
+        except zlp.thrift_interface.CantWriteFile as e:
+            return e
+        except FileNotFoundError:
+            return "File not found!"
+        self.thrift_client.LoadLicense(license_file)
+        return "License transfered"
+
+    def check_license(self):
+        return self.thrift_client.CheckLicense()
 
     def start_projection(self):
         self.thrift_client.TriggerProjection(self.projector_id)
@@ -76,21 +97,6 @@ class ProjectorManager:
     def set_coordinate_system(self,coord_sys):
         self.coordinate_system = [coord_sys]
         return self.coordinate_system
-
-    def check_license(self):
-        return self.thrift_client.CheckLicense()
-
-    def transfer_license(self):
-        try:
-            license_path = os.path.abspath(self.license_path)
-            license_file = os.path.basename(license_path)
-            self.thrift_client.transfer_file(license_path, license_file, True)
-        except zlp.thrift_interface.CantWriteFile as e:
-            return e
-        except FileNotFoundError:
-            return "File not found!"
-        self.thrift_client.LoadLicense(license_file)
-        return "License transfered"
 
     def __define_reference_point(self,crossSize,n,d,x,y):
         self.reference_object.refPointList[n].tracePoint.x = x

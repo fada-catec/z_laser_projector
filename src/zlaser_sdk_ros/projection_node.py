@@ -18,7 +18,7 @@ class ProjectionNode:
         rospy.loginfo("MAIN")
         rospack = rospkg.RosPack()
         self.pkg_path = rospack.get_path('zlaser_sdk_ros')
-        self.setup_path = self.pkg_path + "/scripts/set_up_projector.py" #not used
+        # self.setup_path = self.pkg_path + "/scripts/set_up_projector.py" #not used
         self.lic_path = self.pkg_path + "/lic/1900027652.lic"
 
         # Create projector object
@@ -44,18 +44,20 @@ class ProjectionNode:
         e = self.projector.activate()
         rospy.loginfo(e)
         return TriggerResponse(True,str(e))
-    
-    def transfer_license_cb(self,req):
-        self.projector.license_path = self.lic_path
-        e = self.projector.transfer_license()
-        rospy.loginfo(e)
-        return TriggerResponse(True,"license loaded")
 
     def disconnection_cb(self,req):
         rospy.loginfo("Received request to stop projector")
         e = self.projector.deactivate()
         rospy.loginfo(e)
+        e = self.projector.client_server_disconnect()
+        rospy.loginfo(e)
         return TriggerResponse(True,str(e))
+
+    def transfer_license_cb(self,req):
+        self.projector.license_path = self.lic_path
+        e = self.projector.transfer_license()
+        rospy.loginfo(e)
+        return TriggerResponse(True,"license loaded")
 
     def setup_cb(self,req):
         rospy.loginfo("Received request to setup projector")
