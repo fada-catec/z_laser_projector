@@ -92,9 +92,9 @@ class ProjectorManager:
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
         return available_coordinate_systems
 
-    def set_coordinate_system(self,coord_sys): # set_coord_sys means: defining the object.coordinate_system property
+    def set_coordinate_system(self,coord_sys): # set_coord_sys = defining the object.coordinate_system property
         self.coordinate_system = [coord_sys]
-        return self.coordinate_system
+        return ("Received request to set coordinate system. Setting [{}] as coordinate system".format(coord_sys))
 
     def show_coordinate_system(self,secs):
         # module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")

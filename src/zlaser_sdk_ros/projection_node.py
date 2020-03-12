@@ -82,16 +82,17 @@ class ProjectionNode:
             cs_list = self.projector.get_coordinate_systems() # check coordinate system
             rospy.loginfo("Available coordinate systems: {}".format(cs_list))
             rospy.loginfo("Default coordinate system: {}".format(cs_list[-1]))
-            self.set_coord_system(cs_list[-1]) # set default coordinate system
+            e = self.projector.set_coordinate_system(cs_list[-1]) # set default coordinate system
+            rospy.loginfo(e)
             # AQUÍ FALTARÍA -> show default CS: name, project points, project axis, print SC properties (position, distance, etc.)
         return TriggerResponse(True,"end setup")
 
 
 
-    def set_coord_system(self,cs):
-        if len(cs)>1:
-            rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
-            self.projector.set_coordinate_system(cs[-1])
+    # def set_coord_system(self,cs):
+    #     if len(cs)>1:
+    #         rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
+    #         self.projector.set_coordinate_system(cs[-1])
 
     def show_coord_sys_cb(self,cs):
         self.projector.show_coordinate_system(10)
