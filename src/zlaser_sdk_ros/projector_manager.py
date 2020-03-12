@@ -94,13 +94,13 @@ class ProjectorManager:
 
     def set_coordinate_system(self,coord_sys): # set_coord_sys = defining the object.coordinate_system property
         self.coordinate_system = [coord_sys]
-        return ("Received request to set coordinate system. Setting [{}] as coordinate system".format(coord_sys))
+        return ("Setting [{}] as coordinate system".format(coord_sys))
 
     def show_coordinate_system(self,secs):
         # module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
         time.sleep(secs)
-        self.thrift_client.deactivate_projector(self.projector_id)
+        self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
 
     def define_coordinate_system(self,cs_name):
         self.reference_object = zlp.create_reference_object()
@@ -116,10 +116,10 @@ class ProjectorManager:
         # - define coordinates in system of factory calibration wall [mm]
         # - activate reference point to use for transformation
         # - set cross size to set search area
-        self.__defineReferencePoint(crossSize,0,3533.4,-1000,0)
-        self.__defineReferencePoint(crossSize,1,3533.4,1000,0)
-        self.__defineReferencePoint(crossSize,2,3533.4,-1000,2000)
-        self.__defineReferencePoint(crossSize,3,3533.4,1000,2000)
+        self.__define_reference_point(crossSize,0,3533.4,-1000,0)
+        self.__define_reference_point(crossSize,1,3533.4,1000,0)
+        self.__define_reference_point(crossSize,2,3533.4,-1000,2000)
+        self.__define_reference_point(crossSize,3,3533.4,1000,2000)
 
         self.reference_object.coordinateSystem = cs_name
         self.reference_object.projectorID = self.projector_id
