@@ -42,7 +42,7 @@ class ProjectorManager:
         try:
             projectors = self.thrift_client.scan_projectors(self.projector_IP)
             self.projector_id = projectors[0]
-            print(self.projector_id) # mostrar por pantalla ????
+            print(self.projector_id) # cómo mostrar por pantalla ????
             self.thrift_client.activate_projector(self.projector_id)
             return "Projector activated. You can start the projection now"
         except Exception as e:
@@ -50,7 +50,7 @@ class ProjectorManager:
 
     def deactivate(self):
         if hasattr(self,'reference_object_name'):
-            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario?
+            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
         self.clear_geo_tree()
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
@@ -70,6 +70,9 @@ class ProjectorManager:
         self.thrift_client.LoadLicense(license_file)
         return "License transfered"
 
+    def check_license(self):
+        return self.thrift_client.CheckLicense()
+
     def function_module_create(self):
         try:
             self.module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
@@ -83,20 +86,8 @@ class ProjectorManager:
         except zlp.thrift_interface.FunctionModuleClassNotLicensed as e:
             print("FunctionModuleClassNotLicensed: " + e.which)
             sys.exit(1)
-        
-    def check_license(self):
-        return self.thrift_client.CheckLicense()
 
-    def start_projection(self):
-        self.thrift_client.TriggerProjection(self.projector_id)
 
-    def stop_projection(self):
-        self.thrift_client.deactivate_projector(self.projector_id)
-
-    def clear_geo_tree(self):
-        for name in self.geo_tree_elements:
-            self.thrift_client.RemoveGeoTreeElem(name)
-        self.geo_tree_elements.clear()
 
     def get_coordinate_systems(self):
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
@@ -111,13 +102,6 @@ class ProjectorManager:
     def set_coordinate_system(self,coord_sys):
         self.coordinate_system = [coord_sys]
         return self.coordinate_system
-
-    def __define_reference_point(self,crossSize,n,d,x,y):
-        self.reference_object.refPointList[n].tracePoint.x = x
-        self.reference_object.refPointList[n].tracePoint.y = y
-        self.reference_object.refPointList[n].distance = d
-        self.reference_object.refPointList[n].activated = True
-        self.reference_object.refPointList[n].crossSize = crossSize
 
     def define_coordinate_system(self,cs_name):
         self.reference_object = zlp.create_reference_object()
@@ -146,6 +130,13 @@ class ProjectorManager:
         if self.do_register_coordinate_system: 
             res = self.registerCoordinateSystem()
         return res
+
+    def __define_reference_point(self,crossSize,n,d,x,y):
+        self.reference_object.refPointList[n].tracePoint.x = x
+        self.reference_object.refPointList[n].tracePoint.y = y
+        self.reference_object.refPointList[n].distance = d
+        self.reference_object.refPointList[n].activated = True
+        self.reference_object.refPointList[n].crossSize = crossSize
 
     def register_coordinate_system(self):
         module_id = ""
@@ -226,6 +217,20 @@ class ProjectorManager:
             print("Not all points have been found!")
         else:
             print("All points have been found.")
+
+    def clear_geo_tree(self):
+        for name in self.geo_tree_elements:
+            self.thrift_client.RemoveGeoTreeElem(name)
+        self.geo_tree_elements.clear()
+
+
+
+    def start_projection(self):
+        self.thrift_client.TriggerProjection(self.projector_id)
+
+    def stop_projection(self):
+        self.thrift_client.deactivate_projector(self.projector_id)
+
 
     def set_up_projector(self):
         self.clientServerConnect()

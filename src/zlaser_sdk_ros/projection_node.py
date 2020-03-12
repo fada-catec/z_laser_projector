@@ -84,13 +84,15 @@ class ProjectionNode:
             # AQUÍ FALTARÍA -> show default CS: name, project points, project axis, print SC properties (position, distance, etc.)
         return TriggerResponse(True,"end setup")
 
-    def show_cb(self,cs):
-        self.projector.show_coordinate_system(10)
+
 
     def set_coord_system(self,cs):
         if len(cs)>1:
             rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
             self.projector.set_coordinate_system(cs[-1])
+
+    def show_cb(self,cs):
+        self.projector.show_coordinate_system(10)
 
     def define_coord_sys_cb(self,req):
         rospy.loginfo("Received request to create new coordinate system. Please wait for the system to indicate the end")
@@ -106,7 +108,9 @@ class ProjectionNode:
         # save new coordinate system as default
         self.set_coord_system(cs)
         return TriggerResponse(True,"Created coordinate system")            
-    
+
+
+
     def projection_cb(self,req):
         rospy.loginfo("Received request to project")
         # get values from service call and pass to projector manager
