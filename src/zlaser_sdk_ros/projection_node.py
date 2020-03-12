@@ -30,7 +30,7 @@ class ProjectionNode:
         self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
         self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
 
-        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.define_coord_sys_cb)
+        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.manual_define_coord_sys_cb)
         self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.show_coord_sys_cb)
 
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
@@ -97,7 +97,7 @@ class ProjectionNode:
     def show_coord_sys_cb(self,cs):
         self.projector.show_coordinate_system(10)
 
-    def define_coord_sys_cb(self,req):
+    def manual_define_coord_sys_cb(self,req):
         rospy.loginfo("Received request to create new coordinate system. Please wait for the system to indicate the end")
         # define and register coordinate system
         self.projector.do_register_coordinate_system = True
@@ -109,7 +109,7 @@ class ProjectionNode:
         rospy.loginfo("Projecting {} coordinate system".format(cs[-1]))
         self.projector.show_coordinate_system(5)
         # save new coordinate system as default
-        self.set_coord_system(cs)
+        self.projector.set_coordinate_system(cs)
         return TriggerResponse(True,"Created coordinate system")            
 
 
