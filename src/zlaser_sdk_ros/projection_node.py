@@ -58,7 +58,9 @@ class ProjectionNode:
         self.projector.license_path = self.lic_path
         e = self.projector.transfer_license()
         rospy.loginfo(e)
-        return TriggerResponse(True,"license loaded")
+        e = self.projector.function_module_create()
+        rospy.loginfo(e)
+        return TriggerResponse(True,"License loaded and function module created")
 
     def setup_cb(self,req):
         rospy.loginfo("Received request to setup projector")
@@ -74,9 +76,12 @@ class ProjectionNode:
             return TriggerResponse(False,"end setup")    
         else:
             rospy.loginfo("License is valid...")
+            e = self.projector.function_module_create() # create function module 
+            rospy.loginfo(e)
             cs = self.projector.get_coordinate_systems() # check coordinate system
             rospy.loginfo("Available coordinate systems: {}".format(cs))
-            self.set_coord_system(cs) # set default coordinate system
+            rospy.loginfo("Setting {} as default coordinate system".format(cs[-1]))
+            self.set_coord_system(cs[-1]) # set default coordinate system
             # AQUÍ FALTARÍA -> show default CS: name, project points, project axis, print SC properties (position, distance, etc.)
         return TriggerResponse(True,"end setup")
 

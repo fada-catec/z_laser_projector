@@ -70,6 +70,20 @@ class ProjectorManager:
         self.thrift_client.LoadLicense(license_file)
         return "License transfered"
 
+    def function_module_create(self):
+        try:
+            self.module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
+            return "Function Module Created"
+        except zlp.thrift_interface.FunctionModuleClassNotRegistered as e:
+            print("FunctionModuleClassNotRegistered: " + e.which)
+            sys.exit(1)
+        except zlp.thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
+            print("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
+            sys.exit(1)
+        except zlp.thrift_interface.FunctionModuleClassNotLicensed as e:
+            print("FunctionModuleClassNotLicensed: " + e.which)
+            sys.exit(1)
+        
     def check_license(self):
         return self.thrift_client.CheckLicense()
 
@@ -89,8 +103,8 @@ class ProjectorManager:
         return available_coordinate_systems
 
     def show_coordinate_system(self,secs):
-        module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
-        self.thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","1")
+        # module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
+        self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
         time.sleep(secs)
         self.thrift_client.deactivate_projector(self.projector_id)
 
