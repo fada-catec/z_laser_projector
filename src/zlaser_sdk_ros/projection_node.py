@@ -26,8 +26,9 @@ class ProjectionNode:
 
         # Open services
         self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_cb)
-        self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
         self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnection_cb)
+        self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
+
         
         self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
         self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.define_coord_sys_cb)
