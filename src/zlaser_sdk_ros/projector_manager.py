@@ -23,7 +23,6 @@ class ProjectorManager:
         # Create client object
         self.thrift_client = zlp.ThriftClient()
 
-
     def client_server_connect(self):
         try:
             self.thrift_client.connect(self.server_IP, self.connection_port)
@@ -93,15 +92,15 @@ class ProjectorManager:
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
         return available_coordinate_systems
 
+    def set_coordinate_system(self,coord_sys): # set_coord_sys means: defining the object.coordinate_system property
+        self.coordinate_system = [coord_sys]
+        return self.coordinate_system
+
     def show_coordinate_system(self,secs):
         # module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
         time.sleep(secs)
         self.thrift_client.deactivate_projector(self.projector_id)
-
-    def set_coordinate_system(self,coord_sys):
-        self.coordinate_system = [coord_sys]
-        return self.coordinate_system
 
     def define_coordinate_system(self,cs_name):
         self.reference_object = zlp.create_reference_object()

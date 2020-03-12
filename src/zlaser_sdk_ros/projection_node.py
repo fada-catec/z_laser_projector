@@ -28,13 +28,14 @@ class ProjectionNode:
         self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_cb)
         self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnection_cb)
         self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
-
-        
         self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
+
         self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.define_coord_sys_cb)
+        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.show_coord_sys_cb)
+
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
         self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_cb)
-        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.show_cb)
+        
 
         rospy.spin()
 
@@ -80,6 +81,7 @@ class ProjectionNode:
             rospy.loginfo(e)
             cs_list = self.projector.get_coordinate_systems() # check coordinate system
             rospy.loginfo("Available coordinate systems: {}".format(cs_list))
+            rospy.loginfo("Default coordinate system: {}".format(cs_list[-1]))
             self.set_coord_system(cs_list[-1]) # set default coordinate system
             # AQUÍ FALTARÍA -> show default CS: name, project points, project axis, print SC properties (position, distance, etc.)
         return TriggerResponse(True,"end setup")
@@ -91,7 +93,7 @@ class ProjectionNode:
             rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
             self.projector.set_coordinate_system(cs[-1])
 
-    def show_cb(self,cs):
+    def show_coord_sys_cb(self,cs):
         self.projector.show_coordinate_system(10)
 
     def define_coord_sys_cb(self,req):
