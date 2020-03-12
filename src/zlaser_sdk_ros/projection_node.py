@@ -78,10 +78,9 @@ class ProjectionNode:
             rospy.loginfo("License is valid...")
             e = self.projector.function_module_create() # create function module 
             rospy.loginfo(e)
-            cs = self.projector.get_coordinate_systems() # check coordinate system
-            rospy.loginfo("Available coordinate systems: {}".format(cs))
-            rospy.loginfo("Setting {} as default coordinate system".format(cs[-1]))
-            self.set_coord_system(cs[-1]) # set default coordinate system
+            cs_list = self.projector.get_coordinate_systems() # check coordinate system
+            rospy.loginfo("Available coordinate systems: {}".format(cs_list))
+            self.set_coord_system(cs_list[-1]) # set default coordinate system
             # AQUÍ FALTARÍA -> show default CS: name, project points, project axis, print SC properties (position, distance, etc.)
         return TriggerResponse(True,"end setup")
 
@@ -90,7 +89,7 @@ class ProjectionNode:
 
     def set_coord_system(self,cs):
         if len(cs)>1:
-            rospy.loginfo("Received request to set 'X' coordinate system. Setting {} as default coordinate system".format(cs[-1]))
+            rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
             self.projector.set_coordinate_system(cs[-1])
 
     def define_coord_sys_cb(self,req):
