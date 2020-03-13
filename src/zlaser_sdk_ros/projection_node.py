@@ -98,14 +98,23 @@ class ProjectionNode:
         self.projector.show_coordinate_system(10)
 
     def manual_define_coord_sys_cb(self,req):
+        
         rospy.loginfo("Received request to create new coordinate system manually. Please wait for the system to indicate the end")
-        # define and register coordinate system
+        
         # self.projector.do_register_coordinate_system = True
-        e = self.projector.define_coordinate_system(req)
+
+        cs = self.projector.define_coordinate_system(req) # define coordinate system
+
+        e = self.projector.register_coordinate_system(cs) # define coordinate system
         rospy.loginfo(e)
+        e = self.projector.set_coordinate_system(req.name_cs) # register coordinate system
+        rospy.loginfo(e)
+        # AQUÍ FALTARÍA -> show_coord_system: name, project points, project axis, print SC properties (position, distance, etc.)
+
+
         # show created coordinate system
-        cs = self.projector.get_coordinate_systems()
-        rospy.loginfo("Available coordinate systems: {}".format(cs))
+        # cs = self.projector.get_coordinate_systems()
+        # rospy.loginfo("Available coordinate systems: {}".format(cs))
         rospy.loginfo("Projecting {} coordinate system".format(cs[-1]))
         self.projector.show_coordinate_system(5)
         # save new coordinate system as default

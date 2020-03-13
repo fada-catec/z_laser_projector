@@ -15,7 +15,7 @@ class ProjectorManager:
         self.server_IP = "192.168.10.11"
         self.connection_port = 9090
         self.license_path = "Pendrive_ZLaser/1900027652.lic" #???
-        self.reference_object = []
+        self.reference_object_list = []
         # self.projection_group = "my_group"
         # self.do_register_coordinate_system = False
         # self.do_target_search = False
@@ -90,7 +90,7 @@ class ProjectorManager:
 
         self.cv = threading.Condition()
 
-        self.thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback(self))
+        self.thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback())
 
     def function_module_changed_callback(self, old_state, new_state):
         if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
@@ -119,18 +119,16 @@ class ProjectorManager:
 
     def define_coordinate_system(self,req):
         
-        print("Create the reference object {}".format(req.name_ref_object))
-        self.reference_object[] = append(zlp.create_reference_object())
-        self.reference_object[].name = req.name_ref_object
-        self.reference_object[].coordinateSystem = req.name_cs
-        self.reference_object[].projectorID = self.projector_id
+        print("Create reference object: {}".format(req.name_ref_object))
+        reference_object = zlp.create_reference_object()
+        reference_object.name = req.name_ref_object
+        reference_object.coordinateSystem = req.name_cs
+        reference_object.projectorID = self.projector_id
         
-        self.reference_object.name = self.reference_object_name
-
-        self.reference_object.refPointList = [  zlp.create_reference_point("T1", req.T1_x, req.T1_y),
-                                                zlp.create_reference_point("T2", req.T2_x, req.T2_y),
-                                                zlp.create_reference_point("T3", req.T3_x, req.T3_y),
-                                                zlp.create_reference_point("T4", req.T4_x, req.T4_y)  ]
+        reference_object.refPointList = [   zlp.create_reference_point("T1", req.T1_x, req.T1_y),
+                                            zlp.create_reference_point("T2", req.T2_x, req.T2_y),
+                                            zlp.create_reference_point("T3", req.T3_x, req.T3_y),
+                                            zlp.create_reference_point("T4", req.T4_x, req.T4_y)]
         
         crossSize = zlp.create_2d_point(req.crossize_x,req.crossize_y) # set global crosssize for all reference points
         self.__define_reference_point(crossSize,0,req.distance,req.x1,req.y1) # define coordinates in user system [mm]
@@ -138,13 +136,15 @@ class ProjectorManager:
         self.__define_reference_point(crossSize,2,req.distance,req.x3,req.y3)
         self.__define_reference_point(crossSize,3,req.distance,req.x4,req.y4)
 
-        self.thrift_client.SetReferenceobject(self.reference_object[]) # activate reference point to use for transformation
-        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object[].name)
+        self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
+        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
         
-        res = "Created reference object. Coordinate system is not registered."
+        self.add_ref_object(reference_object)
+
+        print("Created reference object. Coordinate system defined but not registered.")
         # if self.do_register_coordinate_system: 
-        res = self.register_coordinate_system()
-        return res
+        # res = self.register_coordinate_system()
+        return self.reference_object[].coordinateSystem
 
     def __define_reference_point(self,crossSize,n,d,x,y):
         self.reference_object.refPointList[n].tracePoint.x = x
@@ -153,9 +153,14 @@ class ProjectorManager:
         self.reference_object.refPointList[n].activated = True
         self.reference_object.refPointList[n].crossSize = crossSize
 
-    def register_coordinate_system(self):
-        print("Register projector to coordinate system...")
-        self.thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
+    def add_ref_object(self,ref_obj): # set_coord_sys = defining the object.coordinate_system property
+        self.coordinate_system = [coord_sys]
+        return ("Setting [{}] as coordinate system".format(coord_sys))
+
+    def register_coordinate_system(self, cs):
+        
+        print("Registering coordinate system {}".format(cs))
+        self.thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         
         self.cv.acquire()
         self.thrift_client.FunctionModuleRun(self.module_id) # Calculate transformation
