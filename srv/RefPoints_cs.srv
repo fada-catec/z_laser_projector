@@ -1,0 +1,23 @@
+std_msgs/String name_ref_object
+std_msgs/String name_cs
+std_msgs/Float64 distance
+std_msgs/Float64 crossize_x
+std_msgs/Float64 crossize_y
+std_msgs/Float64 T1_x
+std_msgs/Float64 T1_y
+std_msgs/Float64 T2_x
+std_msgs/Float64 T2_y
+std_msgs/Float64 T3_x
+std_msgs/Float64 T3_y
+std_msgs/Float64 T4_x
+std_msgs/Float64 T4_y
+std_msgs/Float64 x1
+std_msgs/Float64 y1
+std_msgs/Float64 x2
+std_msgs/Float64 y2
+std_msgs/Float64 x3
+std_msgs/Float64 y3
+std_msgs/Float64 x4
+std_msgs/Float64 y4
+---
+std_msgs/Bool cs_created

@@ -15,9 +15,10 @@ class ProjectorManager:
         self.server_IP = "192.168.10.11"
         self.connection_port = 9090
         self.license_path = "Pendrive_ZLaser/1900027652.lic" #???
-        self.projection_group = "my_group"
-        self.do_register_coordinate_system = False
-        self.do_target_search = False
+        self.reference_object = []
+        # self.projection_group = "my_group"
+        # self.do_register_coordinate_system = False
+        # self.do_target_search = False
         self.geo_tree_elements = []
 
         # Create client object
@@ -73,18 +74,32 @@ class ProjectorManager:
         return self.thrift_client.CheckLicense()
 
     def function_module_create(self):
+        self.module_id = ""
         try:
             self.module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
             return "Function Module Created"
         except zlp.thrift_interface.FunctionModuleClassNotRegistered as e:
-            print("FunctionModuleClassNotRegistered: " + e.which)
-            sys.exit(1)
+            return ("FunctionModuleClassNotRegistered: " + e.which)
+            # sys.exit(1)
         except zlp.thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
-            print("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
-            sys.exit(1)
+            return ("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
+            # sys.exit(1)
         except zlp.thrift_interface.FunctionModuleClassNotLicensed as e:
-            print("FunctionModuleClassNotLicensed: " + e.which)
-            sys.exit(1)
+            return ("FunctionModuleClassNotLicensed: " + e.which)
+            # sys.exit(1)
+
+        self.cv = threading.Condition()
+
+        self.thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback(self))
+
+    def function_module_changed_callback(self, old_state, new_state):
+        if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
+            self.cv.acquire()
+            print("Function module stopped running.")
+            print("Module", self.module_id, ":", old_state, "->", new_state)
+            self.cv.notify()
+            self.cv.release()
+
 
 
 
@@ -102,32 +117,33 @@ class ProjectorManager:
         time.sleep(secs)
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
 
-    def define_coordinate_system(self,cs_name):
-        self.reference_object = zlp.create_reference_object()
-        self.reference_object_name = "RefObject"
-        #print("Create the reference object...")
+    def define_coordinate_system(self,req):
+        
+        print("Create the reference object {}".format(req.name_ref_object))
+        self.reference_object[] = append(zlp.create_reference_object())
+        self.reference_object[].name = req.name_ref_object
+        self.reference_object[].coordinateSystem = req.name_cs
+        self.reference_object[].projectorID = self.projector_id
+        
         self.reference_object.name = self.reference_object_name
-        self.reference_object.refPointList = [  zlp.create_reference_point("T1", 0, 0),
-                                                zlp.create_reference_point("T2", 1500, 0),
-                                                zlp.create_reference_point("T3", 0, 1500),
-                                                zlp.create_reference_point("T4", 1500, 1500)  ]
-        # set global crosssize for all reference points
-        crossSize = zlp.create_2d_point(50,50)
-        # - define coordinates in system of factory calibration wall [mm]
-        # - activate reference point to use for transformation
-        # - set cross size to set search area
-        self.__define_reference_point(crossSize,0,3533.4,-1000,0)
-        self.__define_reference_point(crossSize,1,3533.4,1000,0)
-        self.__define_reference_point(crossSize,2,3533.4,-1000,2000)
-        self.__define_reference_point(crossSize,3,3533.4,1000,2000)
 
-        self.reference_object.coordinateSystem = cs_name
-        self.reference_object.projectorID = self.projector_id
-        self.coordinate_system = self.reference_object
-        self.thrift_client.SetReferenceobject(self.reference_object)
+        self.reference_object.refPointList = [  zlp.create_reference_point("T1", req.T1_x, req.T1_y),
+                                                zlp.create_reference_point("T2", req.T2_x, req.T2_y),
+                                                zlp.create_reference_point("T3", req.T3_x, req.T3_y),
+                                                zlp.create_reference_point("T4", req.T4_x, req.T4_y)  ]
+        
+        crossSize = zlp.create_2d_point(req.crossize_x,req.crossize_y) # set global crosssize for all reference points
+        self.__define_reference_point(crossSize,0,req.distance,req.x1,req.y1) # define coordinates in user system [mm]
+        self.__define_reference_point(crossSize,1,req.distance,req.x2,req.y2)
+        self.__define_reference_point(crossSize,2,req.distance,req.x3,req.y3)
+        self.__define_reference_point(crossSize,3,req.distance,req.x4,req.y4)
+
+        self.thrift_client.SetReferenceobject(self.reference_object[]) # activate reference point to use for transformation
+        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object[].name)
+        
         res = "Created reference object. Coordinate system is not registered."
-        if self.do_register_coordinate_system: 
-            res = self.registerCoordinateSystem()
+        # if self.do_register_coordinate_system: 
+        res = self.register_coordinate_system()
         return res
 
     def __define_reference_point(self,crossSize,n,d,x,y):
@@ -138,84 +154,21 @@ class ProjectorManager:
         self.reference_object.refPointList[n].crossSize = crossSize
 
     def register_coordinate_system(self):
-        module_id = ""
-        try:
-            module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
-        except zlp.thrift_interface.FunctionModuleClassNotRegistered as e:
-            print("FunctionModuleClassNotRegistered: " + e.which)
-            # sys.exit(1)
-        except zlp.thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
-            print("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
-            # sys.exit(1)
-        except zlp.thrift_interface.FunctionModuleClassNotLicensed as e:
-            print("FunctionModuleClassNotLicensed: " + e.which)
-            # sys.exit(1)
-        self.thrift_client.FunctionModuleSetProperty(module_id, "referenceData", self.coordinate_system.name)
-        cv = threading.Condition()
-        def function_module_changed_callback(module_id, old_state, new_state):
-            if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
-                cv.acquire()
-                #print("Function module stopped running.")
-                # print("Module", module_id, ":", old_state, "->", new_state)
-                cv.notify()
-                cv.release()
-        self.thrift_client.set_function_module_state_changed_callback(function_module_changed_callback)
-        if self.do_target_search: 
-            self.searchTargets()
-        else: 
-            # register projector to coordinate system
-            self.thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
-            #print("Register projector to coordinate system...")
-            cv.acquire()
-            #print("Calculate transformation...")
-            self.thrift_client.FunctionModuleRun(module_id)
-            time.sleep(2)
-            # cv.wait()
-            # cv.release()
-            state = self.thrift_client.FunctionModuleGetProperty(module_id, "state")
-            if state != "1":  # idle
-                return "Function module is not in idle state, hence an error has occured."
-            else:
-                res = self.thrift_client.FunctionModuleGetProperty(module_id, "result.averageDistance")
-                #Activate reference object only if the calculated transformation was succesfully
-                self.reference_object = self.thrift_client.GetReferenceobject(self.reference_object_name)
-                self.reference_object.activated = True
-                self.thrift_client.SetReferenceobject(self.reference_object)
-                # print("Finished to register projector (aveDist:",res,")\n")
-                # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name)
-                # self.thrift_client.FunctionModuleRelease(module_id)
-                # self.thrift_client.deactivate_projector(self.projector_id)
-                return "Finished to register coordinate system on projector"
-
-
-        print("Do point search...")
-        # set up reflector point search
-        self.thrift_client.FunctionModuleSetProperty(module_id, "runMode", "0")
-        point_search_prop_path = "config.projectorManager.projectors." + projector + ".search"
-        self.thrift_client.SetProperty(point_search_prop_path + ".threshold", "5")
-        # run point search
-        cv.acquire()
-        print("Reference point search is running...")
-        self.thrift_client.FunctionModuleRun(module_id)
-        cv.wait()
+        print("Register projector to coordinate system...")
+        self.thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
+        
+        self.cv.acquire()
+        self.thrift_client.FunctionModuleRun(self.module_id) # Calculate transformation
+        self.cv.wait()
         cv.release()
-        state = self.thrift_client.FunctionModuleGetProperty(module_id, "state")
+
+        state = self.thrift_client.FunctionModuleGetProperty(self.module_id, "state")
         if state != "1":  # idle
-            print("Function module is not in idle state, hence an error has occured.")
-            sys.exit(1)
-        print("Finished point search")
-        # Check if all points were found
-        self.reference_object = self.thrift_client.GetReferenceobject(self.reference_object_name)
-        found_all = True
-        for i in range(0, len(self.reference_object.refPointList)):
-            resultPath = "result.tracePoints." + str(i)
-            if self.thrift_client.FunctionModuleGetProperty(module_id, resultPath + ".found") != "true":
-                found_all = False
-                break
-        if not found_all:
-            print("Not all points have been found!")
+            return "Function module is not in idle state, hence an error has occured."
         else:
-            print("All points have been found.")
+            return "Finished to register coordinate system on projector"
+
+
 
     def clear_geo_tree(self):
         for name in self.geo_tree_elements:
