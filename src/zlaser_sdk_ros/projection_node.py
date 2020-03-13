@@ -30,8 +30,8 @@ class ProjectionNode:
         self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
         self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
 
-        self.cs_srv      = rospy.Service('/projector_srv/cs', Trigger, self.manual_define_coord_sys_cb)
-        self.show_srv    = rospy.Service('/projector_srv/show', Trigger, self.show_coord_sys_cb)
+        self.cs_srv      = rospy.Service('/projector_srv/man_def_cs', Trigger, self.manual_define_coord_sys_cb)
+        self.show_srv    = rospy.Service('/projector_srv/show_cs', Trigger, self.show_coord_sys_cb)
 
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
         self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_cb)
