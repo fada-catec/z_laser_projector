@@ -18,6 +18,8 @@ catkin_python_setup()
 add_service_files(
    FILES
    ProjectionShape.srv
+   CsRefPoints.srv
+   ShowCs.srv
 )
 
 generate_messages(
