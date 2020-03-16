@@ -121,8 +121,8 @@ class ProjectorManager:
         
         print("Create reference object: {}".format(req.name_ref_object))
         reference_object = zlp.create_reference_object()
-        reference_object.name = req.name_ref_object
-        reference_object.coordinateSystem = req.name_cs
+        reference_object.name = "RefObject" #req.name_ref_object
+        reference_object.coordinateSystem = "MyCoordinateSystem_1" #req.name_cs
         reference_object.projectorID = self.projector_id
         
         reference_object.refPointList = [   zlp.create_reference_point("T1", req.T1_x, req.T1_y),
