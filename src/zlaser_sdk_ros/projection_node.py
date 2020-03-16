@@ -7,7 +7,7 @@ import time
 from std_srvs.srv import Trigger, TriggerResponse
 from std_msgs.msg import Bool
 from projector_manager import ProjectorManager
-from zlaser_sdk_ros.srv import ProjectionShape, ProjectionShapeResponse
+from zlaser_sdk_ros.srv import ProjectionShape, ProjectionShapeResponse, CsRefPoints, CsRefPointsResponse
 #from zlaser_sdk_ros.projector_manager import ProjectorManager
 
 class ProjectionNode:
@@ -30,7 +30,7 @@ class ProjectionNode:
         self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
         self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
 
-        self.cs_srv      = rospy.Service('/projector_srv/man_def_cs', RefPoints_cs, self.manual_define_coord_sys_cb)
+        self.cs_srv      = rospy.Service('/projector_srv/man_def_cs', CsRefPoints, self.manual_define_coord_sys_cb)
         self.show_srv    = rospy.Service('/projector_srv/show_cs', Trigger, self.show_coord_sys_cb)
 
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
@@ -84,7 +84,7 @@ class ProjectionNode:
             rospy.loginfo("Default coordinate system: {}".format(cs_list[-1]))
             e = self.projector.set_coordinate_system(cs_list[-1]) # set default coordinate system
             rospy.loginfo(e)
-            # AQUÍ FALTARÍA -> show_coord_system: name, project points, project axis, print SC properties (position, distance, etc.)
+            self.show_coord_sys_cb(cs_list[-1],5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
         return TriggerResponse(True,"end setup")
 
 
@@ -94,32 +94,21 @@ class ProjectionNode:
     #         rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
     #         self.projector.set_coordinate_system(cs[-1])
 
-    def show_coord_sys_cb(self,cs):
-        self.projector.show_coordinate_system(10)
+    def show_coord_sys_cb(self,cs,secs): # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
+        rospy.loginfo("Projecting coordinate system: {}".format(cs))
+        self.projector.show_coordinate_system(secs)
 
     def manual_define_coord_sys_cb(self,req):
         
         rospy.loginfo("Received request to create new coordinate system manually. Please wait for the system to indicate the end")
-        
-        # self.projector.do_register_coordinate_system = True
-
         cs = self.projector.define_coordinate_system(req) # define coordinate system
-
-        e = self.projector.register_coordinate_system(cs) # define coordinate system
+        e = self.projector.register_coordinate_system(cs) # register coordinate system
         rospy.loginfo(e)
-        e = self.projector.set_coordinate_system(req.name_cs) # register coordinate system
+        e = self.projector.set_coordinate_system(cs) # set new coordinate system
         rospy.loginfo(e)
-        # AQUÍ FALTARÍA -> show_coord_system: name, project points, project axis, print SC properties (position, distance, etc.)
+        self.show_coord_sys_cb(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
+        return CsRefPointsResponse(Bool(True))            
 
-
-        # show created coordinate system
-        # cs = self.projector.get_coordinate_systems()
-        # rospy.loginfo("Available coordinate systems: {}".format(cs))
-        rospy.loginfo("Projecting {} coordinate system".format(cs[-1]))
-        self.projector.show_coordinate_system(5)
-        # save new coordinate system as default
-        self.projector.set_coordinate_system(cs)
-        return TriggerResponse(True,"Created coordinate system")            
 
 
 

@@ -112,7 +112,7 @@ class ProjectorManager:
         return ("Setting [{}] as coordinate system".format(coord_sys))
 
     def show_coordinate_system(self,secs):
-        # module_id = self.thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
+        print("Projecting [{}] coordinate system".format(coord_sys))
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
         time.sleep(secs)
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
@@ -131,31 +131,30 @@ class ProjectorManager:
                                             zlp.create_reference_point("T4", req.T4_x, req.T4_y)]
         
         crossSize = zlp.create_2d_point(req.crossize_x,req.crossize_y) # set global crosssize for all reference points
-        self.__define_reference_point(crossSize,0,req.distance,req.x1,req.y1) # define coordinates in user system [mm]
-        self.__define_reference_point(crossSize,1,req.distance,req.x2,req.y2)
-        self.__define_reference_point(crossSize,2,req.distance,req.x3,req.y3)
-        self.__define_reference_point(crossSize,3,req.distance,req.x4,req.y4)
+        reference_object = self.__define_reference_point(reference_object,crossSize,0,req.distance,req.x1,req.y1) # define coordinates in user system [mm]
+        reference_object = self.__define_reference_point(reference_object,crossSize,1,req.distance,req.x2,req.y2)
+        reference_object = self.__define_reference_point(reference_object,crossSize,2,req.distance,req.x3,req.y3)
+        reference_object = self.__define_reference_point(reference_object,crossSize,3,req.distance,req.x4,req.y4)
 
         self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
         self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
         
         self.add_ref_object(reference_object)
 
-        print("Created reference object. Coordinate system defined but not registered.")
-        # if self.do_register_coordinate_system: 
-        # res = self.register_coordinate_system()
-        return self.reference_object[].coordinateSystem
+        print("Reference object created. Coordinate system defined but not registered.")
+        return reference_object.coordinateSystem
 
-    def __define_reference_point(self,crossSize,n,d,x,y):
-        self.reference_object.refPointList[n].tracePoint.x = x
-        self.reference_object.refPointList[n].tracePoint.y = y
-        self.reference_object.refPointList[n].distance = d
-        self.reference_object.refPointList[n].activated = True
-        self.reference_object.refPointList[n].crossSize = crossSize
+    def __define_reference_point(self,reference_object,crossSize,n,d,x,y):
+        reference_object.refPointList[n].tracePoint.x = x
+        reference_object.refPointList[n].tracePoint.y = y
+        reference_object.refPointList[n].distance = d
+        reference_object.refPointList[n].activated = True
+        reference_object.refPointList[n].crossSize = crossSize
+        return reference_object
 
-    def add_ref_object(self,ref_obj): # set_coord_sys = defining the object.coordinate_system property
-        self.coordinate_system = [coord_sys]
-        return ("Setting [{}] as coordinate system".format(coord_sys))
+    def add_ref_object(self,ref_obj): 
+        self.reference_object_list.append(ref_obj)
+        return ("[{}] appended".format(self.reference_object_list[-1]))
 
     def register_coordinate_system(self, cs):
         
@@ -165,7 +164,7 @@ class ProjectorManager:
         self.cv.acquire()
         self.thrift_client.FunctionModuleRun(self.module_id) # Calculate transformation
         self.cv.wait()
-        cv.release()
+        self.cv.release()
 
         state = self.thrift_client.FunctionModuleGetProperty(self.module_id, "state")
         if state != "1":  # idle
