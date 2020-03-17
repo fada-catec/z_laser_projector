@@ -129,7 +129,7 @@ class ProjectorManager:
         self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
         # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
         
-        # self.add_ref_object(reference_object)
+        # self.add_ref_object(reference_object) # HACE FALTA??
 
         print("Reference object created. Coordinate system defined but not registered.")
         return (reference_object.coordinateSystem)
@@ -142,7 +142,7 @@ class ProjectorManager:
         reference_object.refPointList[n].crossSize = crossSize
         return reference_object
 
-    # def add_ref_object(self,ref_obj): # Hace falta??
+    # def add_ref_object(self,ref_obj): # HACE FALTA??
     #     self.reference_object_list.append(ref_obj)
     #     print("[{}] appended".format(self.reference_object_list[-1]))
     #     print("Reference object list: [{}]".format(self.reference_object_list))
