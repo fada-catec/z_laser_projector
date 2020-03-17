@@ -110,7 +110,7 @@ class ProjectorManager:
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
         return available_coordinate_systems
 
-    def set_coordinate_system(self,coord_sys): # set_coord_sys = setting the object.coordinate_system property
+    def set_coordinate_system(self,coord_sys): # set_coord_sys = setting the object.coordinate_system property value
         self.coordinate_system = [coord_sys]
         return ("Setting [{}] as coordinate system".format(coord_sys))
 
