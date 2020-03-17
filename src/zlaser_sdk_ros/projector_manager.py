@@ -114,12 +114,6 @@ class ProjectorManager:
         self.coordinate_system = [coord_sys]
         return ("Setting [{}] as coordinate system".format(coord_sys))
 
-    def show_coordinate_system(self,cs,secs):
-        print("Projecting [{}] coordinate system for {} seconds".format(cs,secs))
-        self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
-        time.sleep(secs)
-        self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
-
     def define_coordinate_system(self,req):
         
         print("Create reference object: {}".format(req.name_ref_object))
@@ -142,12 +136,12 @@ class ProjectorManager:
         reference_object = self.__define_reference_point(reference_object,crossSize,3,req.distance.data,req.x4.data,req.y4.data)
 
         self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
-        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
+        # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
         
         self.add_ref_object(reference_object)
 
         print("Reference object created. Coordinate system defined but not registered.")
-        return reference_object.coordinateSystem
+        return (reference_object.name,reference_object.coordinateSystem)
 
     def __define_reference_point(self,reference_object,crossSize,n,d,x,y):
         reference_object.refPointList[n].tracePoint.x = x
@@ -159,11 +153,14 @@ class ProjectorManager:
 
     def add_ref_object(self,ref_obj): 
         self.reference_object_list.append(ref_obj)
-        return ("[{}] appended".format(self.reference_object_list[-1]))
+        print("[{}] appended".format(self.reference_object_list[-1]))
+        print("Reference object list: [{}]".format(self.reference_object_list))
 
-    def register_coordinate_system(self, cs):
+    def register_coordinate_system(self, ref_obj, cs):
         
         print("Registering coordinate system {}".format(cs))
+
+        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj) #ref_obj = reference_object.name
         self.thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         
         # self.cv.acquire()
@@ -176,6 +173,12 @@ class ProjectorManager:
             return "Function module is not in idle state, hence an error has occured."
         else:
             return "Finished to register coordinate system on projector"
+
+    def show_coordinate_system(self,cs,secs):
+        print("Projecting [{}] coordinate system for {} seconds".format(cs,secs))
+        self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
+        time.sleep(secs)
+        self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
 
 
 
