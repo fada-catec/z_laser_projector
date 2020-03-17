@@ -30,8 +30,10 @@ class ProjectionNode:
         self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
         self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
 
+        # self.get_cs_list = rospy.Service('/projector_srv/cs_list', Trigger, self.get_coord_sys_list_cb)
         self.cs_srv      = rospy.Service('/projector_srv/man_def_cs', CsRefPoints, self.manual_define_coord_sys_cb)
         self.show_srv    = rospy.Service('/projector_srv/show_cs', ShowCs, self.show_coord_sys_cb)
+        # self.remove_ref_obj = rospy.Service('/projector_srv/remove_refobj', Trigger, self.remove_ref_obj_cb)
 
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
         self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_cb)
@@ -81,14 +83,16 @@ class ProjectionNode:
             rospy.loginfo(e)
             cs_list = self.projector.get_coordinate_systems() # check coordinate system
             rospy.loginfo("Available coordinate systems: {}".format(cs_list))
-            rospy.loginfo("Default coordinate system: {}".format(cs_list[0]))
-            e = self.projector.set_coordinate_system(cs_list[0]) # set default coordinate system
-            rospy.loginfo(e)
+            rospy.loginfo("Factory coordinate system: {}".format(cs_list[0]))
+            
+            # e = self.projector.set_coordinate_system(cs_list[0]) # set default coordinate system
+            # rospy.loginfo(e)
             # self.projector.show_coordinate_system(cs_list[0],5) 
             # Not showing default cs at setup because if others cs exist at the beginning, it's going to project de last one registered, i.e., the last one
             # which has been executed within the registering function (register_coordinate_system)
             # To choose the next cs to project between the cs defined, we need to execute the registering function, and for that we need its related reference_object
             # For our own defined cs, we have the reference_objects, but we don't have the ref_obj related to the default cs
+
         return TriggerResponse(True,"end setup")
 
     # def set_coord_system(self,cs):
@@ -98,23 +102,21 @@ class ProjectionNode:
 
 
     def manual_define_coord_sys_cb(self,req):
-        
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end")
-        ref_obj, cs = self.projector.define_coordinate_system(req) # define coordinate system
-        e = self.projector.register_coordinate_system(ref_obj,cs) # register coordinate system
-        rospy.loginfo(e)
+        cs = self.projector.define_coordinate_system(req) # define coordinate system
         e = self.projector.set_coordinate_system(cs) # set new coordinate system
         rospy.loginfo(e)
-        self.projector.show_coordinate_system(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
-        return CsRefPointsResponse(Bool(True))            
+        e = self.projector.register_coordinate_system(cs) # register coordinate system
+        rospy.loginfo(e)
+        e = self.projector.show_coordinate_system(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
+        rospy.loginfo(e)
+        return CsRefPointsResponse(Bool(True))
 
     def show_coord_sys_cb(self,req): # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
         rospy.loginfo("Request to project coordinate system: {}".format(req.cs_name.data))
-        e = self.projector.register_coordinate_system(req.ref_obj_name.data,req.cs_name) # register coordinate system
+        e = self.projector.set_coordinate_system(req.cs_name.data) # set default coordinate system
         rospy.loginfo(e)
-        e = self.projector.set_coordinate_system(req.cs_name) # set default coordinate system
-        rospy.loginfo(e)
-        self.projector.show_coordinate_system(req.cs_name,req.secs.data)
+        self.projector.show_coordinate_system(req.cs_name.data,req.secs.data)
         return ShowCsResponse(Bool(True))  
 
 

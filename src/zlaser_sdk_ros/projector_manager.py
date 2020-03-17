@@ -15,7 +15,8 @@ class ProjectorManager:
         self.server_IP = "192.168.10.11"
         self.connection_port = 9090
         self.license_path = "Pendrive_ZLaser/1900027652.lic" #???
-        self.reference_object_list = []
+        
+        # self.reference_object_list = []
 
 
         # self.projection_group = "my_group"
@@ -83,16 +84,12 @@ class ProjectorManager:
             return "Function Module Created"
         except zlp.thrift_interface.FunctionModuleClassNotRegistered as e:
             return ("FunctionModuleClassNotRegistered: " + e.which)
-            # sys.exit(1)
         except zlp.thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
             return ("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
-            # sys.exit(1)
         except zlp.thrift_interface.FunctionModuleClassNotLicensed as e:
             return ("FunctionModuleClassNotLicensed: " + e.which)
-            # sys.exit(1)
 
         # self.cv = threading.Condition()
-
         # self.thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback())
 
     # def function_module_changed_callback(self, old_state, new_state):
@@ -103,22 +100,14 @@ class ProjectorManager:
     #         self.cv.notify()
     #         self.cv.release()
 
-
-
-
     def get_coordinate_systems(self):
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
         return available_coordinate_systems
 
-    def set_coordinate_system(self,coord_sys): # set_coord_sys = setting the object.coordinate_system property value
-        self.coordinate_system = [coord_sys]
-        return ("Setting [{}] as coordinate system".format(coord_sys))
-
     def define_coordinate_system(self,req):
-        
-        print("Create reference object: {}".format(req.name_ref_object))
         reference_object = zlp.create_reference_object()
-        reference_object.name = req.name_ref_object.data
+        reference_object.name = "RefObj_" + req.name_cs.data
+        print("Creating reference object: {}".format(reference_object.name))
         reference_object.coordinateSystem = req.name_cs.data
         reference_object.projectorID = self.projector_id
 
@@ -127,7 +116,6 @@ class ProjectorManager:
                                             zlp.create_reference_point("T3", req.T3_x.data, req.T3_y.data),
                                             zlp.create_reference_point("T4", req.T4_x.data, req.T4_y.data)]
         
-
         crossSize = zlp.create_2d_point(req.crossize_x.data,req.crossize_y.data) # set global crosssize for all reference points
 
         reference_object = self.__define_reference_point(reference_object,crossSize,0,req.distance.data,req.x1.data,req.y1.data) # define coordinates in user system [mm]
@@ -138,10 +126,10 @@ class ProjectorManager:
         self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
         # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
         
-        self.add_ref_object(reference_object)
+        # self.add_ref_object(reference_object)
 
         print("Reference object created. Coordinate system defined but not registered.")
-        return (reference_object.name,reference_object.coordinateSystem)
+        return (reference_object.coordinateSystem)
 
     def __define_reference_point(self,reference_object,crossSize,n,d,x,y):
         reference_object.refPointList[n].tracePoint.x = x
@@ -151,16 +139,29 @@ class ProjectorManager:
         reference_object.refPointList[n].crossSize = crossSize
         return reference_object
 
-    def add_ref_object(self,ref_obj): 
-        self.reference_object_list.append(ref_obj)
-        print("[{}] appended".format(self.reference_object_list[-1]))
-        print("Reference object list: [{}]".format(self.reference_object_list))
+    # def add_ref_object(self,ref_obj): # Hace falta??
+    #     self.reference_object_list.append(ref_obj)
+    #     print("[{}] appended".format(self.reference_object_list[-1]))
+    #     print("Reference object list: [{}]".format(self.reference_object_list))
 
-    def register_coordinate_system(self, ref_obj, cs):
+    def set_coordinate_system(self,coord_sys): 
+        # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS 
         
-        print("Registering coordinate system {}".format(cs))
+        self.coordinate_system = [coord_sys] # set the object.coordinate_system property value to use it wherever - HACE FALTA???
+        reference_object_name = "RefObj_" + coord_sys
+        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object_name)
 
-        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj) #ref_obj = reference_object.name
+        # allReferenceObjects = self.thrift_client.GetGeoTreeIds()
+        # print("Available reference objects:", allReferenceObjects)
+        # ref_obj = self.thrift_client.GetReferenceobject("RefObject1")
+        # print(ref_obj)
+
+        return ("Setting [{}] as coordinate system".format(coord_sys))
+
+    def register_coordinate_system(self, coord_sys):
+        print("Registering coordinate system {}".format(coord_sys))
+
+        # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj) #ref_obj = reference_object.name # se hace en set_cs
         self.thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         
         # self.cv.acquire()
@@ -174,12 +175,12 @@ class ProjectorManager:
         else:
             return "Finished to register coordinate system on projector"
 
-    def show_coordinate_system(self,cs,secs):
-        print("Projecting [{}] coordinate system for {} seconds".format(cs,secs))
+    def show_coordinate_system(self,coord_sys,secs):
+        print("Projecting [{}] coordinate system for {} seconds".format(coord_sys,secs))
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
         time.sleep(secs)
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
-
+        return "Finished to show coordinate system"
 
 
     def clear_geo_tree(self):

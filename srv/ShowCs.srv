@@ -1,4 +1,3 @@
-std_msgs/String ref_obj_name
 std_msgs/String cs_name
 std_msgs/Int16 secs
 ---
