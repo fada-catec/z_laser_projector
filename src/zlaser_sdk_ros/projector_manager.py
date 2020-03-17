@@ -22,7 +22,7 @@ class ProjectorManager:
         # self.projection_group = "my_group"
         # self.do_register_coordinate_system = False
         # self.do_target_search = False
-        self.geo_tree_elements = []
+        # self.geo_tree_elements = []
 
         
         self.thrift_client = zlp.ThriftClient() # Create client object
@@ -52,9 +52,12 @@ class ProjectorManager:
             return e
 
     def deactivate(self):
-        if hasattr(self,'reference_object_name'):
-            self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
-        self.clear_geo_tree() # al hacer deactivate en el proyector se borran automaticamente los geo_trees? es mejor dejar ese if para borrarlos? no hace falta?
+        # QUE HACER ADEMAS AL DEACTIVATE: ????
+        # self.geo_tree_elements.clear() ??
+        # thrift_client.FunctionModuleRelease(module_id) ??
+        # if hasattr(self,'reference_object_name'):
+            # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
+        # self.clear_geo_tree() # al hacer deactivate en el proyector se borran automaticamente los geo_trees? es mejor dejar ese if para borrarlos? no hace falta?
                                 # se borran al desenchufar el proyector
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
@@ -145,7 +148,8 @@ class ProjectorManager:
     #     print("Reference object list: [{}]".format(self.reference_object_list))
 
     def set_coordinate_system(self,coord_sys): 
-        # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS 
+        # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS -> hay que eliminarlos todos en el disconnect
+        # porque se borra la info de los ref_obj pero no los nombres de los coord sys??
         
         self.coordinate_system = [coord_sys] # set the object.coordinate_system property value to use it wherever - HACE FALTA???
         reference_object_name = "RefObj_" + coord_sys
@@ -182,11 +186,21 @@ class ProjectorManager:
         self.thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
         return "Finished to show coordinate system"
 
+    def remove_coordinate_system(self,coord_sys):
+        # for name in self.geo_tree_elements:
+            # self.thrift_client.RemoveGeoTreeElem(name)
 
-    def clear_geo_tree(self):
-        for name in self.geo_tree_elements:
-            self.thrift_client.RemoveGeoTreeElem(name)
-        self.geo_tree_elements.clear()
+        reference_object_name = "RefObj_" + coord_sys
+        self.thrift_client.RemoveGeoTreeElem(reference_object_name)
+        return("Coordinate system [{}] removed".format(coord_sys))
+
+
+
+    # def clear_geo_tree(self, coord_sys):
+    #     for name in self.geo_tree_elements:
+    #         self.thrift_client.RemoveGeoTreeElem(name)
+    #     self.geo_tree_elements.clear()
+    #     return ""
 
 
 

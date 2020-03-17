@@ -20,6 +20,7 @@ add_service_files(
    ProjectionShape.srv
    CsRefPoints.srv
    ShowCs.srv
+   RemovCs.srv
 )
 
 generate_messages(

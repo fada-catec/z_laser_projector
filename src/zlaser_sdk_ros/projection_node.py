@@ -7,7 +7,7 @@ import time
 from std_srvs.srv import Trigger, TriggerResponse
 from std_msgs.msg import Bool
 from projector_manager import ProjectorManager
-from zlaser_sdk_ros.srv import ProjectionShape, ProjectionShapeResponse, CsRefPoints, CsRefPointsResponse, ShowCs, ShowCsResponse
+from zlaser_sdk_ros.srv import ProjectionShape, ProjectionShapeResponse, CsRefPoints, CsRefPointsResponse, ShowCs, ShowCsResponse, RemovCs, RemovCsResponse
 #from zlaser_sdk_ros.projector_manager import ProjectorManager
 
 class ProjectionNode:
@@ -30,10 +30,10 @@ class ProjectionNode:
         self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
         self.setup_srv   = rospy.Service('/projector_srv/setup', Trigger, self.setup_cb)
 
-        # self.get_cs_list = rospy.Service('/projector_srv/cs_list', Trigger, self.get_coord_sys_list_cb)
+        self.get_cs_list = rospy.Service('/projector_srv/cs_list', Trigger, self.get_coord_sys_list_cb)
         self.cs_srv      = rospy.Service('/projector_srv/man_def_cs', CsRefPoints, self.manual_define_coord_sys_cb)
         self.show_srv    = rospy.Service('/projector_srv/show_cs', ShowCs, self.show_coord_sys_cb)
-        # self.remove_ref_obj = rospy.Service('/projector_srv/remove_refobj', Trigger, self.remove_ref_obj_cb)
+        self.rem_cs      = rospy.Service('/projector_srv/remove_coord_sys', RemovCs, self.remove_coord_sys_cb)
 
         self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
         self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_cb)
@@ -101,6 +101,13 @@ class ProjectionNode:
     #         self.projector.set_coordinate_system(cs[-1])
 
 
+    def get_coord_sys_list_cb(self,req):
+        rospy.loginfo("Received request to get the current coordinate system list at projector")
+        cs_list = self.projector.get_coordinate_systems() # check coordinate system
+        rospy.loginfo("Available coordinate systems: {}".format(cs_list))
+        return TriggerResponse(True,"End list cs")
+
+
     def manual_define_coord_sys_cb(self,req):
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end")
         cs = self.projector.define_coordinate_system(req) # define coordinate system
@@ -117,7 +124,13 @@ class ProjectionNode:
         e = self.projector.set_coordinate_system(req.cs_name.data) # set default coordinate system
         rospy.loginfo(e)
         self.projector.show_coordinate_system(req.cs_name.data,req.secs.data)
-        return ShowCsResponse(Bool(True))  
+        return ShowCsResponse(Bool(True))
+
+    def remove_coord_sys_cb(self,req):
+        rospy.loginfo("Received request to remove [{}] coordinate system".format(req.cs_name.data))
+        e = self.projector.remove_coordinate_system(req.cs_name.data) 
+        rospy.loginfo(e)
+        return RemovCsResponse(Bool(True))
 
 
     def projection_cb(self,req):
