@@ -16,13 +16,15 @@ class ProjectorManager:
         self.connection_port = 9090
         self.license_path = "Pendrive_ZLaser/1900027652.lic" #???
         self.reference_object_list = []
+
+
         # self.projection_group = "my_group"
         # self.do_register_coordinate_system = False
         # self.do_target_search = False
         self.geo_tree_elements = []
 
-        # Create client object
-        self.thrift_client = zlp.ThriftClient()
+        
+        self.thrift_client = zlp.ThriftClient() # Create client object
 
     def client_server_connect(self):
         try:
@@ -42,7 +44,7 @@ class ProjectorManager:
         try:
             projectors = self.thrift_client.scan_projectors(self.projector_IP)
             self.projector_id = projectors[0]
-            print(self.projector_id) # cómo mostrar por pantalla ????
+            print("Projector ID: ",self.projector_id) # cómo mostrar por pantalla ????
             self.thrift_client.activate_projector(self.projector_id)
             return "Projector activated. You can start the projection now"
         except Exception as e:
@@ -51,7 +53,8 @@ class ProjectorManager:
     def deactivate(self):
         if hasattr(self,'reference_object_name'):
             self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
-        self.clear_geo_tree()
+        self.clear_geo_tree() # al hacer deactivate en el proyector se borran automaticamente los geo_trees? es mejor dejar ese if para borrarlos? no hace falta?
+                                # se borran al desenchufar el proyector
         try:
             self.thrift_client.deactivate_projector(self.projector_id)
             return "Projector deactivated."
@@ -88,17 +91,17 @@ class ProjectorManager:
             return ("FunctionModuleClassNotLicensed: " + e.which)
             # sys.exit(1)
 
-        self.cv = threading.Condition()
+        # self.cv = threading.Condition()
 
-        self.thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback())
+        # self.thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback())
 
-    def function_module_changed_callback(self, old_state, new_state):
-        if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
-            self.cv.acquire()
-            print("Function module stopped running.")
-            print("Module", self.module_id, ":", old_state, "->", new_state)
-            self.cv.notify()
-            self.cv.release()
+    # def function_module_changed_callback(self, old_state, new_state):
+    #     if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
+    #         self.cv.acquire()
+    #         print("Function module stopped running.")
+    #         print("Module", self.module_id, ":", old_state, "->", new_state)
+    #         self.cv.notify()
+    #         self.cv.release()
 
 
 
@@ -121,20 +124,22 @@ class ProjectorManager:
         
         print("Create reference object: {}".format(req.name_ref_object))
         reference_object = zlp.create_reference_object()
-        reference_object.name = "RefObject" #req.name_ref_object
-        reference_object.coordinateSystem = "MyCoordinateSystem_1" #req.name_cs
+        reference_object.name = req.name_ref_object.data
+        reference_object.coordinateSystem = req.name_cs.data
         reference_object.projectorID = self.projector_id
+
+        reference_object.refPointList = [   zlp.create_reference_point("T1", req.T1_x.data, req.T1_y.data),
+                                            zlp.create_reference_point("T2", req.T2_x.data, req.T2_y.data),
+                                            zlp.create_reference_point("T3", req.T3_x.data, req.T3_y.data),
+                                            zlp.create_reference_point("T4", req.T4_x.data, req.T4_y.data)]
         
-        reference_object.refPointList = [   zlp.create_reference_point("T1", req.T1_x, req.T1_y),
-                                            zlp.create_reference_point("T2", req.T2_x, req.T2_y),
-                                            zlp.create_reference_point("T3", req.T3_x, req.T3_y),
-                                            zlp.create_reference_point("T4", req.T4_x, req.T4_y)]
-        
-        crossSize = zlp.create_2d_point(req.crossize_x,req.crossize_y) # set global crosssize for all reference points
-        reference_object = self.__define_reference_point(reference_object,crossSize,0,req.distance,req.x1,req.y1) # define coordinates in user system [mm]
-        reference_object = self.__define_reference_point(reference_object,crossSize,1,req.distance,req.x2,req.y2)
-        reference_object = self.__define_reference_point(reference_object,crossSize,2,req.distance,req.x3,req.y3)
-        reference_object = self.__define_reference_point(reference_object,crossSize,3,req.distance,req.x4,req.y4)
+
+        crossSize = zlp.create_2d_point(req.crossize_x.data,req.crossize_y.data) # set global crosssize for all reference points
+
+        reference_object = self.__define_reference_point(reference_object,crossSize,0,req.distance.data,req.x1.data,req.y1.data) # define coordinates in user system [mm]
+        reference_object = self.__define_reference_point(reference_object,crossSize,1,req.distance.data,req.x2.data,req.y2.data)
+        reference_object = self.__define_reference_point(reference_object,crossSize,2,req.distance.data,req.x3.data,req.y3.data)
+        reference_object = self.__define_reference_point(reference_object,crossSize,3,req.distance.data,req.x4.data,req.y4.data)
 
         self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
         self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
@@ -161,10 +166,10 @@ class ProjectorManager:
         print("Registering coordinate system {}".format(cs))
         self.thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         
-        self.cv.acquire()
+        # self.cv.acquire()
         self.thrift_client.FunctionModuleRun(self.module_id) # Calculate transformation
-        self.cv.wait()
-        self.cv.release()
+        # self.cv.wait()
+        # self.cv.release()
 
         state = self.thrift_client.FunctionModuleGetProperty(self.module_id, "state")
         if state != "1":  # idle
