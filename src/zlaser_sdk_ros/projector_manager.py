@@ -6,6 +6,7 @@ import threading
 import time
 #from zlaser_sdk_ros import zlp
 import zlp
+import math
 
 class ProjectorManager:
     def __init__(self):
@@ -53,7 +54,8 @@ class ProjectorManager:
 
     def deactivate(self):
         # QUE HACER ADEMAS AL DEACTIVATE: ????
-        # self.geo_tree_elements.clear() ??
+        # self.geo_tree_elements.clear() ?? <- geo_tree_elements[] es un es una lista de geo_tree_elem creada por nosotros (.clear() elimina los elementos del vector)
+        # thrift_client.RemoveGeoTreeElem("") <- remove all??
         # thrift_client.FunctionModuleRelease(module_id) ??
         # if hasattr(self,'reference_object_name'):
             # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
@@ -105,6 +107,11 @@ class ProjectorManager:
 
     def get_coordinate_systems(self):
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
+
+        # TEMPORAL
+        allReferenceObjects = self.thrift_client.GetGeoTreeIds()
+        print("Available reference objects:", allReferenceObjects)
+
         return available_coordinate_systems
 
     def define_coordinate_system(self,req):
@@ -151,7 +158,7 @@ class ProjectorManager:
         # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS -> hay que eliminarlos todos en el disconnect
         # porque se borra la info de los ref_obj pero no los nombres de los coord sys??
         
-        self.coordinate_system = [coord_sys] # set the object.coordinate_system property value to use it wherever - HACE FALTA???
+        self.coordinate_system = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
         reference_object_name = "RefObj_" + coord_sys
         self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object_name)
 
@@ -162,7 +169,7 @@ class ProjectorManager:
 
         return ("Setting [{}] as coordinate system".format(coord_sys))
 
-    def register_coordinate_system(self, coord_sys):
+    def register_coordinate_system(self,coord_sys):
         print("Registering coordinate system {}".format(coord_sys))
 
         # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj) #ref_obj = reference_object.name # se hace en set_cs
@@ -189,81 +196,81 @@ class ProjectorManager:
     def remove_coordinate_system(self,coord_sys):
         # for name in self.geo_tree_elements:
             # self.thrift_client.RemoveGeoTreeElem(name)
+        #self.geo_tree_elements.clear()
 
         reference_object_name = "RefObj_" + coord_sys
         self.thrift_client.RemoveGeoTreeElem(reference_object_name)
         return("Coordinate system [{}] removed".format(coord_sys))
 
 
-
-    # def clear_geo_tree(self, coord_sys):
-    #     for name in self.geo_tree_elements:
-    #         self.thrift_client.RemoveGeoTreeElem(name)
-    #     self.geo_tree_elements.clear()
-    #     return ""
-
-
+    # def set_up_projector(self):
+    #     self.clientServerConnect()
+    #     self.activate()
+    #     self.transferLicense()
+    #     name = self.projection_group + "/my_circle" + id
+    #     self.geo_tree_elements.append(name)
+    #     circle = zlp.create_circle(x, y, r, name)
+    #     circle.activated = True
+    #     circle.coordinateSystemList = self.coordinate_system
+    #     try:
+    #         self.thrift_client.SetCircleSegment(circle)
+    #         return "Defined a circle segment to project"
+    #     except Exception as e:
+    #         return e
 
     def start_projection(self):
-        self.thrift_client.TriggerProjection(self.projector_id)
+        self.thrift_client.TriggerProjection()
 
     def stop_projection(self):
         self.thrift_client.deactivate_projector(self.projector_id)
 
+    def create_polyline(self,projection_group,id,x,y,angle,r):
+        polyline_name = projection_group + "/my_polyline_" + id
+        print(polyline_name)
+        polyline = zlp.create_polyline(polyline_name)
+        # self.geo_tree_elements.append(name)
 
-    def set_up_projector(self):
-        self.clientServerConnect()
-        self.activate()
-        self.transferLicense()
+        # linestring = [ zlp.create_3d_point(x, y),
+        #                zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
+        
+        linestring = [ zlp.create_3d_point(-50, -50),
+                       zlp.create_3d_point( 0,  0)]
 
-        name = self.projection_group + "/my_circle" + id
-        self.geo_tree_elements.append(name)
-        circle = zlp.create_circle(x, y, r, name)
-        circle.activated = True
-        circle.coordinateSystemList = self.coordinate_system
-        try:
-            self.thrift_client.SetCircleSegment(circle)
-            return "Defined a circle segment to project"
-        except Exception as e:
-            return e
-    
-    def create_polyline(self,id):
-        name = self.projection_group + "/my_polyline" + id
-        polyline = zlp.create_polyline(name)
-        self.geo_tree_elements.append(name)
-        linestringA = [ zlp.create_3d_point(-100, -100),
-                        zlp.create_3d_point(+100, -100),
-                        zlp.create_3d_point(+100, +100) ]
-        linestringB = [ zlp.create_3d_point(-200, -200),
-                        zlp.create_3d_point(+200, -200),
-                        zlp.create_3d_point(+200, +200) ]
-        polyline.polylineList = [linestringA, linestringB]
+        print(linestring)
+        
+        polyline.polylineList = [linestring]
         polyline.activated = True
+        print(self.coordinate_system)
         polyline.coordinateSystemList = self.coordinate_system
         try:
             self.thrift_client.SetPolyLine(polyline)
+            print("Projecting shape for 5 seconds in order to check the shape")
+            self.start_projection()
             return "Defined a cross segment to project"
         except Exception as e:
             return e
 
+    def hide_shape(self,projection_group,shape_name,id): # deactivate shape
 
-        name = self.projection_group + "/my_text"
-        text = zlp.create_text_element(x, y, text, name, 100)
-        text.charSpacing = 100
-        text.angle = 25
-        text.activated = True
-        text.coordinateSystemList = self.coordinate_system
-        self.thrift_client.SetTextElement(text)
+        if shape_name == "polyline":
+            polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+            polyline.activated = False
+            self.thrift_client.SetPolyLine(polyline)
 
-    def clean_projection(self):
-        circle.activated   = False
-        polyline.activated = False
-        arc.activated      = False
-        text.activated     = False
-        self.thrift_client.SetCircleSegment(circle)
-        self.thrift_client.SetPolyLine(polyline)
-        self.thrift_client.SetCircleSegment(arc)
-        self.thrift_client.SetTextElement(text)
-        self.startProjection()                          # TODO revise this
+        # name = projection_group + "/my_" + shape_name + "_" + id
+        # shape = self.thrift_client.GetProjectionElement(name)
+        # shape.activated = False
+        # if shape_name == "polyline":
+        #     self.thrift_client.SetPolyLine(polyline)
+        
+        self.start_projection()
+
+    def remove_shape(self,projection_group,shape_name,id):
+        self.thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
+        # self.start_projection()
+
+    def remove_group(self,projection_group):
+        self.thrift_client.RemoveGeoTreeElem(projection_group)
+        # self.start_projection()
 
     

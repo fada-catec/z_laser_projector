@@ -95,18 +95,18 @@ class ProjectionNode:
 
         return TriggerResponse(True,"end setup")
 
+
+
     # def set_coord_system(self,cs):
     #     if len(cs)>1:
     #         rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
     #         self.projector.set_coordinate_system(cs[-1])
-
 
     def get_coord_sys_list_cb(self,req):
         rospy.loginfo("Received request to get the current coordinate system list at projector")
         cs_list = self.projector.get_coordinate_systems() # check coordinate system
         rospy.loginfo("Available coordinate systems: {}".format(cs_list))
         return TriggerResponse(True,"End list cs")
-
 
     def manual_define_coord_sys_cb(self,req):
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end")
@@ -133,35 +133,28 @@ class ProjectionNode:
         return RemovCsResponse(Bool(True))
 
 
-    def projection_cb(self,req):
-        rospy.loginfo("Received request to project")
-        # get values from service call and pass to projector manager
-        x = req.x.data 
-        y = req.y.data 
-        r = req.r.data
-        id = str(req.id.data)
-        shape = req.shape.data 
-        if shape == "circle":
-            rospy.loginfo("Creating circle shape")
-            e = self.projector.create_circle(x,y,r,id)
-            rospy.loginfo(e)
-            # start projection until stop service is called
-            rospy.loginfo(" - Projecting - ")
-            self.projector.start_projection()
 
-        elif shape == "cross":
-            rospy.loginfo("Creating cross shape")
-            e = self.projector.create_cross(x,y,r,id)
+    def projection_cb(self,req):
+        rospy.loginfo("Received request to project a: '{}', at [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))
+        shape = req.shape_type.data
+        # projection_group = req.projection_group.data
+        # id = req.shape_id.data 
+        # x = req.x.data 
+        # y = req.y.data
+        # angle = req.angle.data 
+        # r = req.r.data
+        
+        if shape == "polyline":
+            rospy.loginfo("Creating polyline shape")
+            e = self.projector.create_polyline(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data)
             rospy.loginfo(e)
-            # start projection until stop service is called
-            rospy.loginfo(" - Projecting - ")
-            self.projector.start_projection()  
+            rospy.loginfo(" - Projecting - ") # start projection until stop service is called
+            # self.projector.start_projection()
         else: 
             return ProjectionShapeResponse(Bool(False))
         return ProjectionShapeResponse(Bool(True))
 
     def projection_stop_cb(self,req):
-        # stop projection when service is called 
         self.projector.stop_projection()
         return TriggerResponse(True,"Stopped")
 
