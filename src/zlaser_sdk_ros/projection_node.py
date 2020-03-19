@@ -7,7 +7,7 @@ import time
 from std_srvs.srv import Trigger, TriggerResponse
 from std_msgs.msg import Bool
 from projector_manager import ProjectorManager
-from zlaser_sdk_ros.srv import ProjectionShape, ProjectionShapeResponse, CsRefPoints, CsRefPointsResponse, ShowCs, ShowCsResponse, RemovCs, RemovCsResponse
+from zlaser_sdk_ros.srv import ShapeParams, ShapeParamsResponse, CsRefPoints, CsRefPointsResponse, ShowCs, ShowCsResponse, RemovCs, RemovCsResponse
 #from zlaser_sdk_ros.projector_manager import ProjectorManager
 
 class ProjectionNode:
@@ -21,8 +21,7 @@ class ProjectionNode:
         # self.setup_path = self.pkg_path + "/scripts/set_up_projector.py" #not used
         self.lic_path = self.pkg_path + "/lic/1900027652.lic"
 
-        # Create projector object
-        self.projector = ProjectorManager()
+        self.projector = ProjectorManager() # Create projector object
 
         # Open services
         self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_cb)
@@ -35,10 +34,10 @@ class ProjectionNode:
         self.show_srv    = rospy.Service('/projector_srv/show_cs', ShowCs, self.show_coord_sys_cb)
         self.rem_cs      = rospy.Service('/projector_srv/remove_coord_sys', RemovCs, self.remove_coord_sys_cb)
 
-        self.project_srv = rospy.Service('/projector_srv/project', ProjectionShape, self.projection_cb)
-        self.stop_srv    = rospy.Service('/projector_srv/stop', Trigger, self.projection_stop_cb)
+        self.shape_srv   = rospy.Service('/projector_srv/add_shape', ShapeParams, self.add_shape_cb)
+        self.start_srv   = rospy.Service('/projector_srv/projection_start', Trigger, self.projection_start_cb)
+        self.stop_srv    = rospy.Service('/projector_srv/projection_stop', Trigger, self.projection_stop_cb)
         
-
         rospy.spin()
 
     def connection_cb(self,req):
@@ -119,7 +118,7 @@ class ProjectionNode:
         rospy.loginfo(e)
         return CsRefPointsResponse(Bool(True))
 
-    def show_coord_sys_cb(self,req): # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
+    def show_coord_sys_cb(self,req): # SHOW AND SET. show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
         rospy.loginfo("Request to project coordinate system: {}".format(req.cs_name.data))
         e = self.projector.set_coordinate_system(req.cs_name.data) # set default coordinate system
         rospy.loginfo(e)
@@ -134,26 +133,29 @@ class ProjectionNode:
 
 
 
-    def projection_cb(self,req):
+    def add_shape_cb(self,req):
         rospy.loginfo("Received request to project a: '{}', at [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))
-        shape = req.shape_type.data
-        # projection_group = req.projection_group.data
-        # id = req.shape_id.data 
-        # x = req.x.data 
-        # y = req.y.data
-        # angle = req.angle.data 
-        # r = req.r.data
         
-        if shape == "polyline":
+        if req.shape_type.data == "polyline":
             rospy.loginfo("Creating polyline shape")
             e = self.projector.create_polyline(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data)
             rospy.loginfo(e)
-            rospy.loginfo(" - Projecting - ") # start projection until stop service is called
+            # rospy.loginfo(" ----- Projecting Polyline ----- ")
+            # self.projector.start_projection()
+        elif req.shape_type.data == "circle":
+            rospy.loginfo("Creating circle shape")
+            e = self.projector.create_circle(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.r.data)
+            rospy.loginfo(e)
+            # rospy.loginfo(" ----- Projecting Polyline ----- ") 
             # self.projector.start_projection()
         else: 
-            return ProjectionShapeResponse(Bool(False))
-        return ProjectionShapeResponse(Bool(True))
+            return ShapeParamsResponse(Bool(False))
+        return ShapeParamsResponse(Bool(True))
 
+    def projection_start_cb(self,req):
+        self.projector.start_projection()
+        return TriggerResponse(True,"Started")
+    
     def projection_stop_cb(self,req):
         self.projector.stop_projection()
         return TriggerResponse(True,"Stopped")

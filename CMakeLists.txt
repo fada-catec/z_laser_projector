@@ -17,7 +17,7 @@ catkin_python_setup()
 
 add_service_files(
    FILES
-   ProjectionShape.srv
+   ShapeParams.srv
    CsRefPoints.srv
    ShowCs.srv
    RemovCs.srv

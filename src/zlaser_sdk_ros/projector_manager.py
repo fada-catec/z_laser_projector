@@ -133,6 +133,8 @@ class ProjectorManager:
         reference_object = self.__define_reference_point(reference_object,crossSize,2,req.distance.data,req.x3.data,req.y3.data)
         reference_object = self.__define_reference_point(reference_object,crossSize,3,req.distance.data,req.x4.data,req.y4.data)
 
+        reference_object.activated = True
+
         self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
         # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
         
@@ -226,27 +228,35 @@ class ProjectorManager:
 
     def create_polyline(self,projection_group,id,x,y,angle,r):
         polyline_name = projection_group + "/my_polyline_" + id
-        print(polyline_name)
         polyline = zlp.create_polyline(polyline_name)
         # self.geo_tree_elements.append(name)
 
-        # linestring = [ zlp.create_3d_point(x, y),
-        #                zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
-        
-        linestring = [ zlp.create_3d_point(-50, -50),
-                       zlp.create_3d_point( 0,  0)]
-
-        print(linestring)
+        linestring = [ zlp.create_3d_point(x, y),
+                       zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
         
         polyline.polylineList = [linestring]
         polyline.activated = True
-        print(self.coordinate_system)
-        polyline.coordinateSystemList = self.coordinate_system
+        polyline.coordinateSystemList = [self.coordinate_system]
         try:
             self.thrift_client.SetPolyLine(polyline)
             print("Projecting shape for 5 seconds in order to check the shape")
-            self.start_projection()
+            # self.start_projection()
             return "Defined a cross segment to project"
+        except Exception as e:
+            return e
+
+    def create_circle(self,projection_group,id,x,y,r):
+        circle_name = projection_group + "/my_circle_" + id
+        circle = zlp.create_circle(x,y,r,circle_name)
+
+        circle.activated = True
+        circle.coordinateSystemList = self.coordinate_system
+        try:
+            self.thrift_client.SetCircleSegment(circle)
+            print("Projecting shape for 5 seconds in order to check the shape")
+            # self.start_projection()
+            self.thrift_client.TriggerProjection()
+            return "Defined a circle segment to project"
         except Exception as e:
             return e
 
@@ -256,6 +266,8 @@ class ProjectorManager:
             polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
             polyline.activated = False
             self.thrift_client.SetPolyLine(polyline)
+
+        # reference_object.activated = False  # <- puede servir 
 
         # name = projection_group + "/my_" + shape_name + "_" + id
         # shape = self.thrift_client.GetProjectionElement(name)

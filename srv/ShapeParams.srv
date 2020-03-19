@@ -6,4 +6,4 @@ std_msgs/Float64 y
 std_msgs/Float64 angle
 std_msgs/Float64 r
 ---
-std_msgs/Bool projecting
+std_msgs/Bool shape_added
