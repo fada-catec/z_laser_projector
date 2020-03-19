@@ -218,6 +218,23 @@ class ThriftClient(TClient):
             log.error("Could not activate projector:", projector_serial)
             raise
 
+    def deactivate_projection(self, projector_serial):
+        """Deactivates a projector.
+
+        Args:
+            projector_serial: serial number of the projector
+        """
+
+        try:
+            log.info("Deactivating projection of projector: " + projector_serial)
+            projector_property_path = "config.projectorManager.projectors." + projector_serial
+            self.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
+            self.SetProperty(projector_property_path + ".cmdShowProjection", "1")
+
+        except Exception as e:
+            log.error("Error: projector could not be deactivated")
+            raise e
+
     def deactivate_projector(self, projector_serial):
         """Deactivates a projector.
 
@@ -232,7 +249,7 @@ class ThriftClient(TClient):
             self.SetProperty(projector_property_path + ".cmdShowProjection", "1")
 
             log.info("Deactivating projector: " + projector_serial)
-            self.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial);
+            self.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
             self.SetProperty("config.projectorManager.cmdActivateProjector.active", "0")
             self.SetProperty("config.projectorManager.cmdActivateProjector", "1")
 
@@ -317,8 +334,8 @@ def create_2d_point(x=0, y=0):
 def create_3d_point(x=0, y=0, z=0):
     return thrift_interface.Vector3D(x, y, z)
 
-def create_2d_point(x=0, y=0):
-    return thrift_interface.Vector3D(x, y)
+# def create_2d_point(x=0, y=0):
+#     return thrift_interface.Vector3D(x, y)
 
 
 def create_reference_object():

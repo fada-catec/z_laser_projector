@@ -52,7 +52,7 @@ class ProjectorManager:
     def deactivate(self):
         # QUE HACER ADEMAS AL DEACTIVATE: ????
         # self.geo_tree_elements.clear() ?? <- geo_tree_elements[] es un es una lista de geo_tree_elem creada por nosotros (.clear() elimina los elementos del vector)
-        # thrift_client.RemoveGeoTreeElem("") <- remove all??
+        # thrift_client.RemoveGeoTreeElem("") <- remove all!!!!
         # thrift_client.FunctionModuleRelease(module_id) ??
         # if hasattr(self,'reference_object_name'):
             # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
@@ -161,10 +161,12 @@ class ProjectorManager:
 
         for i in range (0,len(self.reference_object_list)):
             if self.reference_object_list[i].name == ref_obj_name:
+                print("{} activated" .format(self.reference_object_list[i].name))
                 self.reference_object_list[i].activated = True
                 self.thrift_client.SetReferenceobject(self.reference_object_list[i])
                 self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
             else:
+                print("{} deactivated" .format(self.reference_object_list[i].name))
                 self.reference_object_list[i].activated = False
                 self.thrift_client.SetReferenceobject(self.reference_object_list[i])
         
@@ -176,7 +178,7 @@ class ProjectorManager:
         # ref_obj = self.thrift_client.GetReferenceobject("RefObject1")
         # print(ref_obj)
 
-        return ("Setting [{}] as coordinate system".format(coord_sys))
+        return ("[{}] set as coordinate system".format(coord_sys))
 
     def register_coordinate_system(self,coord_sys):
         print("Registering coordinate system {}".format(coord_sys))
@@ -230,8 +232,14 @@ class ProjectorManager:
         self.thrift_client.TriggerProjection()
         return(" ----- PROJECTING ----- ")
 
+        # if reference_object.activated == False or len(thrift_client.GetGeoTreeIds()) < 2: 
+        #     return(" ----- NOTHING TO PROJECT ----- ")
+        # else:
+        #     self.thrift_client.TriggerProjection()
+        #     return(" ----- PROJECTING ----- ")
+
     def stop_projection(self):
-        self.thrift_client.deactivate_projector(self.projector_id)
+        self.thrift_client.deactivate_projection(self.projector_id)
         return(" ----- STOP PROJECTION ----- ")
 
     def create_polyline(self,projection_group,id,x,y,angle,r):
@@ -251,7 +259,9 @@ class ProjectorManager:
         try:
             self.thrift_client.SetPolyLine(polyline)
             print("Projecting shape for 5 seconds in order to check the shape")
-            # self.start_projection()
+            self.start_projection()
+            time.sleep(5)
+            self.stop_projection()
             return "Defined a cross segment to project"
         except Exception as e:
             return e
@@ -265,8 +275,9 @@ class ProjectorManager:
         try:
             self.thrift_client.SetCircleSegment(circle)
             print("Projecting shape for 5 seconds in order to check the shape")
-            # self.start_projection()
-            self.thrift_client.TriggerProjection()
+            self.start_projection()
+            time.sleep(5)
+            self.stop_projection()
             return "Defined a circle segment to project"
         except Exception as e:
             return e

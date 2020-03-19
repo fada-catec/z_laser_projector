@@ -134,7 +134,7 @@ class ProjectionNode:
 
 
     def add_shape_cb(self,req):
-        rospy.loginfo("Received request to project a: '{}', at [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))
+        rospy.loginfo("Received request to add a: '{}', at the [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))
         
         if req.shape_type.data == "polyline":
             rospy.loginfo("Creating polyline shape")
