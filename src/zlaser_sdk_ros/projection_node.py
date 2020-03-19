@@ -140,24 +140,24 @@ class ProjectionNode:
             rospy.loginfo("Creating polyline shape")
             e = self.projector.create_polyline(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data)
             rospy.loginfo(e)
-            # rospy.loginfo(" ----- Projecting Polyline ----- ")
             # self.projector.start_projection()
         elif req.shape_type.data == "circle":
             rospy.loginfo("Creating circle shape")
             e = self.projector.create_circle(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.r.data)
             rospy.loginfo(e)
-            # rospy.loginfo(" ----- Projecting Polyline ----- ") 
             # self.projector.start_projection()
         else: 
             return ShapeParamsResponse(Bool(False))
         return ShapeParamsResponse(Bool(True))
 
     def projection_start_cb(self,req):
-        self.projector.start_projection()
+        e = self.projector.start_projection()
+        rospy.loginfo(e)
         return TriggerResponse(True,"Started")
     
     def projection_stop_cb(self,req):
-        self.projector.stop_projection()
+        e = self.projector.stop_projection()
+        rospy.loginfo(e)
         return TriggerResponse(True,"Stopped")
 
 def main():

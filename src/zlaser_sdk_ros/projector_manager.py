@@ -17,12 +17,9 @@ class ProjectorManager:
         self.connection_port = 9090
         self.license_path = "Pendrive_ZLaser/1900027652.lic" #???
         
-        # self.reference_object_list = []
-
-
-        # self.projection_group = "my_group"
-        # self.do_register_coordinate_system = False
-        # self.do_target_search = False
+        # Auxiliar variables
+        self.reference_object_list = []
+        self.coordinate_system = ""
         # self.geo_tree_elements = []
 
         
@@ -107,11 +104,9 @@ class ProjectorManager:
 
     def get_coordinate_systems(self):
         available_coordinate_systems = self.thrift_client.GetCoordinatesystemList()
-
-        # TEMPORAL
-        allReferenceObjects = self.thrift_client.GetGeoTreeIds()
-        print("Available reference objects:", allReferenceObjects)
-
+        print("CURRENT COORDINATE SYSTEM: [{}]".format(self.coordinate_system))
+        # allGeoTree = self.thrift_client.GetGeoTreeIds()
+        # print("Available GeoTree:", allGeoTree)
         return available_coordinate_systems
 
     def define_coordinate_system(self,req):
@@ -133,12 +128,11 @@ class ProjectorManager:
         reference_object = self.__define_reference_point(reference_object,crossSize,2,req.distance.data,req.x3.data,req.y3.data)
         reference_object = self.__define_reference_point(reference_object,crossSize,3,req.distance.data,req.x4.data,req.y4.data)
 
-        reference_object.activated = True
-
-        self.thrift_client.SetReferenceobject(reference_object) # activate reference point to use for transformation
-        # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
+        # reference_object.activated = True # en set_cs
+        # self.thrift_client.SetReferenceobject(reference_object) # en set_cs
+        # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name) # en set_cs
         
-        # self.add_ref_object(reference_object) # HACE FALTA??
+        self.add_ref_object(reference_object) 
 
         print("Reference object created. Coordinate system defined but not registered.")
         return (reference_object.coordinateSystem)
@@ -151,21 +145,34 @@ class ProjectorManager:
         reference_object.refPointList[n].crossSize = crossSize
         return reference_object
 
-    # def add_ref_object(self,ref_obj): # HACE FALTA??
-    #     self.reference_object_list.append(ref_obj)
-    #     print("[{}] appended".format(self.reference_object_list[-1]))
-    #     print("Reference object list: [{}]".format(self.reference_object_list))
+    def add_ref_object(self,ref_obj): 
+        self.reference_object_list.append(ref_obj)
+        # print(self.reference_object_list[:])
+        print("[{}] appended".format(self.reference_object_list[-1].name))
+        # print("Reference object list: [{}]".format(self.reference_object_list[:].name))
+        # print("Reference object list: [{}]".format(self.reference_object_list))
+        print(type(self.reference_object_list))
 
     def set_coordinate_system(self,coord_sys): 
         # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS -> hay que eliminarlos todos en el disconnect
         # porque se borra la info de los ref_obj pero no los nombres de los coord sys??
         
+        ref_obj_name = "RefObj_" + coord_sys 
+
+        for i in range (0,len(self.reference_object_list)):
+            if self.reference_object_list[i].name == ref_obj_name:
+                self.reference_object_list[i].activated = True
+                self.thrift_client.SetReferenceobject(self.reference_object_list[i])
+                self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
+            else:
+                self.reference_object_list[i].activated = False
+                self.thrift_client.SetReferenceobject(self.reference_object_list[i])
+        
         self.coordinate_system = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
-        reference_object_name = "RefObj_" + coord_sys
-        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object_name)
 
         # allReferenceObjects = self.thrift_client.GetGeoTreeIds()
         # print("Available reference objects:", allReferenceObjects)
+
         # ref_obj = self.thrift_client.GetReferenceobject("RefObject1")
         # print(ref_obj)
 
@@ -174,7 +181,6 @@ class ProjectorManager:
     def register_coordinate_system(self,coord_sys):
         print("Registering coordinate system {}".format(coord_sys))
 
-        # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj) #ref_obj = reference_object.name # se hace en set_cs
         self.thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         
         # self.cv.acquire()
@@ -222,17 +228,22 @@ class ProjectorManager:
 
     def start_projection(self):
         self.thrift_client.TriggerProjection()
+        return(" ----- PROJECTING ----- ")
 
     def stop_projection(self):
         self.thrift_client.deactivate_projector(self.projector_id)
+        return(" ----- STOP PROJECTION ----- ")
 
     def create_polyline(self,projection_group,id,x,y,angle,r):
         polyline_name = projection_group + "/my_polyline_" + id
         polyline = zlp.create_polyline(polyline_name)
         # self.geo_tree_elements.append(name)
 
+        # linestring = [ zlp.create_3d_point(x, y),
+                    #    zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
+
         linestring = [ zlp.create_3d_point(x, y),
-                       zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
+                       zlp.create_3d_point(x+100, y+100)]
         
         polyline.polylineList = [linestring]
         polyline.activated = True
@@ -284,5 +295,3 @@ class ProjectorManager:
     def remove_group(self,projection_group):
         self.thrift_client.RemoveGeoTreeElem(projection_group)
         # self.start_projection()
-
-    
