@@ -151,7 +151,7 @@ class ProjectorManager:
         print("[{}] appended".format(self.reference_object_list[-1].name))
         # print("Reference object list: [{}]".format(self.reference_object_list[:].name))
         # print("Reference object list: [{}]".format(self.reference_object_list))
-        print(type(self.reference_object_list))
+        # print(type(self.reference_object_list))
 
     def set_coordinate_system(self,coord_sys): 
         # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS -> hay que eliminarlos todos en el disconnect
@@ -161,15 +161,22 @@ class ProjectorManager:
 
         for i in range (0,len(self.reference_object_list)):
             if self.reference_object_list[i].name == ref_obj_name:
-                print("{} activated" .format(self.reference_object_list[i].name))
-                self.reference_object_list[i].activated = True
-                self.thrift_client.SetReferenceobject(self.reference_object_list[i])
-                self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
+                index = i
             else:
-                print("{} deactivated" .format(self.reference_object_list[i].name))
+                print("{} DEACTIVATED" .format(self.reference_object_list[i].name))
                 self.reference_object_list[i].activated = False
                 self.thrift_client.SetReferenceobject(self.reference_object_list[i])
+                self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
+                self.thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+                self.thrift_client.FunctionModuleRun(self.module_id)
         
+        print("{} ACTIVATED" .format(self.reference_object_list[index].name))
+        self.reference_object_list[index].activated = True
+        self.thrift_client.SetReferenceobject(self.reference_object_list[index])
+        self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[index].name)
+        self.thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+        self.thrift_client.FunctionModuleRun(self.module_id)
+
         self.coordinate_system = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
 
         # allReferenceObjects = self.thrift_client.GetGeoTreeIds()
@@ -213,30 +220,19 @@ class ProjectorManager:
         return("Coordinate system [{}] removed".format(coord_sys))
 
 
-    # def set_up_projector(self):
-    #     self.clientServerConnect()
-    #     self.activate()
-    #     self.transferLicense()
-    #     name = self.projection_group + "/my_circle" + id
-    #     self.geo_tree_elements.append(name)
-    #     circle = zlp.create_circle(x, y, r, name)
-    #     circle.activated = True
-    #     circle.coordinateSystemList = self.coordinate_system
-    #     try:
-    #         self.thrift_client.SetCircleSegment(circle)
-    #         return "Defined a circle segment to project"
-    #     except Exception as e:
-    #         return e
 
     def start_projection(self):
-        self.thrift_client.TriggerProjection()
-        return(" ----- PROJECTING ----- ")
+        # self.thrift_client.TriggerProjection()
+        # return(" ----- PROJECTING ----- ")
 
-        # if reference_object.activated == False or len(thrift_client.GetGeoTreeIds()) < 2: 
-        #     return(" ----- NOTHING TO PROJECT ----- ")
-        # else:
-        #     self.thrift_client.TriggerProjection()
-        #     return(" ----- PROJECTING ----- ")
+        ref_obj_name = "RefObj_" + self.coordinate_system
+        ref_obj = self.thrift_client.GetGeoTreeElement(ref_obj_name)
+        # GetGeoTreeIds() saca tanto coord sys (son los primeros de la lista) como los shapes, mientras que GetCoordinatesystemList solo saca los cs
+        if ref_obj.activated == False or len(self.thrift_client.GetGeoTreeIds()) <= len(self.thrift_client.GetCoordinatesystemList()):                                        
+            return(" ----- NOTHING TO PROJECT ----- ")
+        else:
+            self.thrift_client.TriggerProjection()
+            return(" ----- PROJECTING ----- ")
 
     def stop_projection(self):
         self.thrift_client.deactivate_projection(self.projector_id)

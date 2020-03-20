@@ -96,11 +96,6 @@ class ProjectionNode:
 
 
 
-    # def set_coord_system(self,cs):
-    #     if len(cs)>1:
-    #         rospy.loginfo("Received request to set coordinate system. Setting [{}] as coordinate system".format(cs))
-    #         self.projector.set_coordinate_system(cs[-1])
-
     def get_coord_sys_list_cb(self,req):
         rospy.loginfo("Received request to get the current coordinate system list at projector")
         cs_list = self.projector.get_coordinate_systems() # check coordinate system
@@ -114,6 +109,7 @@ class ProjectionNode:
         rospy.loginfo(e)
         e = self.projector.register_coordinate_system(cs) # register coordinate system
         rospy.loginfo(e)
+        self.projector.get_coordinate_systems() # pint CURRENT cs
         e = self.projector.show_coordinate_system(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
         rospy.loginfo(e)
         return CsRefPointsResponse(Bool(True))
@@ -122,6 +118,7 @@ class ProjectionNode:
         rospy.loginfo("Request to project coordinate system: {}".format(req.cs_name.data))
         e = self.projector.set_coordinate_system(req.cs_name.data) # set default coordinate system
         rospy.loginfo(e)
+        self.projector.get_coordinate_systems() # pint CURRENT cs
         self.projector.show_coordinate_system(req.cs_name.data,req.secs.data)
         return ShowCsResponse(Bool(True))
 
@@ -134,7 +131,8 @@ class ProjectionNode:
 
 
     def add_shape_cb(self,req):
-        rospy.loginfo("Received request to add a: '{}', at the [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))
+        rospy.loginfo("Received request to add a: '{}' at the [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))
+        self.projector.get_coordinate_systems()
         
         if req.shape_type.data == "polyline":
             rospy.loginfo("Creating polyline shape")

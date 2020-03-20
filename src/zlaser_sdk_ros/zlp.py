@@ -232,7 +232,7 @@ class ThriftClient(TClient):
             self.SetProperty(projector_property_path + ".cmdShowProjection", "1")
 
         except Exception as e:
-            log.error("Error: projector could not be deactivated")
+            log.error("Error: projection could not be stopped")
             raise e
 
     def deactivate_projector(self, projector_serial):
