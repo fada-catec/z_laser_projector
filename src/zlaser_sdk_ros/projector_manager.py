@@ -243,11 +243,11 @@ class ProjectorManager:
         polyline = zlp.create_polyline(polyline_name)
         # self.geo_tree_elements.append(name)
 
-        # linestring = [ zlp.create_3d_point(x, y),
-                    #    zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
-
         linestring = [ zlp.create_3d_point(x, y),
-                       zlp.create_3d_point(x+100, y+100)]
+                       zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
+
+        # linestring = [ zlp.create_3d_point(x, y),
+        #                zlp.create_3d_point(x+100, y+100)]
         
         polyline.polylineList = [linestring]
         polyline.activated = True
@@ -297,7 +297,7 @@ class ProjectorManager:
 
     def remove_shape(self,projection_group,shape_name,id):
         self.thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
-        # self.start_projection()
+        return(" ----- SHAPE REMOVED ----- ")
 
     def remove_group(self,projection_group):
         self.thrift_client.RemoveGeoTreeElem(projection_group)

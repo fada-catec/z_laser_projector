@@ -21,6 +21,7 @@ add_service_files(
    CsRefPoints.srv
    ShowCs.srv
    RemovCs.srv
+   RemovShape.srv
 )
 
 generate_messages(

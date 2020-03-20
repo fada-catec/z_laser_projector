@@ -7,7 +7,8 @@ import time
 from std_srvs.srv import Trigger, TriggerResponse
 from std_msgs.msg import Bool
 from projector_manager import ProjectorManager
-from zlaser_sdk_ros.srv import ShapeParams, ShapeParamsResponse, CsRefPoints, CsRefPointsResponse, ShowCs, ShowCsResponse, RemovCs, RemovCsResponse
+from zlaser_sdk_ros.srv import ShapeParams, ShapeParamsResponse, CsRefPoints, CsRefPointsResponse, ShowCs, ShowCsResponse
+from zlaser_sdk_ros.srv import RemovCs, RemovCsResponse, RemovShape, RemovShapeResponse
 #from zlaser_sdk_ros.projector_manager import ProjectorManager
 
 class ProjectionNode:
@@ -37,6 +38,7 @@ class ProjectionNode:
         self.shape_srv   = rospy.Service('/projector_srv/add_shape', ShapeParams, self.add_shape_cb)
         self.start_srv   = rospy.Service('/projector_srv/projection_start', Trigger, self.projection_start_cb)
         self.stop_srv    = rospy.Service('/projector_srv/projection_stop', Trigger, self.projection_stop_cb)
+        self.r_shape_srv = rospy.Service('/projector_srv/remove_shape', RemovShape, self.remove_shape_cb)
         
         rospy.spin()
 
@@ -147,6 +149,13 @@ class ProjectionNode:
         else: 
             return ShapeParamsResponse(Bool(False))
         return ShapeParamsResponse(Bool(True))
+    
+    def remove_shape_cb(self,req):
+        shape_name = req.projection_group_name.data + "/my_" + req.shape_type.data + "_" + req.shape_id.data
+        rospy.loginfo("Received request to remove the '{}' from the [{}] coordinate system".format(shape_name, self.projector.coordinate_system))
+        e = self.projector.remove_shape(req.projection_group_name.data,req.shape_type.data,req.shape_id.data)
+        rospy.loginfo(e)
+        return RemovShapeResponse(Bool(True))
 
     def projection_start_cb(self,req):
         e = self.projector.start_projection()
