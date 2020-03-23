@@ -218,22 +218,7 @@ class ThriftClient(TClient):
             log.error("Could not activate projector:", projector_serial)
             raise
 
-    def deactivate_projection(self, projector_serial):
-        """Deactivates a projector.
 
-        Args:
-            projector_serial: serial number of the projector
-        """
-
-        try:
-            log.info("Deactivating projection of projector: " + projector_serial)
-            projector_property_path = "config.projectorManager.projectors." + projector_serial
-            self.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
-            self.SetProperty(projector_property_path + ".cmdShowProjection", "1")
-
-        except Exception as e:
-            log.error("Error: projection could not be stopped")
-            raise e
 
     def deactivate_projector(self, projector_serial):
         """Deactivates a projector.

@@ -219,8 +219,6 @@ class ProjectorManager:
         self.thrift_client.RemoveGeoTreeElem(reference_object_name)
         return("Coordinate system [{}] removed".format(coord_sys))
 
-
-
     def start_projection(self):
         # self.thrift_client.TriggerProjection()
         # return(" ----- PROJECTING ----- ")
@@ -234,9 +232,14 @@ class ProjectorManager:
             self.thrift_client.TriggerProjection()
             return(" ----- PROJECTING ----- ")
 
-    def stop_projection(self):
-        self.thrift_client.deactivate_projection(self.projector_id)
-        return(" ----- STOP PROJECTION ----- ")
+    def stop_projection(self): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
+        try:
+            projector_property_path = "config.projectorManager.projectors." + self.projector_id
+            self.thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
+            self.thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
+            return(" ----- STOP PROJECTION ----- ")
+        except Exception as e:
+            return e
 
     def create_polyline(self,projection_group,id,x,y,angle,r):
         polyline_name = projection_group + "/my_polyline_" + id
@@ -262,43 +265,41 @@ class ProjectorManager:
         except Exception as e:
             return e
 
-    def create_circle(self,projection_group,id,x,y,r):
-        circle_name = projection_group + "/my_circle_" + id
-        circle = zlp.create_circle(x,y,r,circle_name)
-
-        circle.activated = True
-        circle.coordinateSystemList = self.coordinate_system
-        try:
-            self.thrift_client.SetCircleSegment(circle)
-            print("Projecting shape for 5 seconds in order to check the shape")
-            self.start_projection()
-            time.sleep(5)
-            self.stop_projection()
-            return "Defined a circle segment to project"
-        except Exception as e:
-            return e
-
-    def hide_shape(self,projection_group,shape_name,id): # deactivate shape
-
-        if shape_name == "polyline":
-            polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
-            polyline.activated = False
-            self.thrift_client.SetPolyLine(polyline)
-
-        # reference_object.activated = False  # <- puede servir 
-
-        # name = projection_group + "/my_" + shape_name + "_" + id
-        # shape = self.thrift_client.GetProjectionElement(name)
-        # shape.activated = False
-        # if shape_name == "polyline":
-        #     self.thrift_client.SetPolyLine(polyline)
-        
-        self.start_projection()
-
     def remove_shape(self,projection_group,shape_name,id):
         self.thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
         return(" ----- SHAPE REMOVED ----- ")
 
-    def remove_group(self,projection_group):
-        self.thrift_client.RemoveGeoTreeElem(projection_group)
-        # self.start_projection()
+
+    # def create_circle(self,projection_group,id,x,y,r):
+    #     circle_name = projection_group + "/my_circle_" + id
+    #     circle = zlp.create_circle(x,y,r,circle_name)
+
+    #     circle.activated = True
+    #     circle.coordinateSystemList = self.coordinate_system
+    #     try:
+    #         self.thrift_client.SetCircleSegment(circle)
+    #         print("Projecting shape for 5 seconds in order to check the shape")
+    #         self.start_projection()
+    #         time.sleep(5)
+    #         self.stop_projection()
+    #         return "Defined a circle segment to project"
+    #     except Exception as e:
+    #         return e
+
+    # def hide_shape(self,projection_group,shape_name,id): # deactivate shape
+
+    #     if shape_name == "polyline":
+    #         polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+    #         polyline.activated = False
+    #         self.thrift_client.SetPolyLine(polyline)
+
+    #     # reference_object.activated = False  # <- puede servir 
+
+    #     # name = projection_group + "/my_" + shape_name + "_" + id
+    #     # shape = self.thrift_client.GetProjectionElement(name)
+    #     # shape.activated = False
+    #     # if shape_name == "polyline":
+    #     #     self.thrift_client.SetPolyLine(polyline)
+
+    # def remove_group(self,projection_group):
+    #     self.thrift_client.RemoveGeoTreeElem(projection_group)
