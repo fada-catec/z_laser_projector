@@ -96,8 +96,6 @@ class ProjectionNode:
 
         return TriggerResponse(True,"end setup")
 
-
-
     def get_coord_sys_list_cb(self,req):
         rospy.loginfo("Received request to get the current coordinate system list at projector")
         cs_list = self.projector.get_coordinate_systems() # check coordinate system
@@ -114,13 +112,13 @@ class ProjectionNode:
         self.projector.get_coordinate_systems() # pint CURRENT cs
         e = self.projector.show_coordinate_system(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
         rospy.loginfo(e)
-        e = self.projector.create_polyline("cs_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50,0.01)
+        e = self.projector.create_polyline("cs_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50,0.01) # origin x axis to project, angle = 0
         rospy.loginfo(e)
-        e = self.projector.create_polyline("cs_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50,0.01)
+        e = self.projector.create_polyline("cs_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50,0.01) # origin y axis to project, angle = 90
         rospy.loginfo(e)
         e = self.projector.start_projection()
         rospy.loginfo(e)
-        input("PROJECTING COORDINATE SYSTEM ORIGIN AXIS. PRESS ENTER TO FINISH.")
+        input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")
         e = self.projector.stop_projection()
         rospy.loginfo(e)
         return CsRefPointsResponse(Bool(True))
@@ -138,8 +136,6 @@ class ProjectionNode:
         e = self.projector.remove_coordinate_system(req.cs_name.data) 
         rospy.loginfo(e)
         return RemovCsResponse(Bool(True))
-
-
 
     def add_shape_cb(self,req):
         rospy.loginfo("Received request to add a: '{}' at the [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))

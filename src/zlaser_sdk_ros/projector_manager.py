@@ -248,9 +248,6 @@ class ProjectorManager:
 
         linestring = [ zlp.create_3d_point(x, y),
                        zlp.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
-
-        # linestring = [ zlp.create_3d_point(x, y),
-        #                zlp.create_3d_point(x+100, y+100)]
         
         polyline.polylineList = [linestring]
         polyline.activated = True
