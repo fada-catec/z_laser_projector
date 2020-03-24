@@ -241,7 +241,7 @@ class ProjectorManager:
         except Exception as e:
             return e
 
-    def create_polyline(self,projection_group,id,x,y,angle,r):
+    def create_polyline(self,projection_group,id,x,y,angle,r,secs):
         polyline_name = projection_group + "/my_polyline_" + id
         polyline = zlp.create_polyline(polyline_name)
         # self.geo_tree_elements.append(name)
@@ -257,9 +257,9 @@ class ProjectorManager:
         polyline.coordinateSystemList = [self.coordinate_system]
         try:
             self.thrift_client.SetPolyLine(polyline)
-            print("Projecting shape for 5 seconds in order to check the shape")
+            print("Projecting shape for {} seconds in order to check the shape".format(secs))
             self.start_projection()
-            time.sleep(5)
+            time.sleep(secs)
             self.stop_projection()
             return "Defined a cross segment to project"
         except Exception as e:

@@ -114,6 +114,15 @@ class ProjectionNode:
         self.projector.get_coordinate_systems() # pint CURRENT cs
         e = self.projector.show_coordinate_system(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
         rospy.loginfo(e)
+        e = self.projector.create_polyline("cs_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50,0.01)
+        rospy.loginfo(e)
+        e = self.projector.create_polyline("cs_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50,0.01)
+        rospy.loginfo(e)
+        e = self.projector.start_projection()
+        rospy.loginfo(e)
+        input("PROJECTING COORDINATE SYSTEM ORIGIN AXIS. PRESS ENTER TO FINISH.")
+        e = self.projector.stop_projection()
+        rospy.loginfo(e)
         return CsRefPointsResponse(Bool(True))
 
     def show_coord_sys_cb(self,req): # SHOW AND SET. show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
@@ -138,14 +147,12 @@ class ProjectionNode:
         
         if req.shape_type.data == "polyline":
             rospy.loginfo("Creating polyline shape")
-            e = self.projector.create_polyline(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data)
+            e = self.projector.create_polyline(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data,5)
             rospy.loginfo(e)
-            # self.projector.start_projection()
-        elif req.shape_type.data == "circle":
-            rospy.loginfo("Creating circle shape")
-            e = self.projector.create_circle(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.r.data)
-            rospy.loginfo(e)
-            # self.projector.start_projection()
+        # elif req.shape_type.data == "circle":
+        #     rospy.loginfo("Creating circle shape")
+        #     e = self.projector.create_circle(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.r.data)
+        #     rospy.loginfo(e)
         else: 
             return ShapeParamsResponse(Bool(False))
         return ShapeParamsResponse(Bool(True))
