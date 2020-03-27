@@ -121,6 +121,10 @@ class ProjectionNode:
         input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")
         e = self.projector.stop_projection()
         rospy.loginfo(e)
+        e = self.projector.remove_shape("cs_origin","polyline","axis_x")
+        rospy.loginfo(e)
+        e = self.projector.remove_shape("cs_origin","polyline","axis_y")
+        rospy.loginfo(e)
         return CsRefPointsResponse(Bool(True))
 
     def show_coord_sys_cb(self,req): # SHOW AND SET. show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
