@@ -51,6 +51,7 @@ class ProjectionNode:
         return TriggerResponse(True,str(e))
 
     def disconnection_cb(self,req):
+        # HAY QUE DISTINGUIR ENTRE DESCONECTAR Y BORRAR TODO O DESCONECTAR SOLO
         rospy.loginfo("Received request to stop projector")
         e = self.projector.deactivate()
         rospy.loginfo(e)
