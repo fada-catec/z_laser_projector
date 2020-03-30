@@ -390,6 +390,23 @@ class ProjectorManager:
         except Exception as e:
             return e
 
+    def hide_shape(self,projection_group,shape_name,id): # deactivate shape
+
+        if shape_name == "polyline":
+            polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+            polyline.activated = False
+            self.thrift_client.SetPolyLine(polyline)
+    
+        return("Shape deactivated")
+
+    #     # reference_object.activated = False  # <- puede servir 
+
+    #     # name = projection_group + "/my_" + shape_name + "_" + id
+    #     # shape = self.thrift_client.GetProjectionElement(name)
+    #     # shape.activated = False
+    #     # if shape_name == "polyline":
+    #     #     self.thrift_client.SetPolyLine(polyline)
+
     def remove_shape(self,projection_group,shape_name,id):
         """Delete a figure from the active coordinate system.
             
@@ -397,8 +414,7 @@ class ProjectorManager:
             string: message
         """
         self.thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
-        return(" ----- SHAPE REMOVED ----- ")
-
+        return("Shape removed")
 
     # def create_circle(self,projection_group,id,x,y,r):
     #     circle_name = projection_group + "/my_circle_" + id
@@ -415,21 +431,6 @@ class ProjectorManager:
     #         return "Defined a circle segment to project"
     #     except Exception as e:
     #         return e
-
-    # def hide_shape(self,projection_group,shape_name,id): # deactivate shape
-
-    #     if shape_name == "polyline":
-    #         polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
-    #         polyline.activated = False
-    #         self.thrift_client.SetPolyLine(polyline)
-
-    #     # reference_object.activated = False  # <- puede servir 
-
-    #     # name = projection_group + "/my_" + shape_name + "_" + id
-    #     # shape = self.thrift_client.GetProjectionElement(name)
-    #     # shape.activated = False
-    #     # if shape_name == "polyline":
-    #     #     self.thrift_client.SetPolyLine(polyline)
 
     # def remove_group(self,projection_group):
     #     self.thrift_client.RemoveGeoTreeElem(projection_group)

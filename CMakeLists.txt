@@ -22,6 +22,7 @@ add_service_files(
    ShowCs.srv
    RemovCs.srv
    RemovShape.srv
+   HideShape.srv
 )
 
 generate_messages(
