@@ -398,7 +398,16 @@ class ProjectorManager:
             return e
 
     def hide_shape(self,projection_group,shape_name,id): # deactivate shape
+        """Hide (deactivate) a figure from a group of the active coordinate system.
 
+        Args:
+            string (projection_group): name of the projection group
+            string (shape_name): type of figure (polyline, circle, etc.)
+            string (id): name of the shape identificator
+            
+        Returns:
+            string: message
+        """
         if shape_name == "polyline":
             polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
             polyline.activated = False
@@ -407,7 +416,16 @@ class ProjectorManager:
         return("Shape deactivated")
 
     def unhide_shape(self,projection_group,shape_name,id): # deactivate shape
+        """Unhide (activate) a figure from a group of the active coordinate system.
 
+        Args:
+            string (projection_group): name of the projection group
+            string (shape_name): type of figure (polyline, circle, etc.)
+            string (id): name of the shape identificator
+            
+        Returns:
+            string: message
+        """
         if shape_name == "polyline":
             polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
             polyline.activated = True
@@ -425,6 +443,11 @@ class ProjectorManager:
 
     def remove_shape(self,projection_group,shape_name,id):
         """Delete a figure from the active coordinate system.
+
+        Args:
+            string (projection_group): name of the projection group
+            string (shape_name): type of figure (polyline, circle, etc.)
+            string (id): name of the shape identificator
             
         Returns:
             string: message
