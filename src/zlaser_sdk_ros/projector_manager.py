@@ -399,6 +399,15 @@ class ProjectorManager:
     
         return("Shape deactivated")
 
+    def unhide_shape(self,projection_group,shape_name,id): # deactivate shape
+
+        if shape_name == "polyline":
+            polyline = self.thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+            polyline.activated = True
+            self.thrift_client.SetPolyLine(polyline)
+    
+        return("Shape deactivated")
+
     #     # reference_object.activated = False  # <- puede servir 
 
     #     # name = projection_group + "/my_" + shape_name + "_" + id
