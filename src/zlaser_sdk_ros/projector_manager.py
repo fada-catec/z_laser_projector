@@ -169,10 +169,17 @@ class ProjectorManager:
         reference_object.coordinateSystem = req.name_cs.data
         reference_object.projectorID = self.projector_id
 
+        T2_x = req.T1_x.data + abs((req.x2.data - req.x1.data))
+        T2_y = req.T1_y.data
+        T3_x = req.T1_x.data + abs((req.x3.data - req.x1.data))
+        T3_y = req.T1_y.data + abs((req.y3.data - req.y1.data))
+        T4_x = req.T1_x.data
+        T4_y = req.T1_y.data + abs((req.y4.data - req.y1.data))
+
         reference_object.refPointList = [   zlp.create_reference_point("T1", req.T1_x.data, req.T1_y.data),
-                                            zlp.create_reference_point("T2", req.T2_x.data, req.T2_y.data),
-                                            zlp.create_reference_point("T3", req.T3_x.data, req.T3_y.data),
-                                            zlp.create_reference_point("T4", req.T4_x.data, req.T4_y.data)]
+                                            zlp.create_reference_point("T2",     T2_x,          T2_y),
+                                            zlp.create_reference_point("T3",     T3_x,          T3_y),
+                                            zlp.create_reference_point("T4",     T4_x,          T4_y)]
         
         crossSize = zlp.create_2d_point(req.crossize_x.data,req.crossize_y.data) # set global crosssize for all reference points
 
