@@ -386,7 +386,7 @@ class ProjectorManager:
             self.start_projection()
             time.sleep(secs)
             self.stop_projection()
-            return "Defined a cross segment to project"
+            return ("{} polyline created ".format(polyline_name))
         except Exception as e:
             return e
 

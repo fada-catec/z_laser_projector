@@ -114,18 +114,18 @@ class ProjectionNode:
         self.projector.get_coordinate_systems() # pint CURRENT cs
         e = self.projector.show_coordinate_system(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
         rospy.loginfo(e)
-        e = self.projector.create_polyline("cs_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50,0.01) # origin x axis to project, angle = 0
+        e = self.projector.create_polyline(cs + "_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50,0.01) # origin x axis to project, angle = 0
         rospy.loginfo(e)
-        e = self.projector.create_polyline("cs_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50,0.01) # origin y axis to project, angle = 90
+        e = self.projector.create_polyline(cs + "_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50,0.01) # origin y axis to project, angle = 90
         rospy.loginfo(e)
         e = self.projector.start_projection()
         rospy.loginfo(e)
         input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")
         e = self.projector.stop_projection()
         rospy.loginfo(e)
-        e = self.projector.hide_shape("cs_origin","polyline","axis_x")
+        e = self.projector.hide_shape(cs + "_origin","polyline","axis_x")
         rospy.loginfo(e)
-        e = self.projector.hide_shape("cs_origin","polyline","axis_y")
+        e = self.projector.hide_shape(cs + "_origin","polyline","axis_y")
         rospy.loginfo(e)
         return CsRefPointsResponse(Bool(True))
 
@@ -135,18 +135,18 @@ class ProjectionNode:
         rospy.loginfo(e)
         self.projector.get_coordinate_systems() # pint CURRENT cs
         self.projector.show_coordinate_system(req.cs_name.data,req.secs.data)
-        e = self.projector.unhide_shape("cs_origin","polyline","axis_x")
+        e = self.projector.unhide_shape(req.cs_name.data + "_origin","polyline","axis_x")
         rospy.loginfo(e)
-        e = self.projector.unhide_shape("cs_origin","polyline","axis_y")
+        e = self.projector.unhide_shape(req.cs_name.data + "_origin","polyline","axis_y")
         rospy.loginfo(e)
         e = self.projector.start_projection()
         rospy.loginfo(e)
         input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")
         e = self.projector.stop_projection()
         rospy.loginfo(e)
-        e = self.projector.hide_shape("cs_origin","polyline","axis_x")
+        e = self.projector.hide_shape(req.cs_name.data + "_origin","polyline","axis_x")
         rospy.loginfo(e)
-        e = self.projector.hide_shape("cs_origin","polyline","axis_y")
+        e = self.projector.hide_shape(req.cs_name.data + "_origin","polyline","axis_y")
         rospy.loginfo(e)
         return ShowCsResponse(Bool(True))
 
