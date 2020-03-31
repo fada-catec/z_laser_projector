@@ -176,6 +176,8 @@ class ProjectorManager:
         T4_x = req.T1_x.data
         T4_y = req.T1_y.data + abs((req.y4.data - req.y1.data))
 
+        # scale_factor = ??? T_x,y * 2 # manteniendo la proporción
+
         reference_object.refPointList = [   zlp.create_reference_point("T1", req.T1_x.data, req.T1_y.data),
                                             zlp.create_reference_point("T2",     T2_x,          T2_y),
                                             zlp.create_reference_point("T3",     T3_x,          T3_y),
