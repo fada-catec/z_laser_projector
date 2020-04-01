@@ -457,6 +457,7 @@ class ProjectorManager:
         self.thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
         return("Shape removed")
 
+
     # def create_circle(self,projection_group,id,x,y,r):
     #     circle_name = projection_group + "/my_circle_" + id
     #     circle = zlp.create_circle(x,y,r,circle_name)
