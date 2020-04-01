@@ -134,14 +134,6 @@ class ProjectorManager:
         # self.cv = threading.Condition()
         # self.thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback())
 
-    # def function_module_changed_callback(self, old_state, new_state):
-    #     if new_state != zlp.thrift_interface.FunctionModuleStates.RUNNING:
-    #         self.cv.acquire()
-    #         print("Function module stopped running.")
-    #         print("Module", self.module_id, ":", old_state, "->", new_state)
-    #         self.cv.notify()
-    #         self.cv.release()
-
     def get_coordinate_systems(self):
         """Get list of current available coordinate systems from projector.
         

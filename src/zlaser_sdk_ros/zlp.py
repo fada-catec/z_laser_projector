@@ -98,16 +98,6 @@ class ThriftClient(TClient):
             log.info("Listening for events on %s:%s" % (connection[0], connection[1]))
             self.ConnectClientEventChannel(connection[1])
 
-    def connect(self, ip, port):
-        """Connects the client to ZLP-Service and establishes an event channel if needed.
-
-        Args:
-            ip: ipv6 network address of ZLP-Service
-            port: port number on which ZLP-Service listens for requests
-        """
-        self.__init_client(ip, port)
-        self.__init_event_channel()
-
     def set_property_changed_callback(self, callback):
         if self._event_channel_handler:
             self._event_channel_handler.property_changed_callback = callback
@@ -138,17 +128,28 @@ class ThriftClient(TClient):
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
+class ProjectorClient(object):
+
+    def __init__(self):
+        self.__thrift_client = ThriftClient()
+
+    def connect(self, ip, port):
+        """Connects the client to ZLP-Service and establishes an event channel if needed.
+
+        Args:
+            ip: ipv6 network address of ZLP-Service
+            port: port number on which ZLP-Service listens for requests
+        """
+        self.__thrift_client.__init_client(ip, port)
+        self.__thrift_client.__init_event_channel()
+
     def disconnect(self):
         """Disconnect from ZLP Service thrift server and close own event server."""
-        self.DisconnectClientEventChannel()
-        self.close()
+        self.__thrift_client.DisconnectClientEventChannel()
+        self.__thrift_client.close()
 
-        if self._event_channel:
-            self._event_channel.close()
-
-    def transfer_file(self, local_path, remote_file, overwrite=False):
-        content = open(local_path, 'r').read()
-        self.TransferDataToFile(content, remote_file, overwrite)
+        if self.__thrift_client._event_channel:
+            self.__thrift_client._event_channel.close()
 
     def get_projectors(self, scan=False, scan_addresses=""):
         """Gets a list of active projectors or scan the network for projectors.
@@ -163,15 +164,15 @@ class ThriftClient(TClient):
         try:
             # set parameters and start the search
             if scan:
-                self.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
+                self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
             else:
-                self.SetProperty("config.projectorManager.cmdGetProjectors.scan", "0")
+                self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "0")
 
-            self.SetProperty("config.projectorManager.cmdGetProjectors.scanAddresses", scan_addresses)
-            self.SetProperty("config.projectorManager.cmdGetProjectors", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scanAddresses", scan_addresses)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors", "1")
 
             # Get the results
-            serial_list = self.GetProperty("config.projectorManager.cmdGetProjectors.result.entries")
+            serial_list = self.__thrift_client.GetProperty("config.projectorManager.cmdGetProjectors.result.entries")
 
             if serial_list:
                 serial_list = serial_list.split(" ")
@@ -209,16 +210,14 @@ class ThriftClient(TClient):
         log.info("Activating projector: " + projector_serial)
 
         try:
-            self.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
-            self.SetProperty("config.projectorManager.cmdActivateProjector.active", "1")
-            self.SetProperty("config.projectorManager.cmdActivateProjector", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
             #blocks until the projector is activated
             self.get_projectors()
         except Exception as e:
             log.error("Could not activate projector:", projector_serial)
             raise
-
-
 
     def deactivate_projector(self, projector_serial):
         """Deactivates a projector.
@@ -230,167 +229,165 @@ class ThriftClient(TClient):
         try:
             log.info("Deactivating projection of projector: " + projector_serial)
             projector_property_path = "config.projectorManager.projectors." + projector_serial
-            self.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
-            self.SetProperty(projector_property_path + ".cmdShowProjection", "1")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
 
             log.info("Deactivating projector: " + projector_serial)
-            self.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
-            self.SetProperty("config.projectorManager.cmdActivateProjector.active", "0")
-            self.SetProperty("config.projectorManager.cmdActivateProjector", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "0")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
 
         except Exception as e:
             log.error("Error: projector could not be deactivated")
             raise e
 
+    def transfer_file(self, local_path, remote_file, overwrite=False):
+        content = open(local_path, 'r').read()
+        self.__thrift_client.TransferDataToFile(content, remote_file, overwrite)
 
-def create_matrix4x4():
-    mat = thrift_interface.Matrix4x4(list())
-    return mat
+class ProjectionElement(object):
+    def __init__(self):
+        # use the default elements to set default values for all new projection elements
+        self.default_projection_element = thrift_interface.ProjectionElement()
+        self.default_projection_element.pen = 0
+        self.default_projection_element.coordinateSystemList = []
+        self.default_projection_element.projectorIDList = []
+        self.default_projection_element.userTrans = self.create_matrix4x4()
+        self.default_projection_element.activated = True
 
-# use the default elements to set default values for all new projection elements
-default_projection_element = thrift_interface.ProjectionElement()
-default_projection_element.pen = 0
-default_projection_element.coordinateSystemList = []
-default_projection_element.projectorIDList = []
-default_projection_element.userTrans = create_matrix4x4()
-default_projection_element.activated = True
+    def create_matrix4x4(self):
+        mat = thrift_interface.Matrix4x4(list())
+        return mat
 
+    def init_element_3d(self, elem):
+        elem.userTrans = self.create_matrix4x4()
+        return elem
 
-def init_element_3d(elem):
-    elem.userTrans = create_matrix4x4()
-    return elem
+    def init_projection_element(self, elem):
+        elem.coordinateSystemList = copy.deepcopy(self.default_projection_element.coordinateSystemList)
+        elem.projectorIDList = copy.deepcopy(self.default_projection_element.projectorIDList)
+        elem.userTrans = copy.deepcopy(self.default_projection_element.userTrans)
+        elem.activated = self.default_projection_element.activated
+        elem.pen = self.default_projection_element.pen
+        # `elem.detectReflection` has a default value
+        return elem
 
-def init_projection_element(elem):
-    elem.coordinateSystemList = copy.deepcopy(default_projection_element.coordinateSystemList)
-    elem.projectorIDList = copy.deepcopy(default_projection_element.projectorIDList)
-    elem.userTrans = copy.deepcopy(default_projection_element.userTrans)
-    elem.activated = default_projection_element.activated
-    elem.pen = default_projection_element.pen
-    # `elem.detectReflection` has a default value
-    return elem
+    def create_projection_element(self, name):
+        projection_element = copy.deepcopy(self.default_projection_element)
+        projection_element.name = name
+        return projection_element
 
+    def create_polyline(self, name):
+        polyline = thrift_interface.Polyline()
+        polyline = self.init_projection_element(polyline)
+        polyline.name = name
+        polyline.polylineList = []
+        return polyline
 
-def create_projection_element(name):
-    projection_element = copy.deepcopy(default_projection_element)
-    projection_element.name = name
-    return projection_element
+    def create_circle(self, x, y, r, name):
+        circle = thrift_interface.CircleSegment()
+        circle = self.init_projection_element(circle)
+        circle.name = name
+        circle.radius = r
+        circle.center = self.create_3d_point(x, y)
+        return circle
 
+    def create_oval(self, x, y, w, h, name, angle=0):
+        oval = thrift_interface.OvalSegment()
+        oval = self.init_projection_element(oval)
+        oval.name = name
+        oval.width = w
+        oval.height = h
+        oval.angle = angle
+        oval.center = self.create_3d_point(x, y)
+        return oval
 
-def create_polyline(name):
-    polyline = thrift_interface.Polyline()
-    polyline = init_projection_element(polyline)
-    polyline.name = name
-    polyline.polylineList = []
-    return polyline
+    def create_text_element(self, x, y, text, name, height):
+        textelem = thrift_interface.TextElement()
+        textelem = self.init_projection_element(textelem)
+        textelem.name = name
+        textelem.position = self.create_3d_point(x, y)
+        textelem.text = text
+        textelem.height = height
+        return textelem
 
+    def create_2d_point(self, x=0, y=0):
+        return thrift_interface.Vector2D(x, y)
 
-def create_circle(x, y, r, name):
-    circle = thrift_interface.CircleSegment()
-    circle = init_projection_element(circle)
-    circle.name = name
-    circle.radius = r
-    circle.center = create_3d_point(x, y)
-    return circle
+    def create_3d_point(self, x=0, y=0, z=0):
+        return thrift_interface.Vector3D(x, y, z)
 
+    # def create_2d_point(x=0, y=0):
+    #     return thrift_interface.Vector3D(x, y)
 
-def create_oval(x, y, w, h, name, angle=0):
-    oval = thrift_interface.OvalSegment()
-    oval = init_projection_element(oval)
-    oval.name = name
-    oval.width = w
-    oval.height = h
-    oval.angle = angle
-    oval.center = create_3d_point(x, y)
-    return oval
+    def create_reference_object(self):
+        ref_obj = thrift_interface.Referenceobject()
+        ref_obj.name = ""
+        ref_obj.activated = False
+        ref_obj.fieldTransMat = self.create_matrix4x4()
+        ref_obj.refPointList = []
+        ref_obj.projectorID = ""
+        ref_obj.coordinateSystem = ""
+        return ref_obj
 
-def create_text_element(x, y, text, name, height):
-    textelem = thrift_interface.TextElement()
-    textelem = init_projection_element(textelem)
-    textelem.name = name
-    textelem.position = create_3d_point(x, y)
-    textelem.text = text
-    textelem.height = height
-    return textelem
+    def create_reference_point(self, name, x, y, z=0, active=True):
+        ref_point = thrift_interface.Referencepoint()
+        ref_point.name = name
+        ref_point.refPoint = self.create_3d_point(x, y, z)
+        ref_point.activated = active
+        ref_point.tracePoint = self.create_2d_point()
+        ref_point.crossSize = self.create_2d_point()
+        ref_point.distance = 0
+        return ref_point
 
-def create_2d_point(x=0, y=0):
-    return thrift_interface.Vector2D(x, y)
+    def create_driftcompensation_object(self, name="", active=True):
+        dc_obj = thrift_interface.DriftCompensationObject()
+        dc_obj.name = name
+        dc_obj.activated = active
+        dc_obj.compensationTransMat = self.create_matrix4x4()
+        dc_obj.dcPointList = []
+        dc_obj.projectorID = ""
+        dc_obj.fixedTranslation = [False,False,False]
+        dc_obj.fixedRotation = [False,False,False]
+        return dc_obj
 
+    def create_driftcompensation_point(self, name, x=0, y=0, z=0, distanceToOrigin=0, active=True):
+        dc_point = thrift_interface.DriftCompensationPoint()
+        dc_point.name = name
+        dc_point.activated = active
+        dc_point.isReserve = False
+        dc_point.traceVector = self.create_3d_point(x, y, z)
+        dc_point.crossSize = 100
+        dc_point.distanceToOrigin = distanceToOrigin
+        dc_point.weight = 1
+        return dc_point
 
-def create_3d_point(x=0, y=0, z=0):
-    return thrift_interface.Vector3D(x, y, z)
+    def create_clip_group(self, name, type=thrift_interface.ClipSetTypes.Union, active=True):
+        clip_group = thrift_interface.ClipGroup()
+        clip_group.name = name
+        clip_group.projectorMap = {}
+        clip_group.coordinateSystem = ""
+        clip_group.setType = type
+        clip_group.activated = active
+        return clip_group
 
-# def create_2d_point(x=0, y=0):
-#     return thrift_interface.Vector3D(x, y)
+    def create_clip_plane(self, name, x, y, z, normal, coordsys, active=True):
+        clip_plane = thrift_interface.ClipPlane()
+        clip_plane.name = name
+        clip_plane.point = self.create_3d_point(x, y, z)
+        clip_plane.normal = normal
+        clip_plane.activated = active
+        clip_plane.coordinateSystem = coordsys
+        clip_plane.projectorMap = {}
+        return clip_plane
 
-
-def create_reference_object():
-    ref_obj = thrift_interface.Referenceobject()
-    ref_obj.name = ""
-    ref_obj.activated = False
-    ref_obj.fieldTransMat = create_matrix4x4()
-    ref_obj.refPointList = []
-    ref_obj.projectorID = ""
-    ref_obj.coordinateSystem = ""
-    return ref_obj
-
-def create_reference_point(name, x, y, z=0, active=True):
-    ref_point = thrift_interface.Referencepoint()
-    ref_point.name = name
-    ref_point.refPoint = create_3d_point(x, y, z)
-    ref_point.activated = active
-    ref_point.tracePoint = create_2d_point()
-    ref_point.crossSize = create_2d_point()
-    ref_point.distance = 0
-    return ref_point
-
-def create_driftcompensation_object(name="", active=True):
-    dc_obj = thrift_interface.DriftCompensationObject()
-    dc_obj.name = name
-    dc_obj.activated = active
-    dc_obj.compensationTransMat = create_matrix4x4()
-    dc_obj.dcPointList = []
-    dc_obj.projectorID = ""
-    dc_obj.fixedTranslation = [False,False,False]
-    dc_obj.fixedRotation = [False,False,False]
-    return dc_obj
-
-def create_driftcompensation_point(name, x=0, y=0, z=0, distanceToOrigin=0, active=True):
-    dc_point = thrift_interface.DriftCompensationPoint()
-    dc_point.name = name
-    dc_point.activated = active
-    dc_point.isReserve = False
-    dc_point.traceVector = create_3d_point(x, y, z)
-    dc_point.crossSize = 100
-    dc_point.distanceToOrigin = distanceToOrigin
-    dc_point.weight = 1
-    return dc_point
-
-def create_clip_group(name, type=thrift_interface.ClipSetTypes.Union, active=True):
-    clip_group = thrift_interface.ClipGroup()
-    clip_group.name = name
-    clip_group.projectorMap = {}
-    clip_group.coordinateSystem = ""
-    clip_group.setType = type
-    clip_group.activated = active
-    return clip_group
-
-def create_clip_plane(name, x, y, z, normal, coordsys, active=True):
-    clip_plane = thrift_interface.ClipPlane()
-    clip_plane.name = name
-    clip_plane.point = create_3d_point(x, y, z)
-    clip_plane.normal = normal
-    clip_plane.activated = active
-    clip_plane.coordinateSystem = coordsys
-    clip_plane.projectorMap = {}
-    return clip_plane
-
-def create_clip_rect(name, x, y, z, w, h, csys, active=True):
-    clip_rect = thrift_interface.ClipRect()
-    clip_rect.name = name
-    clip_rect.position = create_3d_point(x, y, z)
-    clip_rect.activated = active
-    clip_rect.size = create_2d_point(w, h)
-    clip_rect.showOutline = False
-    clip_rect.coordinateSystem = csys
-    clip_rect.clippingActivated = True
-    return clip_rect
+    def create_clip_rect(self, name, x, y, z, w, h, csys, active=True):
+        clip_rect = thrift_interface.ClipRect()
+        clip_rect.name = name
+        clip_rect.position = self.create_3d_point(x, y, z)
+        clip_rect.activated = active
+        clip_rect.size = self.create_2d_point(w, h)
+        clip_rect.showOutline = False
+        clip_rect.coordinateSystem = csys
+        clip_rect.clippingActivated = True
+        return clip_rect
