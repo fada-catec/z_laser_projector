@@ -116,8 +116,16 @@ class ProjectionNode:
         rospy.loginfo(e)
         e = self.projector.create_polyline(cs + "_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50,0.01) # origin x axis to project, angle = 0
         rospy.loginfo(e)
+        # print("Projecting shape for {} seconds in order to check the shape".format(secs))
+        # self.start_project(coord_sys) # ya no está la proyección en los create, hay que hacerlo manual
+        # time.sleep(secs)
+        # self.stop_project(projector_id)
         e = self.projector.create_polyline(cs + "_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50,0.01) # origin y axis to project, angle = 90
         rospy.loginfo(e)
+        # print("Projecting shape for {} seconds in order to check the shape".format(secs))
+        # self.start_project(coord_sys) # ya no está la proyección en los create, hay que hacerlo manual
+        # time.sleep(secs)
+        # self.stop_project(projector_id)
         e = self.projector.start_projection()
         rospy.loginfo(e)
         input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")

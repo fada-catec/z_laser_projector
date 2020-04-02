@@ -68,7 +68,6 @@ class EventChannelInterfaceHandler(object):
         log.debug("onReflectionStateChanged(%s,%d)", elementName, state)
         self.onReflectionStateChanged_callback(elementName, state)
 
-
 class ThriftClient(TClient):
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
         self._event_channel = None
@@ -131,21 +130,28 @@ class ThriftClient(TClient):
 
 class ProjectorClient(object):
 
-    def __init__(self):
-        self.__thrift_client = ThriftClient()
+    def __init__(self,projector_IP,server_IP,connection_port):
+        self.projector_IP = projector_IP
+        self.server_IP = server_IP
+        self.connection_port = connection_port
 
-    def connect(self, ip, port):
+        self.__thrift_client = ThriftClient()
+        self.projector_id = ""
+        self.module_id = ""
+
+    def connect(self):
         """Connects the client to ZLP-Service and establishes an event channel if needed.
 
-        Args:
-            ip: ipv6 network address of ZLP-Service
-            port: port number on which ZLP-Service listens for requests
-        """
-        self.__thrift_client.__init_client(ip, port)
+            Args:
+                ip: ipv6 network address of ZLP-Service
+                port: port number on which ZLP-Service listens for requests """
+        
+        self.__thrift_client.__init_client(self.server_IP, self.connection_port)
         self.__thrift_client.__init_event_channel()
 
     def disconnect(self):
         """Disconnect from ZLP Service thrift server and close own event server."""
+        
         self.__thrift_client.DisconnectClientEventChannel() # NO PODRÍA SER: thrift_interface.DisconnectClientEventChannel() ???????????
         self.__thrift_client.close()
 
@@ -155,13 +161,13 @@ class ProjectorClient(object):
     def get_projectors(self, scan=False, scan_addresses=""):
         """Gets a list of active projectors or scan the network for projectors.
 
-        Args:
-            scan: scan the network for projectors
-            addresses: addresses or address are to scan
+            Args:
+                scan: scan the network for projectors
+                addresses: addresses or address are to scan
 
-        Returns:
-            list: serial numbers of the found projectors
-        """
+            Returns:
+                list: serial numbers of the found projectors """
+        
         try:
             # set parameters and start the search
             if scan:
@@ -187,12 +193,12 @@ class ProjectorClient(object):
     def scan_projectors(self, addresses=""):
         """Scan the network for projectors.
 
-        Args:
-            addresses: addresses or address are to scan
+            Args:
+                addresses: addresses or address are to scan
 
-        Returns:
-            list: serial numbers of the found projectors
-        """
+            Returns:
+                list: serial numbers of the found projectors """
+        
         log.info("Scanning for projectors...")
         serial_list = self.get_projectors(True, addresses)
         if (len(serial_list) == 0):
@@ -202,36 +208,25 @@ class ProjectorClient(object):
         log.info("Available projectors: " + str(serial_list))
         return serial_list
 
-    def activate_projector(self, projector_IP):
-        """Activate a projector.
-
-        Args:
-            projector_serial: serial number of the projector
-        """
+    def activate_projector(self):
         try:
-            projectors = self.scan_projectors(projector_IP)
-            projector_serial = projectors[0]
-            log.info("Activating projector. ID: " + projector_serial)
-            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
+            projectors = self.scan_projectors(self.projector_IP)
+            self.projector_id = projectors[0]
+            log.info("Activating projector. ID: " + self.projector_id)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", self.projector_id)
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "1")
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
             #blocks until the projector is activated
             self.get_projectors()
-            return projector_serial
+            return self.projector_id
         except Exception as e:
-            log.error("Could not activate projector:" + projector_serial)
-            raise
+            log.error("Could not activate projector:" + self.projector_id)
+            return e
 
-    def deactivate_projector(self, projector_serial, module_id):
-        """Deactivates a projector.
-
-        Args:
-            projector_serial: serial number of the projector
-        """
-
+    def deactivate_projector(self):
         try:
-            log.info("Deactivating projection of projector: " + projector_serial)
-            projector_property_path = "config.projectorManager.projectors." + projector_serial
+            log.info("Deactivating projection of projector: " + self.projector_id)
+            projector_property_path = "config.projectorManager.projectors." + self.projector_id
             self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
             self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
 
@@ -244,12 +239,13 @@ class ProjectorClient(object):
             # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
             # self.clear_geo_tree() # al hacer deactivate en el proyector se borran automaticamente los geo_trees? es mejor dejar ese if para borrarlos? no hace falta?
                 # se borran al desenchufar el proyector
+
             log.info("Removing all projection elements")
             self.__thrift_client.RemoveGeoTreeElem("") 
-            self.__thrift_client.FunctionModuleRelease(module_id)
+            self.__thrift_client.FunctionModuleRelease(self.module_id)
 
-            log.info("Deactivating projector: " + projector_serial)
-            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
+            log.info("Deactivating projector: " + self.projector_id)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", self.projector_id)
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "0")
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
 
@@ -276,16 +272,49 @@ class ProjectorClient(object):
     def check_license(self):
         return self.__thrift_client.CheckLicense()
 
-    def function_module_create(self, module_id):
+    def function_module_create(self):
         try:
-            module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
-            return module_id
+            self.module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
+            return self.module_id
         except thrift_interface.FunctionModuleClassNotRegistered as e:
             return ("FunctionModuleClassNotRegistered: " + e.which)
         except thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
             return ("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
         except thrift_interface.FunctionModuleClassNotLicensed as e:
             return ("FunctionModuleClassNotLicensed: " + e.which)
+
+    def start_project(self, coord_sys):
+        """Start projection on the surface of all figures (shapes) that belong to the active coordinate system.
+            
+            Returns:
+                string: message """
+        
+        # self.thrift_client.TriggerProjection()
+        # return(" ----- PROJECTING ----- ")
+
+        ref_obj_name = "RefObj_" + coord_sys
+        ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
+        # GetGeoTreeIds() saca tanto coord sys (son los primeros de la lista) como los shapes, mientras que GetCoordinatesystemList solo saca los cs
+        if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):                                        
+            return(" ----- NOTHING TO PROJECT ----- ")
+        else:
+            self.__thrift_client.TriggerProjection()
+            return(" ----- PROJECTING ----- ")
+
+    def stop_project(self): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
+        """Stop projection of all figures.
+            
+            Returns:
+                string: message """
+        
+        try:
+            projector_property_path = "config.projectorManager.projectors." + self.projector_id
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
+            return(" ----- STOP PROJECTION ----- ")
+        except Exception as e:
+            return e
+
 
 class GeometryTool():
 
@@ -303,18 +332,21 @@ class GeometryTool():
     def create_3d_point(self, x=0, y=0, z=0):
         return thrift_interface.Vector3D(x, y, z)
 
-    # def create_2d_point(x=0, y=0):
-    #     return thrift_interface.Vector3D(x, y)
-
 class CoordSys(object):
 
-    def __init__(self):
+    def __init__(self, projector_id, module_id):
         self.__thrift_client = ThriftClient()
         self.__geometry_tool = GeometryTool()
+
+        self.projector_id = projector_id
+        self.module_id = module_id
+        self.current_cs = ""
         self.reference_object_list = []
 
     def coordinate_system_list(self):
-        return self.__thrift_client.GetCoordinatesystemList()
+        return (self.__thrift_client.GetCoordinatesystemList(), self.current_cs)
+        # allGeoTree = self.thrift_client.GetGeoTreeIds()
+        # print("Available GeoTree:", allGeoTree)
 
     def create_reference_object(self):
         ref_obj = thrift_interface.Referenceobject()
@@ -336,20 +368,20 @@ class CoordSys(object):
         ref_point.distance = 0
         return ref_point
 
-    def define_cs(self,req, projector_id):
+    def define_cs(self,req):
         """Generate new coordinate system.
 
-        Args:
-            struct (req): structure with the necessary parameters value to generate the coordinate system
+            Args:
+                struct (req): structure with the necessary parameters value to generate the coordinate system
+            
+            Returns:
+                string: name of the coordinate system generated """
         
-        Returns:
-            string: name of the coordinate system generated
-        """
         reference_object = self.create_reference_object()
         reference_object.name = "RefObj_" + req.name_cs.data
         print("Creating reference object: {}".format(reference_object.name))
         reference_object.coordinateSystem = req.name_cs.data
-        reference_object.projectorID = projector_id
+        reference_object.projectorID = self.projector_id
 
         T2_x = req.T1_x.data + abs((req.x2.data - req.x1.data))
         T2_y = req.T1_y.data
@@ -384,17 +416,17 @@ class CoordSys(object):
     def __define_reference_point(self,reference_object,crossSize,n,d,x,y):
         """Fill other fields of the coordinate system parameters structure.
 
-        Args:
-            struct (reference_object): current coordinate system parameters structure
-            struct (crossSize): struct with the dimensions of the cross
-            int (n): index of the vector
-            d (float): distance value between the projection surface and the projector
-            x (float): value of the x-axis coordinate
-            y (float): value of the y-axis coordinate
+            Args:
+                struct (reference_object): current coordinate system parameters structure
+                struct (crossSize): struct with the dimensions of the cross
+                int (n): index of the vector
+                d (float): distance value between the projection surface and the projector
+                x (float): value of the x-axis coordinate
+                y (float): value of the y-axis coordinate
+            
+            Returns:
+                struct: coordinate system parameters structure updated """
         
-        Returns:
-            struct: coordinate system parameters structure updated
-        """
         reference_object.refPointList[n].tracePoint.x = x
         reference_object.refPointList[n].tracePoint.y = y
         reference_object.refPointList[n].distance = d
@@ -405,25 +437,25 @@ class CoordSys(object):
     def add_ref_object(self,ref_obj):
         """Add new coordinate system to the list.
 
-        Args:
-            struct (reference_object): parameters structure of the generated coordinate system 
-        """
+            Args:
+                struct (reference_object): parameters structure of the generated coordinate system """
+        
         self.reference_object_list.append(ref_obj)
-        # print(self.reference_object_list[:])
         print("[{}] appended".format(self.reference_object_list[-1].name))
+        # print(self.reference_object_list[:])
         # print("Reference object list: [{}]".format(self.reference_object_list[:].name))
         # print("Reference object list: [{}]".format(self.reference_object_list))
         # print(type(self.reference_object_list))
 
-    def set_cs(self,module_id,coord_sys): 
+    def set_cs(self,coord_sys): 
         """Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.
 
-        Args:
-            string (coord_sys): name of the new coordinate system
+            Args:
+                string (coord_sys): name of the new coordinate system
+            
+            Returns:
+                string: message """
         
-        Returns:
-            string: message
-        """
         # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS -> hay que eliminarlos todos en el disconnect
         # porque se borra la info de los ref_obj pero no los nombres de los coord sys??
         
@@ -436,18 +468,18 @@ class CoordSys(object):
                 print("{} DEACTIVATED" .format(self.reference_object_list[i].name))
                 self.reference_object_list[i].activated = False
                 self.__thrift_client.SetReferenceobject(self.reference_object_list[i])
-                self.__thrift_client.FunctionModuleSetProperty(module_id, "referenceData", self.reference_object_list[i].name)
-                self.__thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
-                self.__thrift_client.FunctionModuleRun(module_id)
+                self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
+                self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+                self.__thrift_client.FunctionModuleRun(self.module_id)
         
         print("{} ACTIVATED" .format(self.reference_object_list[index].name))
         self.reference_object_list[index].activated = True
         self.__thrift_client.SetReferenceobject(self.reference_object_list[index])
-        self.__thrift_client.FunctionModuleSetProperty(module_id, "referenceData", self.reference_object_list[index].name)
-        self.__thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
-        self.__thrift_client.FunctionModuleRun(module_id)
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[index].name)
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+        self.__thrift_client.FunctionModuleRun(self.module_id)
 
-        self.coordinate_system = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
+        self.current_cs = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
 
         # allReferenceObjects = self.thrift_client.GetGeoTreeIds()
         # print("Available reference objects:", allReferenceObjects)
@@ -455,42 +487,41 @@ class CoordSys(object):
         # ref_obj = self.thrift_client.GetReferenceobject("RefObject1")
         # print(ref_obj)
 
-    def register_cs(self,module_id,coord_sys):
+    def register_cs(self,coord_sys):
         """Register the new coordinate system at the projector once it has been generated and activated.
 
-        Args:
-            string (coord_sys): name of the coordinate system
+            Args:
+                string (coord_sys): name of the coordinate system
+            
+            Returns:
+                string: message """
         
-        Returns:
-            string: message
-        """
         print("Registering coordinate system {}".format(coord_sys))
 
-        self.__thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         
-        self.__thrift_client.FunctionModuleRun(module_id) # Calculate transformation
+        self.__thrift_client.FunctionModuleRun(self.module_id) # Calculate transformation
 
-
-        state = self.__thrift_client.FunctionModuleGetProperty(module_id, "state")
+        state = self.__thrift_client.FunctionModuleGetProperty(self.module_id, "state")
         if state != "1":  # idle
             return "Function module is not in idle state, hence an error has occured."
         else:
             return "Finished to register coordinate system on projector"
 
-    def show_cs(self,module_id,coord_sys,secs):
+    def show_cs(self,coord_sys,secs):
         """Project on the surface an existing coordinate system.
 
-        Args:
-            string (coord_sys): name of the coordinate system
-            int (secs): number of seconds the projection lasts
+            Args:
+                string (coord_sys): name of the coordinate system
+                int (secs): number of seconds the projection lasts
 
-        Returns:
-            string: message
-        """
+            Returns:
+                string: message """
+        
         print("Projecting [{}] coordinate system for {} seconds".format(coord_sys,secs))
-        self.__thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","1")
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
         time.sleep(secs)
-        self.__thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","0")
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
         return "Finished to show coordinate system"
     
     def remove_cs(self,coord_sys):
@@ -509,10 +540,15 @@ class CoordSys(object):
         self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
         return("Coordinate system [{}] removed".format(coord_sys))
 
+
+
 class ProjectionElement(object):
-    def __init__(self):
+    
+    def __init__(self,module_id):
         self.__thrift_client = ThriftClient()
         self.__geometry_tool = GeometryTool()
+        self.module_id = module_id
+
         # use the default elements to set default values for all new projection elements
         self.default_projection_element = thrift_interface.ProjectionElement()
         self.default_projection_element.pen = 0
@@ -520,38 +556,6 @@ class ProjectionElement(object):
         self.default_projection_element.projectorIDList = []
         self.default_projection_element.userTrans = self.__geometry_tool.create_matrix4x4()
         self.default_projection_element.activated = True
-
-    def start_project(self, coord_sys):
-        """Start projection on the surface of all figures (shapes) that belong to the active coordinate system.
-            
-            Returns:
-                string: message """
-        
-        # self.thrift_client.TriggerProjection()
-        # return(" ----- PROJECTING ----- ")
-
-        ref_obj_name = "RefObj_" + coord_sys
-        ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
-        # GetGeoTreeIds() saca tanto coord sys (son los primeros de la lista) como los shapes, mientras que GetCoordinatesystemList solo saca los cs
-        if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):                                        
-            return(" ----- NOTHING TO PROJECT ----- ")
-        else:
-            self.__thrift_client.TriggerProjection()
-            return(" ----- PROJECTING ----- ")
-
-    def stop_project(self, projector_id): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
-        """Stop projection of all figures.
-            
-            Returns:
-                string: message """
-        
-        try:
-            projector_property_path = "config.projectorManager.projectors." + projector_id
-            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
-            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
-            return(" ----- STOP PROJECTION ----- ")
-        except Exception as e:
-            return e
 
     def init_projection_element(self, elem):
         elem.coordinateSystemList = copy.deepcopy(self.default_projection_element.coordinateSystemList)
@@ -574,7 +578,7 @@ class ProjectionElement(object):
         polyline.polylineList = []
         return polyline
 
-    def define_polyline(self,projector_id,coord_sys,projection_group,id,x,y,angle,r,secs):
+    def define_polyline(self,coord_sys,projection_group,id,x,y,angle,r,secs):
         """Create a new line to project.
 
             Args:
@@ -601,10 +605,6 @@ class ProjectionElement(object):
         polyline.coordinateSystemList = [coord_sys]
         try:
             self.__thrift_client.SetPolyLine(polyline)
-            print("Projecting shape for {} seconds in order to check the shape".format(secs))
-            self.start_project(coord_sys)
-            time.sleep(secs)
-            self.stop_project(projector_id)
             return ("{} polyline created ".format(polyline_name))
         except Exception as e:
             return e
@@ -614,13 +614,9 @@ class ProjectionElement(object):
     #     circle = zlp.create_circle(x,y,r,circle_name)
 
     #     circle.activated = True
-    #     circle.coordinateSystemList = self.coordinate_system
+    #     circle.coordinateSystemList = self.current_cs
     #     try:
     #         self.thrift_client.SetCircleSegment(circle)
-    #         print("Projecting shape for 5 seconds in order to check the shape")
-    #         self.start_projection()
-    #         time.sleep(5)
-    #         self.stop_projection()
     #         return "Defined a circle segment to project"
     #     except Exception as e:
     #         return e

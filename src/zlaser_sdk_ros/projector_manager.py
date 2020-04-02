@@ -8,6 +8,8 @@ import time
 import zlp
 import math
 
+from zlp import ProjectorClient, CoordSys, ProjectionElement
+
 class ProjectorManager:
     """This is a class to operate the ZLP projector. """
     # https://www.python.org/dev/peps/pep-0257/#multi-line-docstrings
@@ -16,21 +18,21 @@ class ProjectorManager:
     def __init__(self):
         """Initialize the ProjectorManager object."""
         # Define default values
-        self.projector_id = "1"
         self.projector_IP = "192.168.10.10"
         self.server_IP = "192.168.10.11"
         self.connection_port = 9090
         self.license_path = "/lic/1900027652.lic" #???
         
         # Auxiliar variables
-        self.module_id = ""
+        self.projector_id = ""
+        # self.module_id = ""
         # self.reference_object_list = []
-        self.coordinate_system = ""
+        # self.coordinate_system = ""
         # self.geo_tree_elements = []
 
-        self.projector_client = zlp.ProjectorClient() # Create ThriftClient object
-        self.cs_element = zlp.CoordSys()
-        self.projection_element = zlp.ProjectionElement()
+        self.projector_client = ProjectorClient(self.projector_IP,self.server_IP,self.connection_port) # Create ThriftClient object
+        # self.cs_element = CoordSys(projector_id, module_id)
+        # self.projection_element = ProjectionElement(pmodule_id)
 
     def client_server_connect(self):
         """Create the client and connect to thrift server (located at projector) of ZLP-Service.
@@ -39,7 +41,7 @@ class ProjectorManager:
                 string: message """
         
         try:
-            self.projector_client.connect(self.server_IP, self.connection_port)
+            self.projector_client.connect()
             return "Connected to server. You can activate projector now"
         except Exception as e:
             return e
@@ -63,7 +65,7 @@ class ProjectorManager:
                 string: message """
 
         try:
-            self.projector_id = self.projector_client.activate_projector(self.projector_IP)
+            self.projector_id = self.projector_client.activate_projector()
             return "Projector activated. You can start the projection now"
         except Exception as e:
             return e
@@ -75,7 +77,7 @@ class ProjectorManager:
                 string: message """
         
         try:
-            self.projector_client.deactivate_projector(self.projector_id, self.module_id)
+            self.projector_client.deactivate_projector()
             return "Projector deactivated."
         except Exception as e:
             return e
@@ -107,10 +109,31 @@ class ProjectorManager:
                 string: message """
 
         try:
-            self.module_id = self.projector_client.function_module_create(self.module_id)
+            module_id = self.projector_client.function_module_create()
+            
+            self.cs_element = CoordSys(self.projector_id, module_id)
+            self.projection_element = ProjectionElement(module_id)
+
             return "Function Module Created"
         except Exception as e:
             return e
+
+    def start_projection(self,coord_sys):
+        """Start projection on the surface of all figures (shapes) that belong to the active coordinate system.
+            
+            Returns:
+                string: message """
+        
+        self.projector_client.start_project(coord_sys)
+
+    def stop_projection(self): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
+        """Stop projection of all figures.
+            
+            Returns:
+                string: message """
+        
+        self.projector_client.stop_project()
+
 
 
 
@@ -122,10 +145,8 @@ class ProjectorManager:
             Returns:
                 list: names list of available coordinate systems (strings) """
 
-        available_coordinate_systems = self.cs_element.coordinate_system_list()
-        print("CURRENT COORDINATE SYSTEM: [{}]".format(self.coordinate_system))
-        # allGeoTree = self.thrift_client.GetGeoTreeIds()
-        # print("Available GeoTree:", allGeoTree)
+        available_coordinate_systems,current_cs = self.cs_element.coordinate_system_list()
+        print("CURRENT COORDINATE SYSTEM: [{}]".format(current_cs))
         return available_coordinate_systems
 
     def define_coordinate_system(self,req):
@@ -137,12 +158,9 @@ class ProjectorManager:
             Returns:
                 string: name of the coordinate system generated """
 
-        cs = self.cs_element.define_cs(req,self.projector_id)
-
-        # self.add_ref_object(reference_object)
-
+        coord_sys = self.cs_element.define_cs(req)
         print("Reference object created. Coordinate system defined but not registered.")
-        return(cs)
+        return(coord_sys)
 
     def set_coordinate_system(self,coord_sys): 
         """Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.
@@ -153,11 +171,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS -> hay que eliminarlos todos en el disconnect
-        # porque se borra la info de los ref_obj pero no los nombres de los coord sys??
-        
-        self.cs_element.set_cs(self.module_id, coord_sys)
-
+        self.cs_element.set_cs(coord_sys)
         return ("[{}] set as coordinate system".format(coord_sys))
 
     def register_coordinate_system(self,coord_sys):
@@ -170,7 +184,7 @@ class ProjectorManager:
                 string: message """
 
         print("Registering coordinate system {}".format(coord_sys))
-        self.cs_element.register_cs(self.module_id, coord_sys)
+        self.cs_element.register_cs(coord_sys)
 
     def show_coordinate_system(self,coord_sys,secs):
         """Project on the surface an existing coordinate system.
@@ -183,7 +197,7 @@ class ProjectorManager:
                 string: message """
 
         print("Projecting [{}] coordinate system for {} seconds".format(coord_sys,secs))
-        self.cs_element.show_cs(self.module_id, coord_sys, secs)
+        self.cs_element.show_cs(coord_sys, secs)
 
     def remove_coordinate_system(self,coord_sys):
         """Delete a coordinate system.
@@ -192,10 +206,6 @@ class ProjectorManager:
                 
             Returns:
                 string: message """
-        
-        # for name in self.geo_tree_elements:
-            # self.thrift_client.RemoveGeoTreeElem(name)
-        #self.geo_tree_elements.clear()
 
         self.cs_element.remove_cs(coord_sys)
 
@@ -204,23 +214,7 @@ class ProjectorManager:
 
 
 
-    def start_projection(self,coord_sys):
-        """Start projection on the surface of all figures (shapes) that belong to the active coordinate system.
-            
-            Returns:
-                string: message """
-        
-        self.projection_element.start_project(coord_sys)
-
-    def stop_projection(self): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
-        """Stop projection of all figures.
-            
-            Returns:
-                string: message """
-        
-        self.projection_element.stop_project(self.projector_id)
-
-    def create_polyline(self,projector_id,coord_sys,projection_group,id,x,y,angle,r,secs):
+    def create_polyline(self,coord_sys,projection_group,id,x,y,angle,r,secs):
         """Create a new line to project.
 
             Args:
@@ -235,7 +229,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.projection_element.define_polyline(projector_id,coord_sys,projection_group,id,x,y,angle,r,secs)
+        self.projection_element.define_polyline(coord_sys,projection_group,id,x,y,angle,r,secs)
 
     def hide_shape(self,projection_group,shape_name,id): # deactivate shape
         """Hide (deactivate) a figure from a group of the active coordinate system.
