@@ -7,6 +7,7 @@ This module contains utility classes and methods which ease the usage of the thr
 
 import os
 import time
+import math
 import socket
 import copy
 import logging
@@ -145,7 +146,7 @@ class ProjectorClient(object):
 
     def disconnect(self):
         """Disconnect from ZLP Service thrift server and close own event server."""
-        self.__thrift_client.DisconnectClientEventChannel()
+        self.__thrift_client.DisconnectClientEventChannel() # NO PODRÍA SER: thrift_interface.DisconnectClientEventChannel() ???????????
         self.__thrift_client.close()
 
         if self.__thrift_client._event_channel:
@@ -201,25 +202,27 @@ class ProjectorClient(object):
         log.info("Available projectors: " + str(serial_list))
         return serial_list
 
-    def activate_projector(self, projector_serial):
+    def activate_projector(self, projector_IP):
         """Activate a projector.
 
         Args:
             projector_serial: serial number of the projector
         """
-        log.info("Activating projector: " + projector_serial)
-
         try:
+            projectors = self.scan_projectors(projector_IP)
+            projector_serial = projectors[0]
+            log.info("Activating projector. ID: " + projector_serial)
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "1")
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
             #blocks until the projector is activated
             self.get_projectors()
+            return projector_serial
         except Exception as e:
-            log.error("Could not activate projector:", projector_serial)
+            log.error("Could not activate projector:" + projector_serial)
             raise
 
-    def deactivate_projector(self, projector_serial):
+    def deactivate_projector(self, projector_serial, module_id):
         """Deactivates a projector.
 
         Args:
@@ -232,6 +235,19 @@ class ProjectorClient(object):
             self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
             self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
 
+            # HAY QUE DISTINGUIR ENTRE DESCONECTAR Y BORRAR TODO, O DESCONECTAR SOLO, AHORA MISMO BORRA TODO
+            # QUE HACER ADEMAS AL DEACTIVATE: ????
+            # self.geo_tree_elements.clear() ?? <- geo_tree_elements[] es un es una lista de geo_tree_elem creada por nosotros (.clear() elimina los elementos del vector)
+            # thrift_client.RemoveGeoTreeElem("") <- remove all!!!!
+            # thrift_client.FunctionModuleRelease(module_id) ??
+            # if hasattr(self,'reference_object_name'):
+            # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
+            # self.clear_geo_tree() # al hacer deactivate en el proyector se borran automaticamente los geo_trees? es mejor dejar ese if para borrarlos? no hace falta?
+                # se borran al desenchufar el proyector
+            log.info("Removing all projection elements")
+            self.__thrift_client.RemoveGeoTreeElem("") 
+            self.__thrift_client.FunctionModuleRelease(module_id)
+
             log.info("Deactivating projector: " + projector_serial)
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", projector_serial)
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "0")
@@ -241,19 +257,37 @@ class ProjectorClient(object):
             log.error("Error: projector could not be deactivated")
             raise e
 
+    def transfer_license(self, lic_path):
+        try:
+            license_path = os.path.abspath(lic_path)
+            license_file = os.path.basename(license_path)
+            self.transfer_file(license_path, license_file, True)
+        except thrift_interface.CantWriteFile as e:
+            return e
+        except FileNotFoundError:
+            return "File not found!"
+        self.__thrift_client.LoadLicense(license_file)
+        return "License transfered"
+
     def transfer_file(self, local_path, remote_file, overwrite=False):
         content = open(local_path, 'r').read()
         self.__thrift_client.TransferDataToFile(content, remote_file, overwrite)
 
-class ProjectionElement(object):
-    def __init__(self):
-        # use the default elements to set default values for all new projection elements
-        self.default_projection_element = thrift_interface.ProjectionElement()
-        self.default_projection_element.pen = 0
-        self.default_projection_element.coordinateSystemList = []
-        self.default_projection_element.projectorIDList = []
-        self.default_projection_element.userTrans = self.create_matrix4x4()
-        self.default_projection_element.activated = True
+    def check_license(self):
+        return self.__thrift_client.CheckLicense()
+
+    def function_module_create(self, module_id):
+        try:
+            module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
+            return module_id
+        except thrift_interface.FunctionModuleClassNotRegistered as e:
+            return ("FunctionModuleClassNotRegistered: " + e.which)
+        except thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
+            return ("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
+        except thrift_interface.FunctionModuleClassNotLicensed as e:
+            return ("FunctionModuleClassNotLicensed: " + e.which)
+
+class GeometryTool():
 
     def create_matrix4x4(self):
         mat = thrift_interface.Matrix4x4(list())
@@ -262,6 +296,262 @@ class ProjectionElement(object):
     def init_element_3d(self, elem):
         elem.userTrans = self.create_matrix4x4()
         return elem
+
+    def create_2d_point(self, x=0, y=0):
+        return thrift_interface.Vector2D(x, y)
+
+    def create_3d_point(self, x=0, y=0, z=0):
+        return thrift_interface.Vector3D(x, y, z)
+
+    # def create_2d_point(x=0, y=0):
+    #     return thrift_interface.Vector3D(x, y)
+
+class CoordSys(object):
+
+    def __init__(self):
+        self.__thrift_client = ThriftClient()
+        self.__geometry_tool = GeometryTool()
+        self.reference_object_list = []
+
+    def coordinate_system_list(self):
+        return self.__thrift_client.GetCoordinatesystemList()
+
+    def create_reference_object(self):
+        ref_obj = thrift_interface.Referenceobject()
+        ref_obj.name = ""
+        ref_obj.activated = False
+        ref_obj.fieldTransMat = self.__geometry_tool.create_matrix4x4()
+        ref_obj.refPointList = []
+        ref_obj.projectorID = ""
+        ref_obj.coordinateSystem = ""
+        return ref_obj
+
+    def create_reference_point(self, name, x, y, z=0, active=True):
+        ref_point = thrift_interface.Referencepoint()
+        ref_point.name = name
+        ref_point.refPoint = self.__geometry_tool.create_3d_point(x, y, z)
+        ref_point.activated = active
+        ref_point.tracePoint = self.__geometry_tool.create_2d_point()
+        ref_point.crossSize = self.__geometry_tool.create_2d_point()
+        ref_point.distance = 0
+        return ref_point
+
+    def define_cs(self,req, projector_id):
+        """Generate new coordinate system.
+
+        Args:
+            struct (req): structure with the necessary parameters value to generate the coordinate system
+        
+        Returns:
+            string: name of the coordinate system generated
+        """
+        reference_object = self.create_reference_object()
+        reference_object.name = "RefObj_" + req.name_cs.data
+        print("Creating reference object: {}".format(reference_object.name))
+        reference_object.coordinateSystem = req.name_cs.data
+        reference_object.projectorID = projector_id
+
+        T2_x = req.T1_x.data + abs((req.x2.data - req.x1.data))
+        T2_y = req.T1_y.data
+        T3_x = req.T1_x.data + abs((req.x3.data - req.x1.data))
+        T3_y = req.T1_y.data + abs((req.y3.data - req.y1.data))
+        T4_x = req.T1_x.data
+        T4_y = req.T1_y.data + abs((req.y4.data - req.y1.data))
+
+        # scale_factor = ??? T_x,y * 2 # manteniendo la proporción
+
+        reference_object.refPointList = [   self.create_reference_point("T1", req.T1_x.data, req.T1_y.data),
+                                            self.create_reference_point("T2",     T2_x,          T2_y),
+                                            self.create_reference_point("T3",     T3_x,          T3_y),
+                                            self.create_reference_point("T4",     T4_x,          T4_y)]
+        
+        crossSize = self.__geometry_tool.create_2d_point(req.crossize_x.data,req.crossize_y.data) # set global crosssize for all reference points
+
+        reference_object = self.__define_reference_point(reference_object,crossSize,0,req.distance.data,req.x1.data,req.y1.data) # define coordinates in user system [mm]
+        reference_object = self.__define_reference_point(reference_object,crossSize,1,req.distance.data,req.x2.data,req.y2.data)
+        reference_object = self.__define_reference_point(reference_object,crossSize,2,req.distance.data,req.x3.data,req.y3.data)
+        reference_object = self.__define_reference_point(reference_object,crossSize,3,req.distance.data,req.x4.data,req.y4.data)
+
+        # reference_object.activated = True # en set_cs
+        # self.thrift_client.SetReferenceobject(reference_object) # en set_cs
+        # self.thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name) # en set_cs
+        
+        self.add_ref_object(reference_object) 
+
+        # print("Reference object created. Coordinate system defined but not registered.")
+        return (reference_object.coordinateSystem)
+
+    def __define_reference_point(self,reference_object,crossSize,n,d,x,y):
+        """Fill other fields of the coordinate system parameters structure.
+
+        Args:
+            struct (reference_object): current coordinate system parameters structure
+            struct (crossSize): struct with the dimensions of the cross
+            int (n): index of the vector
+            d (float): distance value between the projection surface and the projector
+            x (float): value of the x-axis coordinate
+            y (float): value of the y-axis coordinate
+        
+        Returns:
+            struct: coordinate system parameters structure updated
+        """
+        reference_object.refPointList[n].tracePoint.x = x
+        reference_object.refPointList[n].tracePoint.y = y
+        reference_object.refPointList[n].distance = d
+        reference_object.refPointList[n].activated = True
+        reference_object.refPointList[n].crossSize = crossSize
+        return reference_object
+
+    def add_ref_object(self,ref_obj):
+        """Add new coordinate system to the list.
+
+        Args:
+            struct (reference_object): parameters structure of the generated coordinate system 
+        """
+        self.reference_object_list.append(ref_obj)
+        # print(self.reference_object_list[:])
+        print("[{}] appended".format(self.reference_object_list[-1].name))
+        # print("Reference object list: [{}]".format(self.reference_object_list[:].name))
+        # print("Reference object list: [{}]".format(self.reference_object_list))
+        # print(type(self.reference_object_list))
+
+    def set_cs(self,module_id,coord_sys): 
+        """Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.
+
+        Args:
+            string (coord_sys): name of the new coordinate system
+        
+        Returns:
+            string: message
+        """
+        # SI SE HACE DISCONNECT EN EL PROYECTOR SE PIERDE LA INFO DE LOS REF_OBJECTS -> hay que eliminarlos todos en el disconnect
+        # porque se borra la info de los ref_obj pero no los nombres de los coord sys??
+        
+        ref_obj_name = "RefObj_" + coord_sys 
+
+        for i in range (0,len(self.reference_object_list)):
+            if self.reference_object_list[i].name == ref_obj_name:
+                index = i
+            else:
+                print("{} DEACTIVATED" .format(self.reference_object_list[i].name))
+                self.reference_object_list[i].activated = False
+                self.__thrift_client.SetReferenceobject(self.reference_object_list[i])
+                self.__thrift_client.FunctionModuleSetProperty(module_id, "referenceData", self.reference_object_list[i].name)
+                self.__thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
+                self.__thrift_client.FunctionModuleRun(module_id)
+        
+        print("{} ACTIVATED" .format(self.reference_object_list[index].name))
+        self.reference_object_list[index].activated = True
+        self.__thrift_client.SetReferenceobject(self.reference_object_list[index])
+        self.__thrift_client.FunctionModuleSetProperty(module_id, "referenceData", self.reference_object_list[index].name)
+        self.__thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
+        self.__thrift_client.FunctionModuleRun(module_id)
+
+        self.coordinate_system = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
+
+        # allReferenceObjects = self.thrift_client.GetGeoTreeIds()
+        # print("Available reference objects:", allReferenceObjects)
+
+        # ref_obj = self.thrift_client.GetReferenceobject("RefObject1")
+        # print(ref_obj)
+
+    def register_cs(self,module_id,coord_sys):
+        """Register the new coordinate system at the projector once it has been generated and activated.
+
+        Args:
+            string (coord_sys): name of the coordinate system
+        
+        Returns:
+            string: message
+        """
+        print("Registering coordinate system {}".format(coord_sys))
+
+        self.__thrift_client.FunctionModuleSetProperty(module_id, "runMode", "1")
+        
+        self.__thrift_client.FunctionModuleRun(module_id) # Calculate transformation
+
+
+        state = self.__thrift_client.FunctionModuleGetProperty(module_id, "state")
+        if state != "1":  # idle
+            return "Function module is not in idle state, hence an error has occured."
+        else:
+            return "Finished to register coordinate system on projector"
+
+    def show_cs(self,module_id,coord_sys,secs):
+        """Project on the surface an existing coordinate system.
+
+        Args:
+            string (coord_sys): name of the coordinate system
+            int (secs): number of seconds the projection lasts
+
+        Returns:
+            string: message
+        """
+        print("Projecting [{}] coordinate system for {} seconds".format(coord_sys,secs))
+        self.__thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","1")
+        time.sleep(secs)
+        self.__thrift_client.FunctionModuleSetProperty(module_id,"showAllRefPts","0")
+        return "Finished to show coordinate system"
+    
+    def remove_cs(self,coord_sys):
+        """Delete a coordinate system.
+            Args:
+                string (coord_sys): name of the coordinate system
+                
+            Returns:
+                string: message """
+        
+        # for name in self.geo_tree_elements:
+            # self.thrift_client.RemoveGeoTreeElem(name)
+        #self.geo_tree_elements.clear()
+
+        reference_object_name = "RefObj_" + coord_sys
+        self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
+        return("Coordinate system [{}] removed".format(coord_sys))
+
+class ProjectionElement(object):
+    def __init__(self):
+        self.__thrift_client = ThriftClient()
+        self.__geometry_tool = GeometryTool()
+        # use the default elements to set default values for all new projection elements
+        self.default_projection_element = thrift_interface.ProjectionElement()
+        self.default_projection_element.pen = 0
+        self.default_projection_element.coordinateSystemList = []
+        self.default_projection_element.projectorIDList = []
+        self.default_projection_element.userTrans = self.__geometry_tool.create_matrix4x4()
+        self.default_projection_element.activated = True
+
+    def start_project(self, coord_sys):
+        """Start projection on the surface of all figures (shapes) that belong to the active coordinate system.
+            
+            Returns:
+                string: message """
+        
+        # self.thrift_client.TriggerProjection()
+        # return(" ----- PROJECTING ----- ")
+
+        ref_obj_name = "RefObj_" + coord_sys
+        ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
+        # GetGeoTreeIds() saca tanto coord sys (son los primeros de la lista) como los shapes, mientras que GetCoordinatesystemList solo saca los cs
+        if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):                                        
+            return(" ----- NOTHING TO PROJECT ----- ")
+        else:
+            self.__thrift_client.TriggerProjection()
+            return(" ----- PROJECTING ----- ")
+
+    def stop_project(self, projector_id): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
+        """Stop projection of all figures.
+            
+            Returns:
+                string: message """
+        
+        try:
+            projector_property_path = "config.projectorManager.projectors." + projector_id
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
+            return(" ----- STOP PROJECTION ----- ")
+        except Exception as e:
+            return e
 
     def init_projection_element(self, elem):
         elem.coordinateSystemList = copy.deepcopy(self.default_projection_element.coordinateSystemList)
@@ -284,110 +574,190 @@ class ProjectionElement(object):
         polyline.polylineList = []
         return polyline
 
-    def create_circle(self, x, y, r, name):
-        circle = thrift_interface.CircleSegment()
-        circle = self.init_projection_element(circle)
-        circle.name = name
-        circle.radius = r
-        circle.center = self.create_3d_point(x, y)
-        return circle
+    def define_polyline(self,projector_id,coord_sys,projection_group,id,x,y,angle,r,secs):
+        """Create a new line to project.
 
-    def create_oval(self, x, y, w, h, name, angle=0):
-        oval = thrift_interface.OvalSegment()
-        oval = self.init_projection_element(oval)
-        oval.name = name
-        oval.width = w
-        oval.height = h
-        oval.angle = angle
-        oval.center = self.create_3d_point(x, y)
-        return oval
+            Args:
+                string (projection_group): name of the projection group
+                string (id): name of the shape identificator
+                float (x): x-axis value of the initial point position 
+                float (y): y-axis value of the initial point position 
+                float (angle): line angle value
+                float (r): length of the line
+                int (secs): number of seconds the projection lasts
+                
+            Returns:
+                string: message """
+        
+        polyline_name = projection_group + "/my_polyline_" + id
+        polyline = self.create_polyline(polyline_name)
+        # self.geo_tree_elements.append(name)
 
-    def create_text_element(self, x, y, text, name, height):
-        textelem = thrift_interface.TextElement()
-        textelem = self.init_projection_element(textelem)
-        textelem.name = name
-        textelem.position = self.create_3d_point(x, y)
-        textelem.text = text
-        textelem.height = height
-        return textelem
+        linestring = [ self.__geometry_tool.create_3d_point(x, y),
+                       self.__geometry_tool.create_3d_point(x+r*math.cos(angle*math.pi/180), y+r*math.sin(angle*math.pi/180))]
+        
+        polyline.polylineList = [linestring]
+        polyline.activated = True
+        polyline.coordinateSystemList = [coord_sys]
+        try:
+            self.__thrift_client.SetPolyLine(polyline)
+            print("Projecting shape for {} seconds in order to check the shape".format(secs))
+            self.start_project(coord_sys)
+            time.sleep(secs)
+            self.stop_project(projector_id)
+            return ("{} polyline created ".format(polyline_name))
+        except Exception as e:
+            return e
 
-    def create_2d_point(self, x=0, y=0):
-        return thrift_interface.Vector2D(x, y)
+    # def create_circle(self,projection_group,id,x,y,r):
+    #     circle_name = projection_group + "/my_circle_" + id
+    #     circle = zlp.create_circle(x,y,r,circle_name)
 
-    def create_3d_point(self, x=0, y=0, z=0):
-        return thrift_interface.Vector3D(x, y, z)
+    #     circle.activated = True
+    #     circle.coordinateSystemList = self.coordinate_system
+    #     try:
+    #         self.thrift_client.SetCircleSegment(circle)
+    #         print("Projecting shape for 5 seconds in order to check the shape")
+    #         self.start_projection()
+    #         time.sleep(5)
+    #         self.stop_projection()
+    #         return "Defined a circle segment to project"
+    #     except Exception as e:
+    #         return e
 
-    # def create_2d_point(x=0, y=0):
-    #     return thrift_interface.Vector3D(x, y)
+    def deactivate_shape(self,projection_group,shape_name,id): # deactivate shape
+        """Hide (deactivate) a figure from a group of the active coordinate system.
 
-    def create_reference_object(self):
-        ref_obj = thrift_interface.Referenceobject()
-        ref_obj.name = ""
-        ref_obj.activated = False
-        ref_obj.fieldTransMat = self.create_matrix4x4()
-        ref_obj.refPointList = []
-        ref_obj.projectorID = ""
-        ref_obj.coordinateSystem = ""
-        return ref_obj
+            Args:
+                string (projection_group): name of the projection group
+                string (shape_name): type of figure (polyline, circle, etc.)
+                string (id): name of the shape identificator
+                
+            Returns:
+                string: message """
+        
+        if shape_name == "polyline":
+            polyline = self.__thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+            polyline.activated = False
+            self.__thrift_client.SetPolyLine(polyline)
+    
+        # # reference_object.activated = False  # <- puede servir 
 
-    def create_reference_point(self, name, x, y, z=0, active=True):
-        ref_point = thrift_interface.Referencepoint()
-        ref_point.name = name
-        ref_point.refPoint = self.create_3d_point(x, y, z)
-        ref_point.activated = active
-        ref_point.tracePoint = self.create_2d_point()
-        ref_point.crossSize = self.create_2d_point()
-        ref_point.distance = 0
-        return ref_point
+        # # name = projection_group + "/my_" + shape_name + "_" + id
+        # # shape = self.thrift_client.GetProjectionElement(name)
+        # # shape.activated = False
+        # # if shape_name == "polyline":
+        # #     self.thrift_client.SetPolyLine(polyline)
 
-    def create_driftcompensation_object(self, name="", active=True):
-        dc_obj = thrift_interface.DriftCompensationObject()
-        dc_obj.name = name
-        dc_obj.activated = active
-        dc_obj.compensationTransMat = self.create_matrix4x4()
-        dc_obj.dcPointList = []
-        dc_obj.projectorID = ""
-        dc_obj.fixedTranslation = [False,False,False]
-        dc_obj.fixedRotation = [False,False,False]
-        return dc_obj
 
-    def create_driftcompensation_point(self, name, x=0, y=0, z=0, distanceToOrigin=0, active=True):
-        dc_point = thrift_interface.DriftCompensationPoint()
-        dc_point.name = name
-        dc_point.activated = active
-        dc_point.isReserve = False
-        dc_point.traceVector = self.create_3d_point(x, y, z)
-        dc_point.crossSize = 100
-        dc_point.distanceToOrigin = distanceToOrigin
-        dc_point.weight = 1
-        return dc_point
+    def reactivate_shape(self,projection_group,shape_name,id): # deactivate shape
+        """Unhide (activate) a figure from a group of the active coordinate system.
 
-    def create_clip_group(self, name, type=thrift_interface.ClipSetTypes.Union, active=True):
-        clip_group = thrift_interface.ClipGroup()
-        clip_group.name = name
-        clip_group.projectorMap = {}
-        clip_group.coordinateSystem = ""
-        clip_group.setType = type
-        clip_group.activated = active
-        return clip_group
+            Args:
+                string (projection_group): name of the projection group
+                string (shape_name): type of figure (polyline, circle, etc.)
+                string (id): name of the shape identificator
+                
+            Returns:
+                string: message """
+        
+        if shape_name == "polyline":
+            polyline = self.__thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+            polyline.activated = True
+            self.__thrift_client.SetPolyLine(polyline)
+    
 
-    def create_clip_plane(self, name, x, y, z, normal, coordsys, active=True):
-        clip_plane = thrift_interface.ClipPlane()
-        clip_plane.name = name
-        clip_plane.point = self.create_3d_point(x, y, z)
-        clip_plane.normal = normal
-        clip_plane.activated = active
-        clip_plane.coordinateSystem = coordsys
-        clip_plane.projectorMap = {}
-        return clip_plane
+    def delete_shape(self,projection_group,shape_name,id):
+        """Delete a figure from the active coordinate system.
 
-    def create_clip_rect(self, name, x, y, z, w, h, csys, active=True):
-        clip_rect = thrift_interface.ClipRect()
-        clip_rect.name = name
-        clip_rect.position = self.create_3d_point(x, y, z)
-        clip_rect.activated = active
-        clip_rect.size = self.create_2d_point(w, h)
-        clip_rect.showOutline = False
-        clip_rect.coordinateSystem = csys
-        clip_rect.clippingActivated = True
-        return clip_rect
+            Args:
+                string (projection_group): name of the projection group
+                string (shape_name): type of figure (polyline, circle, etc.)
+                string (id): name of the shape identificator
+                
+            Returns:
+                string: message """
+        
+        self.__thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
+
+    # def remove_group(self,projection_group):
+    #     self.thrift_client.RemoveGeoTreeElem(projection_group)
+
+    # def create_circle(self, x, y, r, name):
+    #     circle = thrift_interface.CircleSegment()
+    #     circle = self.init_projection_element(circle)
+    #     circle.name = name
+    #     circle.radius = r
+    #     circle.center = self.create_3d_point(x, y)
+    #     return circle
+
+    # def create_oval(self, x, y, w, h, name, angle=0):
+    #     oval = thrift_interface.OvalSegment()
+    #     oval = self.init_projection_element(oval)
+    #     oval.name = name
+    #     oval.width = w
+    #     oval.height = h
+    #     oval.angle = angle
+    #     oval.center = self.create_3d_point(x, y)
+    #     return oval
+
+    # def create_text_element(self, x, y, text, name, height):
+    #     textelem = thrift_interface.TextElement()
+    #     textelem = self.init_projection_element(textelem)
+    #     textelem.name = name
+    #     textelem.position = self.create_3d_point(x, y)
+    #     textelem.text = text
+    #     textelem.height = height
+    #     return textelem
+
+    # def create_driftcompensation_object(self, name="", active=True):
+    #     dc_obj = thrift_interface.DriftCompensationObject()
+    #     dc_obj.name = name
+    #     dc_obj.activated = active
+    #     dc_obj.compensationTransMat = self.create_matrix4x4()
+    #     dc_obj.dcPointList = []
+    #     dc_obj.projectorID = ""
+    #     dc_obj.fixedTranslation = [False,False,False]
+    #     dc_obj.fixedRotation = [False,False,False]
+    #     return dc_obj
+
+    # def create_driftcompensation_point(self, name, x=0, y=0, z=0, distanceToOrigin=0, active=True):
+    #     dc_point = thrift_interface.DriftCompensationPoint()
+    #     dc_point.name = name
+    #     dc_point.activated = active
+    #     dc_point.isReserve = False
+    #     dc_point.traceVector = self.create_3d_point(x, y, z)
+    #     dc_point.crossSize = 100
+    #     dc_point.distanceToOrigin = distanceToOrigin
+    #     dc_point.weight = 1
+    #     return dc_point
+
+    # def create_clip_group(self, name, type=thrift_interface.ClipSetTypes.Union, active=True):
+    #     clip_group = thrift_interface.ClipGroup()
+    #     clip_group.name = name
+    #     clip_group.projectorMap = {}
+    #     clip_group.coordinateSystem = ""
+    #     clip_group.setType = type
+    #     clip_group.activated = active
+    #     return clip_group
+
+    # def create_clip_plane(self, name, x, y, z, normal, coordsys, active=True):
+    #     clip_plane = thrift_interface.ClipPlane()
+    #     clip_plane.name = name
+    #     clip_plane.point = self.create_3d_point(x, y, z)
+    #     clip_plane.normal = normal
+    #     clip_plane.activated = active
+    #     clip_plane.coordinateSystem = coordsys
+    #     clip_plane.projectorMap = {}
+    #     return clip_plane
+
+    # def create_clip_rect(self, name, x, y, z, w, h, csys, active=True):
+    #     clip_rect = thrift_interface.ClipRect()
+    #     clip_rect.name = name
+    #     clip_rect.position = self.create_3d_point(x, y, z)
+    #     clip_rect.activated = active
+    #     clip_rect.size = self.create_2d_point(w, h)
+    #     clip_rect.showOutline = False
+    #     clip_rect.coordinateSystem = csys
+    #     clip_rect.clippingActivated = True
+    #     return clip_rect

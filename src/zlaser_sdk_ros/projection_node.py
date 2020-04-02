@@ -62,7 +62,7 @@ class ProjectionNode:
 
     def transfer_license_cb(self,req):
         self.projector.license_path = self.lic_path
-        e = self.projector.transfer_license()
+        e = self.projector.load_license()
         rospy.loginfo(e)
         e = self.projector.function_module_create()
         rospy.loginfo(e)
@@ -75,7 +75,7 @@ class ProjectionNode:
         e = self.projector.activate() # activate projector
         rospy.loginfo(e)
         self.projector.license_path = self.lic_path
-        e = self.projector.transfer_license() # transfer license
+        e = self.projector.load_license() # transfer license
         rospy.loginfo(e)
         if not self.projector.check_license(): # check license
             rospy.logwarn("License is not valid. Load a new one: \n\n rosservice call /projector_srv/load_license")      
