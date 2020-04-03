@@ -139,6 +139,8 @@ class ProjectorClient(object):
         self.projector_id = ""
         self.module_id = ""
 
+        print("------------------------")
+
     def connect(self):
         """Connects the client to ZLP-Service and establishes an event channel if needed.
 
@@ -146,8 +148,13 @@ class ProjectorClient(object):
                 ip: ipv6 network address of ZLP-Service
                 port: port number on which ZLP-Service listens for requests """
         
-        self.__thrift_client.__init_client(self.server_IP, self.connection_port)
-        self.__thrift_client.__init_event_channel()
+        try:
+            self.__thrift_client.__init_client(self.server_IP, self.connection_port)
+            self.__thrift_client.__init_event_channel()
+            print("CCCCCCCCCCCC")
+        except Exception as e:
+            print("............")
+            print(e)
 
     def disconnect(self):
         """Disconnect from ZLP Service thrift server and close own event server."""
@@ -218,9 +225,12 @@ class ProjectorClient(object):
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
             #blocks until the projector is activated
             self.get_projectors()
+            print("#######################")
             # return self.projector_id
         # except Exception as e:
-        except Exception:
+        except Exception as e:
+            print(",,,,,,,,,,,,,,,,,,,,,,,,")
+            print(e)
             log.error("Could not activate projector:" + self.projector_id)
 
     def deactivate_projector(self):
@@ -318,7 +328,6 @@ class ProjectorClient(object):
             return(" ----- STOP PROJECTION ----- ")
         except Exception as e:
             return e
-
 
 class GeometryTool():
 
@@ -545,7 +554,6 @@ class CoordSys(object):
         reference_object_name = "RefObj_" + coord_sys
         self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
         return("Coordinate system [{}] removed".format(coord_sys))
-
 
 class ProjectionElement(object):
     

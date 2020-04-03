@@ -11,6 +11,8 @@ from zlaser_sdk_ros.srv import ShapeParams, ShapeParamsResponse, CsRefPoints, Cs
 from zlaser_sdk_ros.srv import RemovCs, RemovCsResponse, RemovShape, RemovShapeResponse, HideShape, HideShapeResponse
 #from zlaser_sdk_ros.projector_manager import ProjectorManager
 
+import zlp
+
 class ProjectionNode:
     def __init__(self):
 
@@ -41,13 +43,27 @@ class ProjectionNode:
         self.stop_srv    = rospy.Service('/projector_srv/projection_stop', Trigger, self.projection_stop_cb)
         self.h_shape_srv = rospy.Service('/projector_srv/hide_shape', HideShape, self.hide_shape_cb)
         self.r_shape_srv = rospy.Service('/projector_srv/remove_shape', RemovShape, self.remove_shape_cb)
-        
+
+
+
+        self.projector_IP = "192.168.10.10"
+        self.server_IP = "192.168.10.11"
+        self.connection_port = 9090
+        self.projector_client = zlp.ProjectorClient(self.projector_IP,self.server_IP,self.connection_port)
+
+
+
+
         rospy.spin()
 
     def connection_cb(self,req):
         rospy.loginfo("Received request to start projector")
         e = self.projector.client_server_connect()
         rospy.loginfo(e)
+        print("asdfasdfasdfasdf")
+
+        self.projector_client.connect()
+
         e = self.projector.activate()
         rospy.loginfo(e)
         return TriggerResponse(True,str(e))
