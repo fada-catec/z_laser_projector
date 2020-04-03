@@ -24,7 +24,7 @@ class ProjectorManager:
         self.license_path = "/lic/1900027652.lic" #???
         
         # Auxiliar variables
-        self.projector_id = ""
+        # self.projector_id = ""
         # self.module_id = ""
         # self.reference_object_list = []
         # self.coordinate_system = ""
@@ -65,7 +65,7 @@ class ProjectorManager:
                 string: message """
 
         try:
-            self.projector_id = self.projector_client.activate_projector()
+            self.projector_client.activate_projector()
             return "Projector activated. You can start the projection now"
         except Exception as e:
             return e
@@ -109,9 +109,9 @@ class ProjectorManager:
                 string: message """
 
         try:
-            module_id = self.projector_client.function_module_create()
+            module_id, projector_id = self.projector_client.function_module_create()
             
-            self.cs_element = CoordSys(self.projector_id, module_id)
+            self.cs_element = CoordSys(projector_id, module_id)
             self.projection_element = ProjectionElement(module_id)
 
             return "Function Module Created"
@@ -124,7 +124,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.projector_client.start_project(coord_sys)
+        return self.projector_client.start_project(coord_sys)
 
     def stop_projection(self): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
         """Stop projection of all figures.
@@ -132,7 +132,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.projector_client.stop_project()
+        return self.projector_client.stop_project()
 
 
 
@@ -145,9 +145,7 @@ class ProjectorManager:
             Returns:
                 list: names list of available coordinate systems (strings) """
 
-        available_coordinate_systems,current_cs = self.cs_element.coordinate_system_list()
-        print("CURRENT COORDINATE SYSTEM: [{}]".format(current_cs))
-        return available_coordinate_systems
+        return self.cs_element.coordinate_system_list()
 
     def define_coordinate_system(self,req):
         """Generate new coordinate system.
@@ -171,8 +169,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.cs_element.set_cs(coord_sys)
-        return ("[{}] set as coordinate system".format(coord_sys))
+        return self.cs_element.set_cs(coord_sys)
 
     def register_coordinate_system(self,coord_sys):
         """Register the new coordinate system at the projector once it has been generated and activated.
@@ -183,8 +180,7 @@ class ProjectorManager:
             Returns:
                 string: message """
 
-        print("Registering coordinate system {}".format(coord_sys))
-        self.cs_element.register_cs(coord_sys)
+        return self.cs_element.register_cs(coord_sys)
 
     def show_coordinate_system(self,coord_sys,secs):
         """Project on the surface an existing coordinate system.
@@ -196,8 +192,7 @@ class ProjectorManager:
             Returns:
                 string: message """
 
-        print("Projecting [{}] coordinate system for {} seconds".format(coord_sys,secs))
-        self.cs_element.show_cs(coord_sys, secs)
+        return self.cs_element.show_cs(coord_sys, secs)
 
     def remove_coordinate_system(self,coord_sys):
         """Delete a coordinate system.
@@ -207,14 +202,14 @@ class ProjectorManager:
             Returns:
                 string: message """
 
-        self.cs_element.remove_cs(coord_sys)
+        return self.cs_element.remove_cs(coord_sys)
 
 
 
 
 
 
-    def create_polyline(self,coord_sys,projection_group,id,x,y,angle,r,secs):
+    def create_polyline(self,coord_sys,projection_group,id,x,y,angle,r):
         """Create a new line to project.
 
             Args:
@@ -229,7 +224,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.projection_element.define_polyline(coord_sys,projection_group,id,x,y,angle,r,secs)
+        return self.projection_element.define_polyline(coord_sys,projection_group,id,x,y,angle,r)
 
     def hide_shape(self,projection_group,shape_name,id): # deactivate shape
         """Hide (deactivate) a figure from a group of the active coordinate system.
@@ -242,8 +237,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.projection_element.deactivate_shape(projection_group,shape_name,id)
-        return("Shape deactivated")
+        return self.projection_element.deactivate_shape(projection_group,shape_name,id)
 
     def unhide_shape(self,projection_group,shape_name,id): # deactivate shape
         """Unhide (activate) a figure from a group of the active coordinate system.
@@ -256,8 +250,7 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.projection_element.reactivate_shape(projection_group,shape_name,id)
-        return("Shape deactivated")
+        return self.projection_element.reactivate_shape(projection_group,shape_name,id)
 
     def remove_shape(self,projection_group,shape_name,id):
         """Delete a figure from the active coordinate system.
@@ -270,5 +263,4 @@ class ProjectorManager:
             Returns:
                 string: message """
         
-        self.projection_element.delete_shape(projection_group,shape_name,id)
-        return("Shape removed")
+        return self.projection_element.delete_shape(projection_group,shape_name,id)

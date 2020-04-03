@@ -23,6 +23,7 @@ class ProjectionNode:
         self.lic_path = self.pkg_path + "/lic/1900027652.lic"
 
         self.projector = ProjectorManager() # Create projector object
+        self.coordinate_system = ""
 
         # Open services
         self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_cb)
@@ -86,7 +87,8 @@ class ProjectionNode:
             rospy.loginfo(e)
             cs_list = self.projector.get_coordinate_systems() # check coordinate system
             rospy.loginfo("Available coordinate systems: {}".format(cs_list))
-            rospy.loginfo("Factory coordinate system: {}".format(cs_list[0]))
+            rospy.loginfo("Factory coordinate system: [{}]".format(cs_list[0]))
+            rospy.loginfo("CURRENT coordinate system: [{}] ".format(self.coordinate_system))
             
             # e = self.projector.set_coordinate_system(cs_list[0]) # set default coordinate system
             # rospy.loginfo(e)
@@ -99,62 +101,66 @@ class ProjectionNode:
         return TriggerResponse(True,"end setup")
 
     def get_coord_sys_list_cb(self,req):
-        rospy.loginfo("Received request to get the current coordinate system list at projector")
+        rospy.loginfo("Received request to get the coordinate system list at projector")
         cs_list = self.projector.get_coordinate_systems() # check coordinate system
         rospy.loginfo("Available coordinate systems: {}".format(cs_list))
-        return TriggerResponse(True,"End list cs")
+        return TriggerResponse(True,"end cs list")
 
     def manual_define_coord_sys_cb(self,req):
+        
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end")
-        cs = self.projector.define_coordinate_system(req) # define coordinate system
-        e = self.projector.set_coordinate_system(cs) # set new coordinate system
+        
+        self.coordinate_system = self.projector.define_coordinate_system(req) # define new coordinate system
+        e = self.projector.set_coordinate_system(self.coordinate_system) # set new coordinate system
         rospy.loginfo(e)
-        e = self.projector.register_coordinate_system(cs) # register coordinate system
+        rospy.loginfo("CURRENT coordinate system: [{}] ".format(self.coordinate_system))
+        e = self.projector.register_coordinate_system(self.coordinate_system) # register coordinate system
         rospy.loginfo(e)
-        self.projector.get_coordinate_systems() # pint CURRENT cs
-        e = self.projector.show_coordinate_system(cs,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
+        self.projector.get_coordinate_systems() # print CURRENT cs list
+        e = self.projector.show_coordinate_system(self.coordinate_system,5) # show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.) # show created coordinate system for secs
         rospy.loginfo(e)
-        e = self.projector.create_polyline(cs + "_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50,0.01) # origin x axis to project, angle = 0
+        
+        e = self.projector.create_polyline(self.coordinate_system, self.coordinate_system + "_origin","axis_x",req.T1_x.data,req.T1_y.data,0,50) # origin x axis to project, angle = 0
         rospy.loginfo(e)
-        # print("Projecting shape for {} seconds in order to check the shape".format(secs))
-        # self.start_project(coord_sys) # ya no está la proyección en los create, hay que hacerlo manual
-        # time.sleep(secs)
-        # self.stop_project(projector_id)
-        e = self.projector.create_polyline(cs + "_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50,0.01) # origin y axis to project, angle = 90
+        e = self.projector.create_polyline(self.coordinate_system, self.coordinate_system + "_origin","axis_y",req.T1_x.data,req.T1_y.data,90,50) # origin y axis to project, angle = 90
         rospy.loginfo(e)
-        # print("Projecting shape for {} seconds in order to check the shape".format(secs))
-        # self.start_project(coord_sys) # ya no está la proyección en los create, hay que hacerlo manual
-        # time.sleep(secs)
-        # self.stop_project(projector_id)
-        e = self.projector.start_projection()
+
+        e = self.projector.start_projection(self.coordinate_system)
         rospy.loginfo(e)
         input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")
         e = self.projector.stop_projection()
         rospy.loginfo(e)
-        e = self.projector.hide_shape(cs + "_origin","polyline","axis_x")
+
+        e = self.projector.hide_shape(self.coordinate_system + "_origin","polyline","axis_x")
         rospy.loginfo(e)
-        e = self.projector.hide_shape(cs + "_origin","polyline","axis_y")
+        e = self.projector.hide_shape(self.coordinate_system + "_origin","polyline","axis_y")
         rospy.loginfo(e)
         return CsRefPointsResponse(Bool(True))
 
     def show_coord_sys_cb(self,req): # SHOW AND SET. show_coord_sys: name, project points, project axis, print SC properties (position, distance, etc.)
-        rospy.loginfo("Request to project coordinate system: {}".format(req.cs_name.data))
-        e = self.projector.set_coordinate_system(req.cs_name.data) # set default coordinate system
+        rospy.loginfo("Request to project (and set) coordinate system: {}".format(req.cs_name.data))
+        
+        self.coordinate_system = req.cs_name.data # set current coordinate system
+        e = self.projector.set_coordinate_system(self.coordinate_system) # set current coordinate system
         rospy.loginfo(e)
-        self.projector.get_coordinate_systems() # pint CURRENT cs
-        self.projector.show_coordinate_system(req.cs_name.data,req.secs.data)
-        e = self.projector.unhide_shape(req.cs_name.data + "_origin","polyline","axis_x")
+        rospy.loginfo("CURRENT coordinate system: [{}] ".format(self.coordinate_system))
+        self.projector.get_coordinate_systems() # print CURRENT cs list
+        self.projector.show_coordinate_system(self.coordinate_system,req.secs.data)
+        
+        e = self.projector.unhide_shape(self.coordinate_system + "_origin","polyline","axis_x")
         rospy.loginfo(e)
-        e = self.projector.unhide_shape(req.cs_name.data + "_origin","polyline","axis_y")
+        e = self.projector.unhide_shape(self.coordinate_system + "_origin","polyline","axis_y")
         rospy.loginfo(e)
-        e = self.projector.start_projection()
+
+        e = self.projector.start_projection(self.coordinate_system)
         rospy.loginfo(e)
         input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")
         e = self.projector.stop_projection()
         rospy.loginfo(e)
-        e = self.projector.hide_shape(req.cs_name.data + "_origin","polyline","axis_x")
+
+        e = self.projector.hide_shape(self.coordinate_system + "_origin","polyline","axis_x")
         rospy.loginfo(e)
-        e = self.projector.hide_shape(req.cs_name.data + "_origin","polyline","axis_y")
+        e = self.projector.hide_shape(self.coordinate_system + "_origin","polyline","axis_y")
         rospy.loginfo(e)
         return ShowCsResponse(Bool(True))
 
@@ -162,16 +168,22 @@ class ProjectionNode:
         rospy.loginfo("Received request to remove [{}] coordinate system".format(req.cs_name.data))
         e = self.projector.remove_coordinate_system(req.cs_name.data) 
         rospy.loginfo(e)
+        self.coordinate_system = ""
+        rospy.loginfo("Current coordinate system [{}]. Set other coordinate system or define a new one before continue".format(self.coordinate_system))
         return RemovCsResponse(Bool(True))
 
     def add_shape_cb(self,req):
-        rospy.loginfo("Received request to add a: '{}' at the [{}] coordinate system".format(req.shape_type.data, self.projector.coordinate_system))
-        self.projector.get_coordinate_systems()
+        rospy.loginfo("Received request to add a: '{}' at the current coordinate system: [{}] ".format(req.shape_type.data, self.coordinate_system))
+        # self.projector.get_coordinate_systems()
         
         if req.shape_type.data == "polyline":
             rospy.loginfo("Creating polyline shape")
-            e = self.projector.create_polyline(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data,5)
+            e = self.projector.create_polyline(self.coordinate_system,req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data)
             rospy.loginfo(e)
+            print("Projecting polyline for 5 seconds in order to check the shape")
+            self.projector.start_projection(self.coordinate_system)
+            time.sleep(5)
+            self.projector.stop_projection()
         # elif req.shape_type.data == "circle":
         #     rospy.loginfo("Creating circle shape")
         #     e = self.projector.create_circle(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.r.data)
@@ -182,24 +194,24 @@ class ProjectionNode:
     
     def hide_shape_cb(self,req):
         shape_name = req.projection_group_name.data + "/my_" + req.shape_type.data + "_" + req.shape_id.data
-        rospy.loginfo("Received request to deactivate the '{}' from the [{}] coordinate system".format(shape_name, self.projector.coordinate_system))
+        rospy.loginfo("Received request to deactivate the '{}' from the current coordinate system: [{}] ".format(shape_name, self.coordinate_system))
         e = self.projector.hide_shape(req.projection_group_name.data,req.shape_type.data,req.shape_id.data)
         rospy.loginfo(e)
         return HideShapeResponse(Bool(True))
         
     def remove_shape_cb(self,req):
         shape_name = req.projection_group_name.data + "/my_" + req.shape_type.data + "_" + req.shape_id.data
-        rospy.loginfo("Received request to remove the '{}' from the [{}] coordinate system".format(shape_name, self.projector.coordinate_system))
+        rospy.loginfo("Received request to remove the '{}' from the [{}] coordinate system".format(shape_name, self.coordinate_system))
         e = self.projector.remove_shape(req.projection_group_name.data,req.shape_type.data,req.shape_id.data)
         rospy.loginfo(e)
         return RemovShapeResponse(Bool(True))
 
-    def projection_start_cb(self,req):
-        e = self.projector.start_projection()
+    def projection_start_cb(self):
+        e = self.projector.start_projection(self.coordinate_system)
         rospy.loginfo(e)
         return TriggerResponse(True,"Started")
     
-    def projection_stop_cb(self,req):
+    def projection_stop_cb(self):
         e = self.projector.stop_projection()
         rospy.loginfo(e)
         return TriggerResponse(True,"Stopped")

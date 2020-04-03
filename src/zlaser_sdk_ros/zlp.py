@@ -218,10 +218,10 @@ class ProjectorClient(object):
             self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
             #blocks until the projector is activated
             self.get_projectors()
-            return self.projector_id
-        except Exception as e:
+            # return self.projector_id
+        # except Exception as e:
+        except Exception:
             log.error("Could not activate projector:" + self.projector_id)
-            return e
 
     def deactivate_projector(self):
         try:
@@ -233,8 +233,12 @@ class ProjectorClient(object):
             # HAY QUE DISTINGUIR ENTRE DESCONECTAR Y BORRAR TODO, O DESCONECTAR SOLO, AHORA MISMO BORRA TODO
             # QUE HACER ADEMAS AL DEACTIVATE: ????
             # self.geo_tree_elements.clear() ?? <- geo_tree_elements[] es un es una lista de geo_tree_elem creada por nosotros (.clear() elimina los elementos del vector)
+            
             # thrift_client.RemoveGeoTreeElem("") <- remove all!!!!
-            # thrift_client.FunctionModuleRelease(module_id) ??
+            # thrift_client.FunctionModuleRelease(module_id) remove all tambien??
+
+            # CUANDO SE DESENCHUFA SE BORRA TODO
+            
             # if hasattr(self,'reference_object_name'):
             # self.thrift_client.RemoveGeoTreeElem(self.reference_object_name) # necesario? se pone mejor en un método aparte remove_geo_tree_elem no?
             # self.clear_geo_tree() # al hacer deactivate en el proyector se borran automaticamente los geo_trees? es mejor dejar ese if para borrarlos? no hace falta?
@@ -275,7 +279,7 @@ class ProjectorClient(object):
     def function_module_create(self):
         try:
             self.module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
-            return self.module_id
+            return self.module_id, self.projector_id
         except thrift_interface.FunctionModuleClassNotRegistered as e:
             return ("FunctionModuleClassNotRegistered: " + e.which)
         except thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
@@ -340,11 +344,11 @@ class CoordSys(object):
 
         self.projector_id = projector_id
         self.module_id = module_id
-        self.current_cs = ""
+        # self.current_cs = ""
         self.reference_object_list = []
 
     def coordinate_system_list(self):
-        return (self.__thrift_client.GetCoordinatesystemList(), self.current_cs)
+        return self.__thrift_client.GetCoordinatesystemList()
         # allGeoTree = self.thrift_client.GetGeoTreeIds()
         # print("Available GeoTree:", allGeoTree)
 
@@ -411,7 +415,7 @@ class CoordSys(object):
         self.add_ref_object(reference_object) 
 
         # print("Reference object created. Coordinate system defined but not registered.")
-        return (reference_object.coordinateSystem)
+        return reference_object.coordinateSystem
 
     def __define_reference_point(self,reference_object,crossSize,n,d,x,y):
         """Fill other fields of the coordinate system parameters structure.
@@ -479,13 +483,15 @@ class CoordSys(object):
         self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         self.__thrift_client.FunctionModuleRun(self.module_id)
 
-        self.current_cs = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
+        # self.current_cs = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
 
         # allReferenceObjects = self.thrift_client.GetGeoTreeIds()
         # print("Available reference objects:", allReferenceObjects)
 
         # ref_obj = self.thrift_client.GetReferenceobject("RefObject1")
         # print(ref_obj)
+
+        return ("[{}] set as current coordinate system".format(coord_sys))
 
     def register_cs(self,coord_sys):
         """Register the new coordinate system at the projector once it has been generated and activated.
@@ -506,7 +512,7 @@ class CoordSys(object):
         if state != "1":  # idle
             return "Function module is not in idle state, hence an error has occured."
         else:
-            return "Finished to register coordinate system on projector"
+            return ("Finished to register [{}] coordinate system on projector".format(coord_sys))
 
     def show_cs(self,coord_sys,secs):
         """Project on the surface an existing coordinate system.
@@ -520,10 +526,10 @@ class CoordSys(object):
         
         print("Projecting [{}] coordinate system for {} seconds".format(coord_sys,secs))
         self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
-        time.sleep(secs)
+        time.sleep(secs) # input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.") # Y ASI PUEDO QUITAR EL SLEEP Y UNIFICAR OS SERVICIOS ShowCs y RemovCs en uno Solo
         self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
         return "Finished to show coordinate system"
-    
+
     def remove_cs(self,coord_sys):
         """Delete a coordinate system.
             Args:
@@ -539,7 +545,6 @@ class CoordSys(object):
         reference_object_name = "RefObj_" + coord_sys
         self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
         return("Coordinate system [{}] removed".format(coord_sys))
-
 
 
 class ProjectionElement(object):
@@ -578,7 +583,7 @@ class ProjectionElement(object):
         polyline.polylineList = []
         return polyline
 
-    def define_polyline(self,coord_sys,projection_group,id,x,y,angle,r,secs):
+    def define_polyline(self,coord_sys,projection_group,id,x,y,angle,r):
         """Create a new line to project.
 
             Args:
@@ -633,9 +638,13 @@ class ProjectionElement(object):
                 string: message """
         
         if shape_name == "polyline":
-            polyline = self.__thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+            name = projection_group + "/my_" + shape_name + "_" + id
+            polyline = self.__thrift_client.GetPolyLine(name)
             polyline.activated = False
             self.__thrift_client.SetPolyLine(polyline)
+            return ("Polyline {} deactivated".format(name))
+        else:
+            return "Shape name does not exist"
     
         # # reference_object.activated = False  # <- puede servir 
 
@@ -644,7 +653,6 @@ class ProjectionElement(object):
         # # shape.activated = False
         # # if shape_name == "polyline":
         # #     self.thrift_client.SetPolyLine(polyline)
-
 
     def reactivate_shape(self,projection_group,shape_name,id): # deactivate shape
         """Unhide (activate) a figure from a group of the active coordinate system.
@@ -658,10 +666,13 @@ class ProjectionElement(object):
                 string: message """
         
         if shape_name == "polyline":
-            polyline = self.__thrift_client.GetPolyLine(projection_group + "/my_" + shape_name + "_" + id)
+            name = projection_group + "/my_" + shape_name + "_" + id
+            polyline = self.__thrift_client.GetPolyLine(name)
             polyline.activated = True
             self.__thrift_client.SetPolyLine(polyline)
-    
+            return ("Polyline {} reactivated".format(name))
+        else:
+            return "Shape name does not exist"
 
     def delete_shape(self,projection_group,shape_name,id):
         """Delete a figure from the active coordinate system.
@@ -675,6 +686,7 @@ class ProjectionElement(object):
                 string: message """
         
         self.__thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
+        return "Shape removed"
 
     # def remove_group(self,projection_group):
     #     self.thrift_client.RemoveGeoTreeElem(projection_group)
