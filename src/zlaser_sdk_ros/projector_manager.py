@@ -42,10 +42,8 @@ class ProjectorManager:
         
         try:
             self.projector_client.connect()
-            print("BBBBBBBBBBBBBBBBBBB")
             return "Connected to server. You can activate projector now"
         except Exception as e:
-            print("AAAAAAAAAAAA")
             return e
 
     def client_server_disconnect(self):
@@ -68,7 +66,6 @@ class ProjectorManager:
 
         try:
             self.projector_client.activate_projector()
-            print("aaaaaaaaaaEEEEEEEEEEEEEE")
             return "Projector activated. You can start the projection now"
         except Exception as e:
             return e
@@ -114,8 +111,10 @@ class ProjectorManager:
         try:
             module_id, projector_id = self.projector_client.function_module_create()
             
+            print("CoordSys() from projector_manager")
             self.cs_element = CoordSys(projector_id, module_id)
-            self.projection_element = ProjectionElement(module_id)
+            # print("ProjectionElement() from projector_manager")
+            # self.projection_element = ProjectionElement(module_id)
 
             return "Function Module Created"
         except Exception as e:
@@ -147,8 +146,9 @@ class ProjectorManager:
         
             Returns:
                 list: names list of available coordinate systems (strings) """
-
-        return self.cs_element.coordinate_system_list()
+        cs_list = self.cs_element.coordinate_system_list()
+        print("BBBBBBBBBBBBBBBBBB")
+        return cs_list
 
     def define_coordinate_system(self,req):
         """Generate new coordinate system.
