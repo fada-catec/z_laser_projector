@@ -42,7 +42,7 @@ class EventChannelInterfaceHandler(object):
     """Implements the functions of ClientEventChannel thrift interface."""
 
     def __init__(self):
-        print("__init__ EventChannelInterfaceHandler")
+        # print("__init__ EventChannelInterfaceHandler")
         self.property_changed_callback = lambda x, y: None
         self.geo_tree_changed_callback = lambda x, y: None
         self.service_state_changed_callback = lambda x, y: None
@@ -51,39 +51,39 @@ class EventChannelInterfaceHandler(object):
         self.onReflectionStateChanged_callback = lambda a, b: None
 
     def PropertyChanged(self, name, value):
-        print("PropertyChanged")
+        # print("PropertyChanged")
         self.property_changed_callback(name, value)
 
     def GeoTreeChanged(self, changed_flags, element_names):
-        print("GeoTreeChanged")
+        # print("GeoTreeChanged")
         self.geo_tree_changed_callback(changed_flags, element_names)
 
     def ServiceStateChanged(self, oldState, newState):
-        print("ServiceStateChanged")
+        # print("ServiceStateChanged")
         self.service_state_changed_callback(oldState, newState)
 
     def FunctionModuleStateChanged(self, functionModID, oldState, newState):
-        print("FunctionModuleStateChanged")
+        # print("FunctionModuleStateChanged")
         self.function_module_changed_callback(functionModID, oldState, newState)
 
     def RemoteControlFrameReceived(self, rc_id, command, toggle, projector, timestamp):
-        print("RemoteControlFrameReceived")
+        # print("RemoteControlFrameReceived")
         self.rc_command_received_callback(rc_id, command, toggle, projector, timestamp)
 
     def onReflectionStateChanged(self, elementName, state):
-        print("onReflectionStateChanged")
+        # print("onReflectionStateChanged")
         log.debug("onReflectionStateChanged(%s,%d)", elementName, state)
         self.onReflectionStateChanged_callback(elementName, state)
 
 class ThriftClient(TClient):
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
-        print("__init__ ThriftClient")
+        # print("__init__ ThriftClient")
         self._event_channel = None
         self._event_channel_handler = event_handler
 
     def init_client(self, ip, port):
         """Establish a connection to thrift server of ZLP Service."""
-        print("init_client")
+        # print("init_client")
         client_socket = TSocket(ip, port, socket_family=socket.AF_INET, socket_timeout=50000)
         transport = TBufferedTransportFactory().get_transport(client_socket)
         protocol = TBinaryProtocolFactory().get_protocol(transport)
@@ -93,7 +93,7 @@ class ThriftClient(TClient):
 
     def init_event_channel(self):
         """Create a thrift server and register it at ZLP Service to receive events."""
-        print("init_event_channel")
+        # print("init_event_channel")
         if self._event_channel_handler and not self._event_channel:
             processor = TProcessor(thrift_interface.ClientEventChannel, self._event_channel_handler)
             server_socket = TServerSocket(host="0.0.0.0", port=0, socket_family=socket.AF_INET, client_timeout=200000)
@@ -109,35 +109,35 @@ class ThriftClient(TClient):
             self.ConnectClientEventChannel(connection[1])
 
     def set_property_changed_callback(self, callback):
-        print("set_property_changed_callback")
+        # print("set_property_changed_callback")
         if self._event_channel_handler:
             self._event_channel_handler.property_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_geotree_changed_callback(self, callback):
-        print("set_geotree_changed_callback")
+        # print("set_geotree_changed_callback")
         if self._event_channel_handler:
             self._event_channel_handler.geo_tree_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_function_module_state_changed_callback(self, callback):
-        print("set_function_module_state_changed_callback")
+        # print("set_function_module_state_changed_callback")
         if self._event_channel_handler:
             self._event_channel_handler.function_module_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_rc_command_received_callback(self, callback):
-        print("set_rc_command_received_callback")
+        # print("set_rc_command_received_callback")
         if self._event_channel_handler:
             self._event_channel_handler.rc_command_received_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_reflection_state_changed_callback(self, callback):
-        print("set_reflection_state_changed_callback")
+        # print("set_reflection_state_changed_callback")
         if self._event_channel_handler:
             self._event_channel_handler.onReflectionStateChanged_callback = callback
         else:
@@ -146,15 +146,18 @@ class ThriftClient(TClient):
 class ProjectorClient(object):
 
     def __init__(self,projector_IP,server_IP,connection_port):
-        print("__init__ ProjectorClient")
+        # print("__init__ ProjectorClient")
         self.projector_IP = projector_IP
         self.server_IP = server_IP
         self.connection_port = connection_port
 
-        print("ThriftClient_1() from ProjectorClient of zlp")
-        self.__thrift_client1 = ThriftClient()
+        # print("ThriftClient_1() from ProjectorClient of zlp")
+        self.__thrift_client = ThriftClient()
         self.projector_id = ""
         self.module_id = ""
+
+    def return_thrift_client(self):
+        return self.__thrift_client
 
     def connect(self):
         """Connects the client to ZLP-Service and establishes an event channel if needed.
@@ -163,17 +166,17 @@ class ProjectorClient(object):
                 ip: ipv6 network address of ZLP-Service
                 port: port number on which ZLP-Service listens for requests """
         
-        self.__thrift_client1.init_client(self.server_IP, self.connection_port)
-        self.__thrift_client1.init_event_channel()
+        self.__thrift_client.init_client(self.server_IP, self.connection_port)
+        self.__thrift_client.init_event_channel()
 
     def disconnect(self):
         """Disconnect from ZLP Service thrift server and close own event server."""
         
-        self.__thrift_client1.DisconnectClientEventChannel() # NO PODRÍA SER: thrift_interface.DisconnectClientEventChannel() ???????????
-        self.__thrift_client1.close()
+        self.__thrift_client.DisconnectClientEventChannel() # NO PODRÍA SER: thrift_interface.DisconnectClientEventChannel() ???????????
+        self.__thrift_client.close()
 
-        if self.__thrift_client1._event_channel:
-            self.__thrift_client1._event_channel.close()
+        if self.__thrift_client._event_channel:
+            self.__thrift_client._event_channel.close()
 
     def get_projectors(self, scan=False, scan_addresses=""):
         """Gets a list of active projectors or scan the network for projectors.
@@ -188,15 +191,15 @@ class ProjectorClient(object):
         try:
             # set parameters and start the search
             if scan:
-                self.__thrift_client1.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
+                self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
             else:
-                self.__thrift_client1.SetProperty("config.projectorManager.cmdGetProjectors.scan", "0")
+                self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "0")
 
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdGetProjectors.scanAddresses", scan_addresses)
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdGetProjectors", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scanAddresses", scan_addresses)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors", "1")
 
             # Get the results
-            serial_list = self.__thrift_client1.GetProperty("config.projectorManager.cmdGetProjectors.result.entries")
+            serial_list = self.__thrift_client.GetProperty("config.projectorManager.cmdGetProjectors.result.entries")
 
             if serial_list:
                 serial_list = serial_list.split(" ")
@@ -230,9 +233,9 @@ class ProjectorClient(object):
             projectors = self.scan_projectors(self.projector_IP)
             self.projector_id = projectors[0]
             log.info("Activating projector. ID: " + self.projector_id)
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdActivateProjector.serial", self.projector_id)
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdActivateProjector.active", "1")
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdActivateProjector", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", self.projector_id)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
             #blocks until the projector is activated
             self.get_projectors()
             # return self.projector_id
@@ -244,8 +247,8 @@ class ProjectorClient(object):
         try:
             log.info("Deactivating projection of projector: " + self.projector_id)
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
-            self.__thrift_client1.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
-            self.__thrift_client1.SetProperty(projector_property_path + ".cmdShowProjection", "1")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
 
             # HAY QUE DISTINGUIR ENTRE DESCONECTAR Y BORRAR TODO, O DESCONECTAR SOLO, AHORA MISMO BORRA TODO
             # QUE HACER ADEMAS AL DEACTIVATE: ????
@@ -262,13 +265,13 @@ class ProjectorClient(object):
                 # se borran al desenchufar el proyector
 
             log.info("Removing all projection elements")
-            self.__thrift_client1.RemoveGeoTreeElem("") 
-            self.__thrift_client1.FunctionModuleRelease(self.module_id)
+            self.__thrift_client.RemoveGeoTreeElem("") 
+            self.__thrift_client.FunctionModuleRelease(self.module_id)
 
             log.info("Deactivating projector: " + self.projector_id)
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdActivateProjector.serial", self.projector_id)
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdActivateProjector.active", "0")
-            self.__thrift_client1.SetProperty("config.projectorManager.cmdActivateProjector", "1")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", self.projector_id)
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "0")
+            self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
 
         except Exception as e:
             log.error("Error: projector could not be deactivated")
@@ -283,19 +286,19 @@ class ProjectorClient(object):
             return e
         except FileNotFoundError:
             return "File not found!"
-        self.__thrift_client1.LoadLicense(license_file)
+        self.__thrift_client.LoadLicense(license_file)
         return "License transfered"
 
     def transfer_file(self, local_path, remote_file, overwrite=False):
         content = open(local_path, 'r').read()
-        self.__thrift_client1.TransferDataToFile(content, remote_file, overwrite)
+        self.__thrift_client.TransferDataToFile(content, remote_file, overwrite)
 
     def check_license(self):
-        return self.__thrift_client1.CheckLicense()
+        return self.__thrift_client.CheckLicense()
 
     def function_module_create(self):
         try:
-            self.module_id = self.__thrift_client1.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
+            self.module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
             return self.module_id, self.projector_id
         except thrift_interface.FunctionModuleClassNotRegistered as e:
             return ("FunctionModuleClassNotRegistered: " + e.which)
@@ -314,12 +317,12 @@ class ProjectorClient(object):
         # return(" ----- PROJECTING ----- ")
 
         ref_obj_name = "RefObj_" + coord_sys
-        ref_obj = self.__thrift_client1.GetGeoTreeElement(ref_obj_name)
+        ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
         # GetGeoTreeIds() saca tanto coord sys (son los primeros de la lista) como los shapes, mientras que GetCoordinatesystemList solo saca los cs
-        if ref_obj.activated == False or len(self.__thrift_client1.GetGeoTreeIds()) <= len(self.__thrift_client1.GetCoordinatesystemList()):                                        
+        if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):                                        
             return(" ----- NOTHING TO PROJECT ----- ")
         else:
-            self.__thrift_client1.TriggerProjection()
+            self.__thrift_client.TriggerProjection()
             return(" ----- PROJECTING ----- ")
 
     def stop_project(self): # este tipo de método son los que se incluyen en zlp pero este concretamente no está incluido, se añade aqui para no tocar zlp
@@ -330,12 +333,11 @@ class ProjectorClient(object):
         
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
-            self.__thrift_client1.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
-            self.__thrift_client1.SetProperty(projector_property_path + ".cmdShowProjection", "1")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
+            self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection", "1")
             return(" ----- STOP PROJECTION ----- ")
         except Exception as e:
             return e
-
 
 # CAMBIAR LOG.INFO !!!!!!!!!!!!!!!!
 
@@ -357,11 +359,11 @@ class GeometryTool():
 
 class CoordSys(object):
 
-    def __init__(self, projector_id, module_id):
-        print("__init__ CoordSys")
-        print("ThriftClient_2() from CoordSys of zlp")
-        self.__thrift_client2 = ThriftClient()
-        print("GeometryTool() from CoordSys of zlp")
+    def __init__(self, projector_id, module_id, thrift_client):
+        # print("__init__ CoordSys")
+        # print("Tthrift_client from CoordSys of zlp")
+        self.__thrift_client = thrift_client # es el thrift_client creado en ProjectorClient => solo hay uno
+        # print("GeometryTool() from CoordSys of zlp")
         self.__geometry_tool = GeometryTool()
 
         self.projector_id = projector_id
@@ -370,8 +372,8 @@ class CoordSys(object):
         self.reference_object_list = []
 
     def coordinate_system_list(self):
-        print("AAAAAAAAAAAAAA")
-        return self.__thrift_client2.GetCoordinatesystemList()
+        # print("AAAAAAAAAAAAAA")
+        return self.__thrift_client.GetCoordinatesystemList()
         # allGeoTree = self.thrift_client.GetGeoTreeIds()
         # print("Available GeoTree:", allGeoTree)
 
@@ -494,18 +496,18 @@ class CoordSys(object):
             else:
                 print("{} DEACTIVATED" .format(self.reference_object_list[i].name))
                 self.reference_object_list[i].activated = False
-                self.__thrift_client2.SetReferenceobject(self.reference_object_list[i])
-                self.__thrift_client2.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
-                self.__thrift_client2.FunctionModuleSetProperty(self.module_id, "runMode", "1")
-                self.__thrift_client2.FunctionModuleRun(self.module_id)
+                self.__thrift_client.SetReferenceobject(self.reference_object_list[i])
+                self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
+                self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+                self.__thrift_client.FunctionModuleRun(self.module_id)
         
         print("{} ACTIVATED" .format(self.reference_object_list[index].name))
         self.reference_object_list[index].activated = True
-        self.__thrift_client2.SetReferenceobject(self.reference_object_list[index])
-        print("HHHHHHHHHHHHHHHHHH")
-        self.__thrift_client2.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[index].name)
-        self.__thrift_client2.FunctionModuleSetProperty(self.module_id, "runMode", "1")
-        self.__thrift_client2.FunctionModuleRun(self.module_id)
+        self.__thrift_client.SetReferenceobject(self.reference_object_list[index])
+        # print("HHHHHHHHHHHHHHHHHH")
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[index].name)
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+        self.__thrift_client.FunctionModuleRun(self.module_id)
 
         # self.current_cs = coord_sys # set the object.coordinate_system property value to use it wherever - HACE FALTA???
 
@@ -528,11 +530,11 @@ class CoordSys(object):
         
         print("Registering coordinate system {}".format(coord_sys))
 
-        self.__thrift_client2.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
         
-        self.__thrift_client2.FunctionModuleRun(self.module_id) # Calculate transformation
+        self.__thrift_client.FunctionModuleRun(self.module_id) # Calculate transformation
 
-        state = self.__thrift_client2.FunctionModuleGetProperty(self.module_id, "state")
+        state = self.__thrift_client.FunctionModuleGetProperty(self.module_id, "state")
         if state != "1":  # idle
             return "Function module is not in idle state, hence an error has occured."
         else:
@@ -549,9 +551,9 @@ class CoordSys(object):
                 string: message """
         
         print("Projecting [{}] coordinate system for {} seconds".format(coord_sys,secs))
-        self.__thrift_client2.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
         time.sleep(secs) # input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.") # Y ASI PUEDO QUITAR EL SLEEP Y UNIFICAR OS SERVICIOS ShowCs y RemovCs en uno Solo
-        self.__thrift_client2.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
+        self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
         return "Finished to show coordinate system"
 
     def remove_cs(self,coord_sys):
@@ -567,16 +569,16 @@ class CoordSys(object):
         #self.geo_tree_elements.clear()
 
         reference_object_name = "RefObj_" + coord_sys
-        self.__thrift_client2.RemoveGeoTreeElem(reference_object_name)
+        self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
         return("Coordinate system [{}] removed".format(coord_sys))
 
 
 class ProjectionElement(object):
     
-    def __init__(self,module_id):
+    def __init__(self,module_id, thrift_client):
         print("__init__ ProjectionElement")
         print("ThriftClient_3() from CoordSys of zlp")
-        self.__thrift_client3 = ThriftClient()
+        self.__thrift_client = thrift_client
         print("GeometryTool() from CoordSys of zlp")
         self.__geometry_tool = GeometryTool()
         self.module_id = module_id
@@ -636,7 +638,7 @@ class ProjectionElement(object):
         polyline.activated = True
         polyline.coordinateSystemList = [coord_sys]
         try:
-            self.__thrift_client3.SetPolyLine(polyline)
+            self.__thrift_client.SetPolyLine(polyline)
             return ("{} polyline created ".format(polyline_name))
         except Exception as e:
             return e
@@ -666,9 +668,9 @@ class ProjectionElement(object):
         
         if shape_name == "polyline":
             name = projection_group + "/my_" + shape_name + "_" + id
-            polyline = self.__thrift_client3.GetPolyLine(name)
+            polyline = self.__thrift_client.GetPolyLine(name)
             polyline.activated = False
-            self.__thrift_client3.SetPolyLine(polyline)
+            self.__thrift_client.SetPolyLine(polyline)
             return ("Polyline {} deactivated".format(name))
         else:
             return "Shape name does not exist"
@@ -694,9 +696,9 @@ class ProjectionElement(object):
         
         if shape_name == "polyline":
             name = projection_group + "/my_" + shape_name + "_" + id
-            polyline = self.__thrift_client3.GetPolyLine(name)
+            polyline = self.__thrift_client.GetPolyLine(name)
             polyline.activated = True
-            self.__thrift_client3.SetPolyLine(polyline)
+            self.__thrift_client.SetPolyLine(polyline)
             return ("Polyline {} reactivated".format(name))
         else:
             return "Shape name does not exist"
@@ -712,7 +714,7 @@ class ProjectionElement(object):
             Returns:
                 string: message """
         
-        self.__thrift_client3.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
+        self.__thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
         return "Shape removed"
 
     # def remove_group(self,projection_group):

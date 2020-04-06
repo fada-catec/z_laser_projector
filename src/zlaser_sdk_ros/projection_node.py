@@ -22,7 +22,7 @@ class ProjectionNode:
         # self.setup_path = self.pkg_path + "/scripts/set_up_projector.py" #not used
         self.lic_path = self.pkg_path + "/lic/1900027652.lic"
 
-        print("ProjectorManager() from projection_node")
+        # print("ProjectorManager() from projection_node")
         self.projector = ProjectorManager() # Create projector object
         self.coordinate_system = ""
 
@@ -68,8 +68,13 @@ class ProjectionNode:
         self.projector.license_path = self.lic_path
         e = self.projector.load_license()
         rospy.loginfo(e)
-        e = self.projector.function_module_create()
-        rospy.loginfo(e)
+        if not self.projector.check_license(): # check license
+            rospy.logwarn("License is not valid. Load a new one: \n\n rosservice call /projector_srv/load_license")      
+            return TriggerResponse(False,"end setup")    
+        else:
+            rospy.loginfo("License is valid...")
+            e = self.projector.function_module_create() # create function module 
+            rospy.loginfo(e)
         return TriggerResponse(True,"License loaded and function module created")
 
     def setup_cb(self,req):
@@ -209,12 +214,12 @@ class ProjectionNode:
         rospy.loginfo(e)
         return RemovShapeResponse(Bool(True))
 
-    def projection_start_cb(self):
+    def projection_start_cb(self,req):
         e = self.projector.start_projection(self.coordinate_system)
         rospy.loginfo(e)
         return TriggerResponse(True,"Started")
     
-    def projection_stop_cb(self):
+    def projection_stop_cb(self,req):
         e = self.projector.stop_projection()
         rospy.loginfo(e)
         return TriggerResponse(True,"Stopped")

@@ -110,11 +110,12 @@ class ProjectorManager:
 
         try:
             module_id, projector_id = self.projector_client.function_module_create()
-            
-            print("CoordSys() from projector_manager")
-            self.cs_element = CoordSys(projector_id, module_id)
+            thrift_client = self.projector_client.return_thrift_client()
+
+            # print("CoordSys() from projector_manager")
+            self.cs_element = CoordSys(projector_id, module_id, thrift_client)
             # print("ProjectionElement() from projector_manager")
-            # self.projection_element = ProjectionElement(module_id)
+            self.projection_element = ProjectionElement(module_id,thrift_client)
 
             return "Function Module Created"
         except Exception as e:
@@ -147,7 +148,7 @@ class ProjectorManager:
             Returns:
                 list: names list of available coordinate systems (strings) """
         cs_list = self.cs_element.coordinate_system_list()
-        print("BBBBBBBBBBBBBBBBBB")
+        # print("BBBBBBBBBBBBBBBBBB")
         return cs_list
 
     def define_coordinate_system(self,req):
