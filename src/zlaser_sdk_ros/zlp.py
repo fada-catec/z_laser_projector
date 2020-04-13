@@ -21,25 +21,14 @@ logging.basicConfig(format="%(asctime)s %(name)s %(levelname)s: %(message)s")
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
-
 _interface_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "interface.thrift")
-# Thriftpy 0.3.9 has problems with absolute Windows paths. The issue is fixed in later
-# versions. See:
-#   https://github.com/Thriftpy/thriftpy/issues/234
-#   https://github.com/Thriftpy/thriftpy/pull/285/commits/2147b2d0cf2dccee0e7cdabf85595e6ebfded849
-#
-# The solution is to patch .../thriftpy/parser/parser.py to handle filesystem paths
-# propperly. Without this fix an error of the form:
-#   "ThriftPy does not support generating module with path in protocol 'c'"
-#
-# is raised here.
 thrift_interface = thriftpy.load(_interface_file, module_name="zlaser_thrift")
 
-
 class EventChannelInterfaceHandler(object):
-    """Implement the functions of ClientEventChannel thrift interface."""
+    """This class implement the functions of ClientEventChannel thrift interface."""
 
     def __init__(self):
+        """Initialize the EventChannelInterfaceHandler object."""
         self.property_changed_callback = lambda x, y: None
         self.geo_tree_changed_callback = lambda x, y: None
         self.service_state_changed_callback = lambda x, y: None
@@ -66,17 +55,22 @@ class EventChannelInterfaceHandler(object):
         self.onReflectionStateChanged_callback(elementName, state)
 
 class ThriftClient(TClient):
-    """."""
+    """This class implement the functions to carry out the connection with the ZLP Service."""
+    
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
-        """.
+        """Initialize the ThriftClient object.
 
             Args:
-                event_handler: """
+                object event_handler: ClientEventChannel thrift interface"""
         self._event_channel = None
         self._event_channel_handler = event_handler
 
     def init_client(self, ip, port):
-        """Establish a connection to thrift server of ZLP Service."""
+        """Establish a connection to thrift server of ZLP Service.
+            
+            Args:
+                string ip: ipv6 network address of ZLP-Service
+                string port: port number on which ZLP-Service listens for requests"""
         client_socket = TSocket(ip, port, socket_family=socket.AF_INET, socket_timeout=50000)
         transport = TBufferedTransportFactory().get_transport(client_socket)
         protocol = TBinaryProtocolFactory().get_protocol(transport)
@@ -143,7 +137,6 @@ class ProjectorClient(object):
             
             Returns:
                 object ThriftClient(): object with the generated client to communicate with the projector"""
-        
         try:
             return self.__thrift_client
         
@@ -160,7 +153,6 @@ class ProjectorClient(object):
             Returns:
                 bool success: success value
                 string message: information message"""
-
         try:
             self.__thrift_client.init_client(server_IP, connection_port)
             self.__thrift_client.init_event_channel()
@@ -179,7 +171,6 @@ class ProjectorClient(object):
             Returns:
                 bool success: success value
                 string message: information message"""
-
         try: 
             self.__thrift_client.RemoveGeoTreeElem("") 
             self.__thrift_client.FunctionModuleRelease(self.module_id)
@@ -209,7 +200,6 @@ class ProjectorClient(object):
                 list serial_list: serial numbers of the found projectors
                 bool success: success value
                 string message: information message"""
-        
         try:
             self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
             self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scanAddresses", scan_addresses)
@@ -384,7 +374,6 @@ class ProjectorClient(object):
             Returns:
                 bool success: success value
                 string message: information message"""
-
         try:
             ref_obj_name = "RefObj_" + coord_sys
             ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
@@ -408,7 +397,6 @@ class ProjectorClient(object):
             Returns:
                 bool success: success value
                 string message: information message"""
-        
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
             self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
@@ -430,7 +418,6 @@ class GeometryTool():
             
             Returns:
                 struct mat: matrix struct initialized with empty values"""
-        
         mat = thrift_interface.Matrix4x4(list())
         return mat
 
@@ -443,7 +430,6 @@ class GeometryTool():
 
             Returns:
                 bool thrift_interface.Vector2D: struct with the values of the 2 axis (x,y)"""
-        
         return thrift_interface.Vector2D(x, y)
 
     def create_3d_point(self, x=0, y=0, z=0):
@@ -456,13 +442,18 @@ class GeometryTool():
 
             Returns:
                 struct thrift_interface.Vector3D: struct with the values of the 3 axis (x,y,z)"""
-        
         return thrift_interface.Vector3D(x, y, z)
 
 class CoordinateSystem(object):
-    """."""
+    """This class implement the functions related with coordinate systems management."""
+    
     def __init__(self, projector_id, module_id, thrift_client):
-        """."""
+        """Initialize the CoordinateSystem object.
+        
+            Args:
+                string projector_id: serial number of the projector
+                string module_id: function module identification name
+                object thrift_client: object with the generated client to communicate with the projector"""
         self.__thrift_client = thrift_client 
         self.__geometry_tool = GeometryTool()
 
@@ -589,7 +580,6 @@ class CoordinateSystem(object):
             
             Returns:
                 struct reference_object: coordinate system parameters structure updated """
-        
         reference_object.refPointList[n].tracePoint.x = x
         reference_object.refPointList[n].tracePoint.y = y
         reference_object.refPointList[n].distance = d
@@ -734,9 +724,14 @@ class CoordinateSystem(object):
         return success,message
 
 class ProjectionElementControl(object):
-    """."""
+    """This class implement the functions related with figures projection."""
+    
     def __init__(self,module_id, thrift_client):
-        """."""
+        """Initialize the ProjectionElementControl object.
+        
+            Args:
+                string module_id: function module identification name
+                object thrift_client: object with the generated client to communicate with the projector"""
         self.__thrift_client = thrift_client
         self.__geometry_tool = GeometryTool()
         self.module_id = module_id
