@@ -21,12 +21,15 @@ class ProjectionNode:
         self.pkg_path = rospack.get_path('zlaser_sdk_ros')
         # self.setup_path = self.pkg_path + "/scripts/set_up_projector.py" #not used
         self.lic_path = self.pkg_path + "/lic/1900027652.lic"
-
-        # print("ProjectorManager() from projection_node")
-        self.projector = ProjectorManager() # Create projector object
         self.coordinate_system = ""
 
-        # Open services
+
+        projector_IP = "192.168.10.10"
+        server_IP = "192.168.10.11"
+        connection_port = 9090
+        self.projector = ProjectorManager(projector_IP, server_IP, connection_port)
+
+
         self.cnt_srv     = rospy.Service('/projector_srv/connect', Trigger, self.connection_cb)
         self.discnt_srv  = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnection_cb)
         self.lic_srv     = rospy.Service('/projector_srv/load_license', Trigger, self.transfer_license_cb)
@@ -51,6 +54,10 @@ class ProjectionNode:
         rospy.loginfo(e)
         print(type(e)) #<class 'thriftpy.transport.TTransportException'>
         # if e = TTransportException(type=1, message="Could not connect to ('192.168.10.11', 9090)")
+
+        # log.info("Connecting to ZLP Service at %s:%s" % (ip, port))
+
+        # log.info("Activating projector. ID: " + self.projector_id)
         e = self.projector.activate()
         rospy.loginfo(e)
         return TriggerResponse(True,str(e))
@@ -58,6 +65,8 @@ class ProjectionNode:
     def disconnection_cb(self,req):
         # HAY QUE DISTINGUIR ENTRE DESCONECTAR Y BORRAR TODO O DESCONECTAR SOLO
         rospy.loginfo("Received request to stop projector")
+        
+        # log.info("Deactivating projection of projector: " + self.projector_id)
         e = self.projector.deactivate()
         rospy.loginfo(e)
         e = self.projector.client_server_disconnect()
@@ -73,7 +82,7 @@ class ProjectionNode:
             return TriggerResponse(False,"end setup")    
         else:
             rospy.loginfo("License is valid...")
-            e = self.projector.function_module_create() # create function module 
+            e = self.projector.geotree_operator_create() # create function module 
             rospy.loginfo(e)
         return TriggerResponse(True,"License loaded and function module created")
 
@@ -91,7 +100,7 @@ class ProjectionNode:
             return TriggerResponse(False,"end setup")    
         else:
             rospy.loginfo("License is valid...")
-            e = self.projector.function_module_create() # create function module 
+            e = self.projector.geotree_operator_create() # create function module 
             rospy.loginfo(e)
             cs_list = self.projector.get_coordinate_systems() # check coordinate system
             rospy.loginfo("Available coordinate systems: {}".format(cs_list))
