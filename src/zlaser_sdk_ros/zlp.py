@@ -1,4 +1,4 @@
-#! python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Helper module for python thrift interface to ZLP Service.
     This module contains utility classes and methods which ease the usage of the thrift interface to ZLP Service."""
@@ -307,7 +307,7 @@ class ProjectorClient(object):
         
         return success,message
 
-    def transfer_file(self, local_path, remote_file, overwrite=False):
+    def transfer_file(self, local_path, remote_file, overwrite=False): # private?
         """Transfer data of the local license file to remote file at ZLP-Service.
         
             Args:
@@ -336,9 +336,16 @@ class ProjectorClient(object):
             Returns:
                 bool thrift_client.CheckLicense(): return True for success, False otherwise """
         try:
-            return self.__thrift_client.CheckLicense()
+            success = self.__thrift_client.CheckLicense()
+            if success:
+                message = "License is valid"
+            else:
+                message = "License is not valid"
         except Exception as e:
-            return e
+            success = False
+            message = e
+
+        return success,message
 
     def function_module_create(self):
         """Create function module to operate with GeoTreeElements (coordinate systems and shapes).
@@ -376,10 +383,14 @@ class ProjectorClient(object):
                 string message: information message"""
         try:
             ref_obj_name = "RefObj_" + coord_sys
+            print(ref_obj_name)
             ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
-            if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):                                        
+            if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):
+                print(ref_obj.activated)
+                print(self.__thrift_client.GetGeoTreeIds())
+                print(self.__thrift_client.GetCoordinatesystemList())                   
                 success = False
-                message = "Nothing to project"
+                message = "Coordinate_system is not activated or nothing to project"
             else:
                 self.__thrift_client.TriggerProjection()
                 success = True
@@ -410,7 +421,7 @@ class ProjectorClient(object):
         
         return success,message
 
-class GeometryTool():
+class GeometryTool(object):
     """This class implement functions to generate basic mathematical tools."""
 
     def create_matrix4x4(self):
@@ -443,6 +454,43 @@ class GeometryTool():
             Returns:
                 struct thrift_interface.Vector3D: struct with the values of the 3 axis (x,y,z)"""
         return thrift_interface.Vector3D(x, y, z)
+
+class CoordinateSystemParameters(object):
+    """This class is used as data structure with the necessary information to define a coordinate system."""
+    
+    def __init__(self,cs):
+        """Initialize the CoordinateSystemParameters object.
+        
+            Args:
+                struct cs: struct with the necessary parameters to create the coordinate system"""
+        self.name    = cs.name_cs.data
+        self.d       = cs.distance.data
+        self.x1      = cs.x1.data
+        self.y1      = cs.y1.data
+        self.x2      = cs.x2.data
+        self.y2      = cs.y2.data
+        self.x3      = cs.x3.data
+        self.y3      = cs.y3.data
+        self.x4      = cs.x4.data
+        self.y4      = cs.y4.data
+        self.T1_x    = cs.T1_x.data
+        self.T1_y    = cs.T1_y.data
+
+class ProjectionELementParameters(object):
+    """This class is used as data structure with the necessary information to create a projection element."""
+    
+    def __init__(self,proj_elem):
+        """Initialize the ProjectionELementParameters object.
+        
+            Args:
+                struct proj_elem: struct with the necessary parameters to create the projection element"""
+        self.shape_type            = proj_elem.shape_type.data
+        self.projection_group_name = proj_elem.projection_group_name.data
+        self.shape_id              = proj_elem.shape_id.data
+        self.x                     = proj_elem.x.data
+        self.y                     = proj_elem.y.data
+        self.angle                 = proj_elem.angle.data
+        self.length                = proj_elem.length.data
 
 class CoordinateSystem(object):
     """This class implement the functions related with coordinate systems management."""
@@ -519,7 +567,7 @@ class CoordinateSystem(object):
         """Generate new coordinate system.
 
             Args:
-                struct cs: struct with the necessary information to create the coordinate system 
+                struct cs: struct with the necessary parameters to create the coordinate system 
             
             Returns:
                 string cs.name: name of the coordinate system generated
@@ -547,10 +595,13 @@ class CoordinateSystem(object):
                                                 self.create_reference_point("T3", T3_x, T3_y),
                                                 self.create_reference_point("T4", T4_x, T4_y)]
             
-            cross_size = self.__geometry_tool.create_2d_point(cs.crossize_x,cs.crossize_y)
-            
-            d = cs.distance
+            d = cs.d
 
+            cross_size_x = d * 0.02
+            cross_size_y = d * 0.02
+
+            cross_size = self.__geometry_tool.create_2d_point(cross_size_x,cross_size_y)
+            
             reference_object = self.__define_reference_point(reference_object,cross_size,0,d,cs.x1,cs.y1)
             reference_object = self.__define_reference_point(reference_object,cross_size,1,d,cs.x2,cs.y2)
             reference_object = self.__define_reference_point(reference_object,cross_size,2,d,cs.x3,cs.y3)
@@ -784,7 +835,7 @@ class ProjectionElementControl(object):
         polyline.polylineList = []
         return polyline
 
-    def define_polyline(self,coord_sys,projection_group,id,x,y,angle,length):
+    def define_polyline(self,coord_sys,proj_elem_params):
         """Create a new line to project.
 
             Args:
@@ -800,6 +851,14 @@ class ProjectionElementControl(object):
                 bool success: success value
                 string message: information message"""
         try:
+
+            projection_group = proj_elem_params.projection_group_name
+            id               = proj_elem_params.shape_id
+            x                = proj_elem_params.x1
+            y                = proj_elem_params.y
+            angle            = proj_elem_params.angle
+            length           = proj_elem_params.length
+
             polyline_name = projection_group + "/my_polyline_" + id
             polyline = self.create_polyline(polyline_name)
 
@@ -821,7 +880,7 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def deactivate_shape(self,projection_group,shape_name,id): 
+    def deactivate_shape(self,proj_elem_params): 
         """Hide (deactivate) a figure from a group of the active coordinate system.
 
             Args:
@@ -833,8 +892,12 @@ class ProjectionElementControl(object):
                 bool success: success value
                 string message: information message"""
         try:
-            if shape_name == "polyline":
-                name = projection_group + "/my_" + shape_name + "_" + id
+            shape_type       = proj_elem_params.shape_type
+            projection_group = proj_elem_params.projection_group_name
+            id               = proj_elem_params.shape_id
+
+            if shape_type == "polyline":
+                name = projection_group + "/my_" + shape_type + "_" + id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 polyline.activated = False
                 self.__thrift_client.SetPolyLine(polyline)
@@ -852,7 +915,7 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def reactivate_shape(self,projection_group,shape_name,id): 
+    def reactivate_shape(self,proj_elem_params): 
         """Unhide (activate) a figure from a group of the active coordinate system.
 
             Args:
@@ -864,8 +927,12 @@ class ProjectionElementControl(object):
                 bool success: success value
                 string message: information message"""
         try:
-            if shape_name == "polyline":
-                name = projection_group + "/my_" + shape_name + "_" + id
+            shape_type       = proj_elem_params.shape_type
+            projection_group = proj_elem_params.projection_group_name
+            id               = proj_elem_params.shape_id
+
+            if shape_type == "polyline":
+                name = projection_group + "/my_" + shape_type + "_" + id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 polyline.activated = True
                 self.__thrift_client.SetPolyLine(polyline)
@@ -883,7 +950,7 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def delete_shape(self,projection_group,shape_name,id):
+    def delete_shape(self,proj_elem_params):
         """Delete a figure from the active coordinate system.
 
             Args:
@@ -895,7 +962,11 @@ class ProjectionElementControl(object):
                 bool success: success value
                 string message: information message"""
         try:
-            self.__thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_name + "_" + id)
+            shape_type       = proj_elem_params.shape_type
+            projection_group = proj_elem_params.projection_group_name
+            id               = proj_elem_params.shape_id
+
+            self.__thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_type + "_" + id)
             success = True
             message = "Shape removed"
 
@@ -904,3 +975,26 @@ class ProjectionElementControl(object):
             message = e
 
         return success,message
+
+    # def cs_origin_axes(self,coord_sys,cs):
+    #     """Generate coordinate system origin x and y axes.
+            
+    #         Args:
+    #             string coord_sys: name of the coordinate system
+    #             struct cs: struct with the necessary parameters to create the coordinate system
+                
+    #         Returns:
+    #             bool success: success value
+    #             string message: information message"""
+    #     try:
+            
+    #         self.define_polyline(coord_sys, coord_sys + "_origin","axis_x",cs.T1_x,cs.T1_y,0,50) 
+    #         self.define_polyline(coord_sys, coord_sys + "_origin","axis_y",cs.T1_x,cs.T1_y,90,50)
+    #         success = True
+    #         message = ""
+
+    #     except Exception as e:
+    #         success = False 
+    #         message = e
+
+    #     return success,message

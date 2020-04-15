@@ -17,12 +17,9 @@ catkin_python_setup()
 
 add_service_files(
    FILES
-   ShapeParams.srv
    CsRefPoints.srv
-   ShowCs.srv
-   RemovCs.srv
-   RemovShape.srv
-   HideShape.srv
+   ProjectionElement.srv
+   CoordinateSystem.srv
 )
 
 generate_messages(

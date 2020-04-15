@@ -1,9 +1,17 @@
+std_msgs/Bool add
+std_msgs/Bool hide
+std_msgs/Bool unhide
+std_msgs/Bool remove
+
 std_msgs/String shape_type
 std_msgs/String projection_group_name
 std_msgs/String shape_id
 std_msgs/Float64 x
 std_msgs/Float64 y
 std_msgs/Float64 angle
-std_msgs/Float64 r
+std_msgs/Float64 length
+
 ---
-std_msgs/Bool shape_added
+
+std_msgs/Bool success
+std_msgs/String message

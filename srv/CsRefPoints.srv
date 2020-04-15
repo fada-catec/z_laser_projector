@@ -1,7 +1,5 @@
 std_msgs/String name_cs
 std_msgs/Float64 distance
-std_msgs/Float64 crossize_x
-std_msgs/Float64 crossize_y
 std_msgs/Float64 x1
 std_msgs/Float64 y1
 std_msgs/Float64 x2
@@ -12,5 +10,8 @@ std_msgs/Float64 x4
 std_msgs/Float64 y4
 std_msgs/Float64 T1_x
 std_msgs/Float64 T1_y
+
 ---
+
 std_msgs/Bool cs_created
+std_msgs/String message

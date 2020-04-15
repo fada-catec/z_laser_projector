@@ -1,4 +1,0 @@
-std_msgs/String cs_name
-std_msgs/Int16 secs
----
-std_msgs/Bool cs_showed
