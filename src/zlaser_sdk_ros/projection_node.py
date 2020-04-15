@@ -7,7 +7,7 @@ import time
 from std_srvs.srv import Trigger, TriggerResponse
 from std_msgs.msg import Bool, String
 from projector_manager import ProjectorManager
-from zlp import CoordinateSystemParameters, ProjectionELementParameters
+from zlp import CoordinateSystemParameters, ProjectionElementParameters
 
 from zlaser_sdk_ros.srv import CsRefPoints, CsRefPointsResponse, CoordinateSystem, CoordinateSystemResponse
 from zlaser_sdk_ros.srv import ProjectionElement, ProjectionElementResponse
@@ -166,34 +166,18 @@ class ProjectionNode:
             s,m = self.projector.show_coordinate_system(self.coordinate_system,5)
             if s:
                 rospy.loginfo(m)
+                s,m = self.projector.cs_axes_create(self.coordinate_system,cs_params)
+                if s:
+                    rospy.loginfo(m)
+                else:
+                    rospy.logerr(m)
+
             else:
                 rospy.logerr(m)
         else:
             rospy.logerr(m)
 
         return CsRefPointsResponse(Bool(s),String(m))
-        
-        # e = self.projector.set_coordinate_system(self.coordinate_system) # set new coordinate system
-        # rospy.loginfo(e)
-        # rospy.loginfo("CURRENT coordinate system: [{}] ".format(self.coordinate_system))
-        # e = self.projector.register_coordinate_system(self.coordinate_system) # register coordinate system
-        # rospy.loginfo(e)
-        # self.projector.get_coordinate_systems() # print CURRENT cs list
-
-        # e = self.projector.cs_axes(self.coordinate_system,cs_params) 
-        # rospy.loginfo(e)
-
-        # e = self.projector.start_projection(self.coordinate_system)
-        # rospy.loginfo(e)
-        # input("PROJECTING COORDINATE SYSTEM ORIGIN AXES. PRESS ENTER TO FINISH.")
-        # e = self.projector.stop_projection()
-        # rospy.loginfo(e)
-
-        # e = self.projector.hide_shape(self.coordinate_system + "_origin","polyline","axis_x")
-        # rospy.loginfo(e)
-        # e = self.projector.hide_shape(self.coordinate_system + "_origin","polyline","axis_y")
-        # rospy.loginfo(e)
-        
 
     def get_coord_sys_list_cb(self,req):
         rospy.loginfo("Received request to get the coordinate system list at projector")
@@ -208,6 +192,8 @@ class ProjectionNode:
             s = False
             m = "get_list request not True"
             cs_list = []
+
+        rospy.loginfo("coordinate systems list: {}".format(cs_list))
 
         return CoordinateSystemResponse(Bool(s),String(m),String(cs_list))
 
@@ -233,19 +219,13 @@ class ProjectionNode:
 
     def show_coord_sys_cb(self,req):
         rospy.loginfo("Request to project current coordinate system.")
-        
-        # self.coordinate_system = req.cs_name.data # set current coordinate system
-        # e = self.projector.set_coordinate_system(self.coordinate_system) # set current coordinate system
-        # rospy.loginfo(e)
-        # rospy.loginfo("CURRENT coordinate system: [{}] ".format(self.coordinate_system))
-        # self.projector.get_coordinate_systems() # print CURRENT cs list
 
         if req.show_current.data:
-            if req.cs_name.data and req.secs.data:
+            if req.secs.data:
                 s,m = self.projector.show_coordinate_system(self.coordinate_system,req.secs.data)
                 if s:
                     rospy.loginfo(m)
-                    # s,m = self.projector.cs_axes_unhide(self.coordinate_system)
+                    s,m = self.projector.cs_axes_unhide(self.coordinate_system)
                     if s:
                         rospy.loginfo(m)
                     else:
@@ -254,7 +234,7 @@ class ProjectionNode:
                     rospy.logerr(m)
             else:
                 s = False
-                m = "cs_name or secs request is empty"
+                m = "secs request is empty"
         else:
             s = False
             m = "show_current request not True"
@@ -286,7 +266,8 @@ class ProjectionNode:
     def add_shape_cb(self,req):
         rospy.loginfo("Received request to add a shape to the current coordinate system.")
 
-        proj_elem_params = ProjectionELementParameters(req)
+        proj_elem_params = ProjectionElementParameters(req)
+        proj_elem_params.set_params()
         
         if req.add.data:
             if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:
@@ -308,32 +289,16 @@ class ProjectionNode:
             m = "add request not True"
         
         return ProjectionElementResponse(Bool(s),String(m))
-
-        # if req.shape_type.data == "polyline":
-        #     rospy.loginfo("Creating polyline shape")
-        #     e = self.projector.create_polyline(self.coordinate_system,req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.angle.data,req.r.data)
-        #     rospy.loginfo(e)
-        #     print("Projecting polyline for 5 seconds in order to check the shape")
-        #     self.projector.start_projection(self.coordinate_system)
-        #     time.sleep(5)
-        #     self.projector.stop_projection()
-        # # elif req.shape_type.data == "circle":
-        # #     rospy.loginfo("Creating circle shape")
-        # #     e = self.projector.create_circle(req.projection_group_name.data,req.shape_id.data,req.x.data,req.y.data,req.r.data)
-        # #     rospy.loginfo(e)
-        # else: 
-        #     return ShapeParamsResponse(Bool(False))
-        # return ShapeParamsResponse(Bool(True))
     
     def hide_shape_cb(self,req):
         rospy.loginfo("Received request to hide shape.")
 
-        proj_elem_params = ProjectionELementParameters(req) # en hide_shape req.x está vacío, hay problemas??
+        proj_elem_params = ProjectionElementParameters(req) # en hide_shape req.x está vacío, hay problemas??
                                                             # hay algun problema por machacar proj_elem_params??
+        proj_elem_params.set_params()
 
         if req.hide.data:
             if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:
-                # shape_name = proj_elem_params.projection_group_name + "/my_" + proj_elem_params.shape_type + "_" + proj_elem_params.shape_id
                 s,m = self.projector.hide_shape(proj_elem_params)
                 if s:
                     rospy.loginfo(m)
@@ -351,7 +316,8 @@ class ProjectionNode:
     def unhide_shape_cb(self,req):
         rospy.loginfo("Received request to unhide shape.")
 
-        proj_elem_params = ProjectionELementParameters(req)
+        proj_elem_params = ProjectionElementParameters(req)
+        proj_elem_params.set_params()
 
         if req.unhide.data:
             if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:
@@ -372,7 +338,8 @@ class ProjectionNode:
     def remove_shape_cb(self,req):
         rospy.loginfo("Received request to remove shape.")
 
-        proj_elem_params = ProjectionELementParameters(req)
+        proj_elem_params = ProjectionElementParameters(req)
+        proj_elem_params.set_params()
 
         if req.unhide.data:
             if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:

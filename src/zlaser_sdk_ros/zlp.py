@@ -383,12 +383,8 @@ class ProjectorClient(object):
                 string message: information message"""
         try:
             ref_obj_name = "RefObj_" + coord_sys
-            print(ref_obj_name)
             ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
             if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):
-                print(ref_obj.activated)
-                print(self.__thrift_client.GetGeoTreeIds())
-                print(self.__thrift_client.GetCoordinatesystemList())                   
                 success = False
                 message = "Coordinate_system is not activated or nothing to project"
             else:
@@ -476,21 +472,45 @@ class CoordinateSystemParameters(object):
         self.T1_x    = cs.T1_x.data
         self.T1_y    = cs.T1_y.data
 
-class ProjectionELementParameters(object):
+class ProjectionElementParameters(object):
     """This class is used as data structure with the necessary information to create a projection element."""
     
+    # def __init__(self,proj_elem):
+    #     """Initialize the ProjectionElementParameters object.
+        
+    #         Args:
+    #             struct proj_elem: struct with the necessary parameters to create the projection element"""
+    #     self.shape_type            = proj_elem.shape_type.data
+    #     self.projection_group_name = proj_elem.projection_group_name.data
+    #     self.shape_id              = proj_elem.shape_id.data
+    #     self.x                     = proj_elem.x.data
+    #     self.y                     = proj_elem.y.data
+    #     self.angle                 = proj_elem.angle.data
+    #     self.length                = proj_elem.length.data
+
     def __init__(self,proj_elem):
-        """Initialize the ProjectionELementParameters object.
+        """Initialize the ProjectionElementParameters object.
         
             Args:
                 struct proj_elem: struct with the necessary parameters to create the projection element"""
-        self.shape_type            = proj_elem.shape_type.data
-        self.projection_group_name = proj_elem.projection_group_name.data
-        self.shape_id              = proj_elem.shape_id.data
-        self.x                     = proj_elem.x.data
-        self.y                     = proj_elem.y.data
-        self.angle                 = proj_elem.angle.data
-        self.length                = proj_elem.length.data
+        self.proj_elem             = proj_elem
+        self.shape_type            = ""
+        self.projection_group_name = ""
+        self.shape_id              = ""
+        self.x                     = 0.0
+        self.y                     = 0.0
+        self.angle                 = 0.0
+        self.length                = 0.0
+
+    def set_params(self):
+        """Set the ProjectionElementParameters values."""
+        self.shape_type            = self.proj_elem.shape_type.data
+        self.projection_group_name = self.proj_elem.projection_group_name.data
+        self.shape_id              = self.proj_elem.shape_id.data
+        self.x                     = self.proj_elem.x.data
+        self.y                     = self.proj_elem.y.data
+        self.angle                 = self.proj_elem.angle.data
+        self.length                = self.proj_elem.length.data
 
 class CoordinateSystem(object):
     """This class implement the functions related with coordinate systems management."""
@@ -596,7 +616,6 @@ class CoordinateSystem(object):
                                                 self.create_reference_point("T4", T4_x, T4_y)]
             
             d = cs.d
-
             cross_size_x = d * 0.02
             cross_size_y = d * 0.02
 
@@ -851,10 +870,9 @@ class ProjectionElementControl(object):
                 bool success: success value
                 string message: information message"""
         try:
-
             projection_group = proj_elem_params.projection_group_name
             id               = proj_elem_params.shape_id
-            x                = proj_elem_params.x1
+            x                = proj_elem_params.x
             y                = proj_elem_params.y
             angle            = proj_elem_params.angle
             length           = proj_elem_params.length

@@ -5,7 +5,7 @@ import sys
 # import threading
 import time
 import math
-from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl, ProjectionElementParameters
 
 class ProjectorManager:
     
@@ -65,7 +65,6 @@ class ProjectorManager:
 
         success,message = self.set_coordinate_system(coord_sys)
 
-        # success,message = self.register_coordinate_system(coord_sys) 
         success,message = self.cs_element.register_cs(coord_sys)
 
         # success,message = self.__cs_axes_create(coord_sys,cs_params)
@@ -75,11 +74,6 @@ class ProjectorManager:
     def set_coordinate_system(self,coord_sys): 
         success,message = self.cs_element.set_cs(coord_sys)
         return success,message
-
-    # SE PUEDE BORRAR register_coordinate_system???
-    # def register_coordinate_system(self,coord_sys): 
-    #     success,message = self.cs_element.register_cs(coord_sys)
-    #     return success,message
 
     def show_coordinate_system(self,coord_sys,secs):
         success,message = self.cs_element.show_cs(coord_sys, secs)
@@ -91,11 +85,6 @@ class ProjectorManager:
 
     def create_polyline(self,coord_sys,proj_elem_params):
         success,message = self.projection_element.define_polyline(coord_sys,proj_elem_params)
-
-        success,message = self.start_projection(coord_sys)
-        time.sleep(5)
-        self.stop_projection()
-
         return success,message
 
     def hide_shape(self,proj_elem_params): 
@@ -110,59 +99,60 @@ class ProjectorManager:
         success,message = self.projection_element.delete_shape(proj_elem_params)
         return success,message
 
-
-
-
-
-
-    # def __cs_axes_create(self,coord_sys,cs_params):
+    def cs_axes_create(self,coord_sys,cs_params):
         
-    #     proj_elem_params.shape_type            = "polyline"
-    #     proj_elem_params.projection_group_name = coord_sys + "_origin"
-    #     proj_elem_params.shape_id              = "axis_x"
-    #     proj_elem_params.x                     = cs_params.T1_x
-    #     proj_elem_params.y                     = cs_params.T1_y
-    #     proj_elem_params.angle                 = 0
-    #     proj_elem_params.length                = 50
-
-    #     success,message = self.projection_element.define_polyline(coord_sys, proj_elem_params) 
+        proj_elem_params = ProjectionElementParameters("")
         
-    #     proj_elem_params.shape_type            = "polyline"
-    #     proj_elem_params.projection_group_name = coord_sys + "_origin"
-    #     proj_elem_params.shape_id              = "axis_y"
-    #     proj_elem_params.x                     = cs_params.T1_x
-    #     proj_elem_params.y                     = cs_params.T1_y
-    #     proj_elem_params.angle                 = 90
-    #     proj_elem_params.length                = 50
+        proj_elem_params.shape_type            = "polyline"
+        proj_elem_params.projection_group_name = coord_sys + "_origin"
+        proj_elem_params.shape_id              = "axis_x"
+        proj_elem_params.x                     = cs_params.T1_x
+        proj_elem_params.y                     = cs_params.T1_y
+        proj_elem_params.angle                 = 0
+        proj_elem_params.length                = 50
 
-    #     success,message = self.projection_element.define_polyline(coord_sys, proj_elem_params)
-
-    #     success,message = self.start_projection(coord_sys)
-    #     time.sleep(5)
-    #     success,message = self.stop_projection()
-
-    #     success,message = self.hide_shape(proj_elem_params)
-    #     success,message = self.hide_shape(proj_elem_params)
-
-    #     return success,message
-
-    # def cs_axes_unhide(self,coord_sys):
+        success,message = self.projection_element.define_polyline(coord_sys, proj_elem_params) 
         
-    #     proj_elem_params.shape_type            = "polyline"
-    #     proj_elem_params.projection_group_name = coord_sys + "_origin"
-    #     proj_elem_params.shape_id              = "axis_y"
-    #     success,message = self.unhide_shape(proj_elem_params)
+        proj_elem_params.shape_type            = "polyline"
+        proj_elem_params.projection_group_name = coord_sys + "_origin"
+        proj_elem_params.shape_id              = "axis_y"
+        proj_elem_params.x                     = cs_params.T1_x
+        proj_elem_params.y                     = cs_params.T1_y
+        proj_elem_params.angle                 = 90
+        proj_elem_params.length                = 50
 
-    #     proj_elem_params.shape_type            = "polyline"
-    #     proj_elem_params.projection_group_name = coord_sys + "_origin"
-    #     proj_elem_params.shape_id              = "axis_y"
-    #     success,message = self.unhide_shape(proj_elem_params)
+        success,message = self.projection_element.define_polyline(coord_sys, proj_elem_params)
 
-    #     success,message = self.start_projection(coord_sys)
-    #     time.sleep(5)
-    #     success,message = self.stop_projection()
+        success,message = self.start_projection(coord_sys)
+        time.sleep(5)
+        success,message = self.stop_projection()
 
-    #     success,message = self.hide_shape(proj_elem_params)
-    #     success,message = self.hide_shape(proj_elem_params)
+        success,message = self.hide_shape(proj_elem_params)
+        success,message = self.hide_shape(proj_elem_params)
 
-    #     return success,message
+        return success,message
+
+    def cs_axes_unhide(self,coord_sys):
+        
+        proj_elem_params = ProjectionElementParameters("")
+
+        proj_elem_params.shape_type            = "polyline"
+        proj_elem_params.projection_group_name = coord_sys + "_origin"
+        proj_elem_params.shape_id              = "axis_y"
+
+        success,message = self.unhide_shape(proj_elem_params)
+
+        proj_elem_params.shape_type            = "polyline"
+        proj_elem_params.projection_group_name = coord_sys + "_origin"
+        proj_elem_params.shape_id              = "axis_y"
+        
+        success,message = self.unhide_shape(proj_elem_params)
+
+        success,message = self.start_projection(coord_sys)
+        time.sleep(5)
+        success,message = self.stop_projection()
+
+        success,message = self.hide_shape(proj_elem_params)
+        success,message = self.hide_shape(proj_elem_params)
+
+        return success,message
