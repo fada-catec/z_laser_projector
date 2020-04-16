@@ -1,15 +1,10 @@
 std_msgs/String name_cs
 std_msgs/Float64 distance
-std_msgs/Float64 x1
-std_msgs/Float64 y1
-std_msgs/Float64 x2
-std_msgs/Float64 y2
-std_msgs/Float64 x3
-std_msgs/Float64 y3
-std_msgs/Float64 x4
-std_msgs/Float64 y4
-std_msgs/Float64 T1_x
-std_msgs/Float64 T1_y
+RefPoint p1
+RefPoint p2
+RefPoint p3
+RefPoint p4
+RefPoint T1
 
 ---
 

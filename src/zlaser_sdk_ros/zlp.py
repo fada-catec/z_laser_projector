@@ -307,7 +307,7 @@ class ProjectorClient(object):
         
         return success,message
 
-    def transfer_file(self, local_path, remote_file, overwrite=False): # private?
+    def transfer_file(self, local_path, remote_file, overwrite=False):
         """Transfer data of the local license file to remote file at ZLP-Service.
         
             Args:
@@ -358,13 +358,6 @@ class ProjectorClient(object):
             self.module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
             success = True
             message = "Function module created"
-        
-        # except thrift_interface.FunctionModuleClassNotRegistered as e:
-        #     return ("FunctionModuleClassNotRegistered: " + e.which)
-        # except thrift_interface.FunctionModulePropertyBranchAlreadyInUse as e:
-        #     return ("FunctionModulePropertyBranchAlreadyInUse: " + e.branchName)
-        # except thrift_interface.FunctionModuleClassNotLicensed as e:
-        #     return ("FunctionModuleClassNotLicensed: " + e.which)
 
         except Exception as e:
             success = False
@@ -461,39 +454,25 @@ class CoordinateSystemParameters(object):
                 struct cs: struct with the necessary parameters to create the coordinate system"""
         self.name    = cs.name_cs.data
         self.d       = cs.distance.data
-        self.x1      = cs.x1.data
-        self.y1      = cs.y1.data
-        self.x2      = cs.x2.data
-        self.y2      = cs.y2.data
-        self.x3      = cs.x3.data
-        self.y3      = cs.y3.data
-        self.x4      = cs.x4.data
-        self.y4      = cs.y4.data
-        self.T1_x    = cs.T1_x.data
-        self.T1_y    = cs.T1_y.data
+        self.x1      = cs.p1.x
+        self.y1      = cs.p1.y
+        self.x2      = cs.p2.x
+        self.y2      = cs.p2.y
+        self.x3      = cs.p3.x
+        self.y3      = cs.p3.y
+        self.x4      = cs.p4.x
+        self.y4      = cs.p4.y
+        self.T1_x    = cs.T1.x
+        self.T1_y    = cs.T1.y
 
 class ProjectionElementParameters(object):
     """This class is used as data structure with the necessary information to create a projection element."""
-    
-    # def __init__(self,proj_elem):
-    #     """Initialize the ProjectionElementParameters object.
-        
-    #         Args:
-    #             struct proj_elem: struct with the necessary parameters to create the projection element"""
-    #     self.shape_type            = proj_elem.shape_type.data
-    #     self.projection_group_name = proj_elem.projection_group_name.data
-    #     self.shape_id              = proj_elem.shape_id.data
-    #     self.x                     = proj_elem.x.data
-    #     self.y                     = proj_elem.y.data
-    #     self.angle                 = proj_elem.angle.data
-    #     self.length                = proj_elem.length.data
 
-    def __init__(self,proj_elem):
+    def __init__(self):
         """Initialize the ProjectionElementParameters object.
         
             Args:
                 struct proj_elem: struct with the necessary parameters to create the projection element"""
-        self.proj_elem             = proj_elem
         self.shape_type            = ""
         self.projection_group_name = ""
         self.shape_id              = ""
@@ -502,15 +481,15 @@ class ProjectionElementParameters(object):
         self.angle                 = 0.0
         self.length                = 0.0
 
-    def set_params(self):
+    def set_params(self,proj_elem):
         """Set the ProjectionElementParameters values."""
-        self.shape_type            = self.proj_elem.shape_type.data
-        self.projection_group_name = self.proj_elem.projection_group_name.data
-        self.shape_id              = self.proj_elem.shape_id.data
-        self.x                     = self.proj_elem.x.data
-        self.y                     = self.proj_elem.y.data
-        self.angle                 = self.proj_elem.angle.data
-        self.length                = self.proj_elem.length.data
+        self.shape_type            = proj_elem.shape_type.data
+        self.projection_group_name = proj_elem.projection_group_name.data
+        self.shape_id              = proj_elem.shape_id.data
+        self.x                     = proj_elem.x.data
+        self.y                     = proj_elem.y.data
+        self.angle                 = proj_elem.angle.data
+        self.length                = proj_elem.length.data
 
 class CoordinateSystem(object):
     """This class implement the functions related with coordinate systems management."""
@@ -602,13 +581,13 @@ class CoordinateSystem(object):
             T1_x = cs.T1_x
             T1_y = cs.T1_y
             T2_x = T1_x + abs((cs.x2 - cs.x1))
-            T2_y = T1_y
+            T2_y = T1_y + abs((cs.y2 - cs.y1))
             T3_x = T1_x + abs((cs.x3 - cs.x1))
             T3_y = T1_y + abs((cs.y3 - cs.y1))
-            T4_x = T1_x
+            T4_x = T1_x + abs((cs.x4 - cs.x1))
             T4_y = T1_y + abs((cs.y4 - cs.y1))
 
-            # scale_factor = ??? T_x,y * 2 # manteniendo la proporción
+            # TODO scale_factor = ??? T_x,y * 2 manteniendo la proporción
 
             reference_object.refPointList = [   self.create_reference_point("T1", T1_x, T1_y),
                                                 self.create_reference_point("T2", T2_x, T2_y),
@@ -680,26 +659,9 @@ class CoordinateSystem(object):
                 if self.reference_object_list[i].name == ref_obj_name:
                     index = i
                 else:
-                    # print("{} DEACTIVATED" .format(self.reference_object_list[i].name))
-
                     self.__ref_obj_state(False,self.reference_object_list[i])
-
-                    # self.reference_object_list[i].activated = False
-                    # self.__thrift_client.SetReferenceobject(self.reference_object_list[i])
-                    # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[i].name)
-                    # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
-                    # self.__thrift_client.FunctionModuleRun(self.module_id)
             
-            # print("{} ACTIVATED" .format(self.reference_object_list[index].name))
-
             self.__ref_obj_state(True,self.reference_object_list[index])
-
-            # self.reference_object_list[index].activated = True
-            # self.__thrift_client.SetReferenceobject(self.reference_object_list[index])
-            # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", self.reference_object_list[index].name)
-            # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
-            # self.__thrift_client.FunctionModuleRun(self.module_id)
-
             success = True
             message = coord_sys + " set as current coordinate system"
 
@@ -828,18 +790,6 @@ class ProjectionElementControl(object):
         elem.pen = self.default_projection_element.pen
         return elem
 
-    # def create_projection_element(self, name):
-    #     """Generate new reference object.
-            
-    #         Args:
-    #             string name:  projection element name
-
-    #         Returns:
-    #             struct projection_element: reference object struct fields initialized"""
-    #     projection_element = copy.deepcopy(self.default_projection_element)
-    #     projection_element.name = name
-    #     return projection_element
-
     def create_polyline(self, name):
         """Generate new polyline.
             
@@ -921,7 +871,7 @@ class ProjectionElementControl(object):
                 self.__thrift_client.SetPolyLine(polyline)
                 
                 success = True
-                message = "Polyline" + name + "deactivated."
+                message = "Polyline " + name + " deactivated."
 
             else:
                 success = False
@@ -956,7 +906,7 @@ class ProjectionElementControl(object):
                 self.__thrift_client.SetPolyLine(polyline)
                 
                 success = True
-                message = "Polyline" + name + "reactivated."
+                message = "Polyline " + name + " reactivated."
 
             else:
                 success = False
@@ -994,25 +944,3 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    # def cs_origin_axes(self,coord_sys,cs):
-    #     """Generate coordinate system origin x and y axes.
-            
-    #         Args:
-    #             string coord_sys: name of the coordinate system
-    #             struct cs: struct with the necessary parameters to create the coordinate system
-                
-    #         Returns:
-    #             bool success: success value
-    #             string message: information message"""
-    #     try:
-            
-    #         self.define_polyline(coord_sys, coord_sys + "_origin","axis_x",cs.T1_x,cs.T1_y,0,50) 
-    #         self.define_polyline(coord_sys, coord_sys + "_origin","axis_y",cs.T1_x,cs.T1_y,90,50)
-    #         success = True
-    #         message = ""
-
-    #     except Exception as e:
-    #         success = False 
-    #         message = e
-
-    #     return success,message

@@ -4,6 +4,7 @@ import rospy
 import rospkg
 import os
 import time
+import numpy as np
 from std_srvs.srv import Trigger, TriggerResponse
 from std_msgs.msg import Bool, String
 from projector_manager import ProjectorManager
@@ -53,84 +54,86 @@ class ProjectionNode:
         rospy.loginfo("Received request to connect and activate projector.")
 
         s,m = self.projector.client_server_connect()
-        if s:
-            rospy.loginfo(m)
-            s,m = self.projector.activate()
-            if s:
-                rospy.loginfo(m)
-                m = "Projector connected and activated."
-            else:
-                rospy.logerr(m)
-        else:
+        if not s:
             rospy.logerr(m)
-
+            return TriggerResponse(s,m)
+        
+        s,m = self.projector.activate()
+        if not s:
+            rospy.logerr(m)
+            return TriggerResponse(s,m)
+        
+        m = "Projector connected and activated."
+        rospy.loginfo(m)
         return TriggerResponse(s,m)
 
     def disconnection_cb(self,req):
         rospy.loginfo("Received request to disconnect projector.")
         
         s,m = self.projector.deactivate()
-        if s:
-            rospy.loginfo(m)
-            s,m = self.projector.client_server_disconnect()
-            if s:
-                rospy.loginfo(m)
-                m = "Projector deactivated and disconnected."
-            else:
-                rospy.logerr(m)
-        else:
+        if not s:
             rospy.logerr(m)
+            return TriggerResponse(s,m)
+        
+        s,m = self.projector.client_server_disconnect()
+        if not s:
+            rospy.logerr(m)
+            return TriggerResponse(s,m)
 
+        m = "Projector deactivated and disconnected."
+        rospy.loginfo(m)
         return TriggerResponse(s,m)
 
     def transfer_license_cb(self,req):
         rospy.loginfo("Received request to load license file.")
 
-        s,m1,m2 = self.projector.load_license(self.lic_path)
-        if s: 
-            rospy.loginfo(m1)
-            s,m = self.projector.geotree_operator_create()
-            if s:
-                rospy.loginfo(m)
-                m = "License correctly loaded."
-            else:
-                rospy.logerr(m)
-        else:
-            rospy.logerr(m2)
-            m = m2
-            rospy.logwarn("Load license again: \n\n rosservice call /projector_srv/load_license") 
-
+        s,m = self.projector.load_license(self.lic_path)
+        if not s: 
+            rospy.logerr(m)
+            rospy.logwarn("Load license again: \n\n rosservice call /projector_srv/load_license")
+            return TriggerResponse(s,m)
+        
+        s,m = self.projector.geotree_operator_create()
+        if not s:
+            rospy.logerr(m)
+            return TriggerResponse(s,m)
+        
+        m = "License correctly loaded."
+        rospy.loginfo(m)
         return TriggerResponse(s,m)
 
     def setup_cb(self,req):
         rospy.loginfo("Received request to setup projector")
 
         s,m = self.projector.client_server_connect()
-        if s:
-            rospy.loginfo(m)
-            s,m = self.projector.activate()
-            if s:
-                rospy.loginfo(m)
-                s,m1,m2 = self.projector.load_license(self.lic_path)
-                if s: 
-                    rospy.loginfo(m1)
-                    s,m = self.projector.geotree_operator_create()
-                    if s:
-                        rospy.loginfo(m)
-                        m = "Projector activated, connected and license correctly loaded."
-                    else:
-                        rospy.logerr(m)
-                else:
-                    rospy.logerr(m2)
-                    m = m2
-                    rospy.logwarn("Load license again: \n\n rosservice call /projector_srv/load_license") 
-            else:
-                rospy.logerr(m)
-        else:
+        if not s:
             rospy.logerr(m)
+            return TriggerResponse(s,m)
 
-        rospy.loginfo("No Current Coordinate System set so far.")
+        s,m = self.projector.activate()
+        if not s:
+            rospy.logerr(m)
+            return TriggerResponse(s,m)
 
+        rospy.loginfo(m)
+        s,m = self.projector.load_license(self.lic_path)
+        if not s: 
+            rospy.logerr(m)
+            rospy.logwarn("Load license again: \n\n rosservice call /projector_srv/load_license")
+            return TriggerResponse(s,m)
+
+        rospy.loginfo(m)
+        s,m = self.projector.geotree_operator_create()
+        if not s:
+            rospy.logerr(m)
+            return TriggerResponse(s,m)
+        
+        m = "Projector setup correct: activated, connected and license loaded."
+        rospy.loginfo(m)
+
+        if not self.coordinate_system:
+            rospy.loginfo("No Current Coordinate System set so far.")
+        
         return TriggerResponse(s,m)
 
     def projection_start_cb(self,req):
@@ -161,200 +164,195 @@ class ProjectionNode:
         cs_params = CoordinateSystemParameters(req)
 
         self.coordinate_system,s,m = self.projector.define_coordinate_system(cs_params)
-        if s:
-            rospy.loginfo(m)
-            s,m = self.projector.show_coordinate_system(self.coordinate_system,5)
-            if s:
-                rospy.loginfo(m)
-                s,m = self.projector.cs_axes_create(self.coordinate_system,cs_params)
-                if s:
-                    rospy.loginfo(m)
-                else:
-                    rospy.logerr(m)
-
-            else:
-                rospy.logerr(m)
-        else:
+        if not s:
             rospy.logerr(m)
-
+            return CsRefPointsResponse(Bool(s),String(m))
+        
+        s,m = self.projector.show_coordinate_system(self.coordinate_system,5)
+        if not s:
+            rospy.logerr(m)
+            return CsRefPointsResponse(Bool(s),String(m))
+        
+        s,m = self.projector.cs_axes_create(self.coordinate_system,cs_params)
+        if not s:
+            rospy.logerr(m)
+            return CsRefPointsResponse(Bool(s),String(m))
+            
+        m = "Coordinate system correctly defined"
+        rospy.loginfo(m)
         return CsRefPointsResponse(Bool(s),String(m))
 
     def get_coord_sys_list_cb(self,req):
         rospy.loginfo("Received request to get the coordinate system list at projector")
         
-        if req.get_list.data:
-            cs_list,s,m = self.projector.get_coordinate_systems()
-            if s:
-                rospy.loginfo(m)
-            else:
-                rospy.logerr(m)
-        else:
+        cs_list = []
+        cs_list = [String(cs_name) for cs_name in cs_list]
+        
+        if not req.get_list.data:
             s = False
             m = "get_list request not True"
-            cs_list = []
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+
+        cs_list,s,m = self.projector.get_coordinate_systems()
+        if not s:
+                rospy.logerr(m)
+                return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
         rospy.loginfo("coordinate systems list: {}".format(cs_list))
-
-        return CoordinateSystemResponse(Bool(s),String(m),String(cs_list))
+        cs_list = [String(cs_name) for cs_name in cs_list]
+        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def set_coord_sys_cb(self,req):
         rospy.loginfo("Received request to set coordinate system.")
 
-        if req.set.data:
-            if req.cs_name.data:
-                s,m = self.projector.set_coordinate_system(req.cs_name.data)
-                if s:
-                    rospy.loginfo(m)
-                    self.coordinate_system = req.cs_name.data
-                else:
-                    rospy.logerr(m)
-            else:
-                s = False
-                m = "cs_name request is empty"
-        else:
-            s = False
-            m = "set request not True"
+        cs_list = []
+        cs_list = [String(cs_name) for cs_name in cs_list]
 
-        return CoordinateSystemResponse(Bool(s),String(m),String([]))
+        if not req.set.data or not req.cs_name.data:
+            s = False
+            m = "set request is not True or cs_name request is empty"
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+
+        s,m = self.projector.set_coordinate_system(req.cs_name.data)
+        if not s:
+            rospy.logerr(m)
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+
+        self.coordinate_system = req.cs_name.data
+        m = "Coordinate system set correctly."
+        rospy.loginfo(m)
+        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def show_coord_sys_cb(self,req):
         rospy.loginfo("Request to project current coordinate system.")
 
-        if req.show_current.data:
-            if req.secs.data:
-                s,m = self.projector.show_coordinate_system(self.coordinate_system,req.secs.data)
-                if s:
-                    rospy.loginfo(m)
-                    s,m = self.projector.cs_axes_unhide(self.coordinate_system)
-                    if s:
-                        rospy.loginfo(m)
-                    else:
-                        rospy.logerr(m)
-                else:
-                    rospy.logerr(m)
-            else:
-                s = False
-                m = "secs request is empty"
-        else:
-            s = False
-            m = "show_current request not True"
+        cs_list = []
+        cs_list = [String(cs_name) for cs_name in cs_list]
 
-        return CoordinateSystemResponse(Bool(s),String(m),String([]))
+        if not req.show_current.data or not req.secs.data:
+            s = False
+            m = "show_current request not True or secs request is empty"
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+
+        s,m = self.projector.show_coordinate_system(self.coordinate_system,req.secs.data)
+        if not s:
+            rospy.logerr(m)
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+   
+        s,m = self.projector.cs_axes_unhide(self.coordinate_system)
+        if not s:
+            rospy.logerr(m)
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+
+        m = "Coordinate system showed correctly"
+        rospy.loginfo(m)
+        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def remove_coord_sys_cb(self,req):
         rospy.loginfo("Received request to remove coordinate system")
         
-        if req.remove.data:
-            if req.cs_name.data:
-                s,m = self.projector.remove_coordinate_system(req.cs_name.data)
-                if s:
-                    rospy.loginfo(m)
-                    self.coordinate_system = ""
-                else:
-                    rospy.logerr(m)
-            else:
-                s = False
-                m = "cs_name request is empty"
-        else:
+        cs_list = []
+        cs_list = [String(cs_name) for cs_name in cs_list]
+
+        if not req.remove.data or not req.cs_name.data:
             s = False
-            m = "set request not True"
-
+            m = "set request not True or cs_name request is empty"
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+        
+        s,m = self.projector.remove_coordinate_system(req.cs_name.data)
+        if not s:
+            rospy.logerr(m)
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+        
+        self.coordinate_system = ""
+        m = "Coordinate system removed correctly"
+        rospy.loginfo(m)
         rospy.loginfo("Set other coordinate system or define a new one before continue")
-
-        return CoordinateSystemResponse(Bool(s),String(m),String([]))
+        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def add_shape_cb(self,req):
         rospy.loginfo("Received request to add a shape to the current coordinate system.")
 
-        proj_elem_params = ProjectionElementParameters(req)
-        proj_elem_params.set_params()
+        proj_elem_params = ProjectionElementParameters()
+        proj_elem_params.set_params(req)
         
-        if req.add.data:
-            if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:
-                if req.shape_type.data == "polyline":
-                    rospy.loginfo("Creating polyline shape")
-                    s,m = self.projector.create_polyline(self.coordinate_system,proj_elem_params)
-                    if s:
-                        rospy.loginfo(m)
-                    else:
-                        rospy.logerr(m)
-                else: 
-                    s = False
-                    m = "shape_type does not match any"
-            else:
-                s = False
-                m = "shape_type or projection_group_name or shape_id request is empty"
-        else:
+        if not req.add.data or not (req.shape_type.data and req.projection_group_name.data and req.shape_id.data):
             s = False
-            m = "add request not True"
-        
+            m = "add request not True or shape_type or projection_group_name or shape_id request is empty"
+            return ProjectionElementResponse(Bool(s),String(m))
+
+        if req.shape_type.data == "polyline":
+            rospy.loginfo("Creating polyline shape")
+            s,m = self.projector.create_polyline(self.coordinate_system,proj_elem_params)
+            if not s:
+                rospy.logerr(m)
+                return ProjectionElementResponse(Bool(s),String(m))
+            m = "Shape added correctly"
+            rospy.loginfo(m)
+        else: 
+            s = False
+            m = "shape_type does not match any"
+
         return ProjectionElementResponse(Bool(s),String(m))
     
     def hide_shape_cb(self,req):
         rospy.loginfo("Received request to hide shape.")
 
-        proj_elem_params = ProjectionElementParameters(req) # en hide_shape req.x está vacío, hay problemas??
-                                                            # hay algun problema por machacar proj_elem_params??
-        proj_elem_params.set_params()
+        proj_elem_params = ProjectionElementParameters()
+        proj_elem_params.set_params(req)
 
-        if req.hide.data:
-            if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:
-                s,m = self.projector.hide_shape(proj_elem_params)
-                if s:
-                    rospy.loginfo(m)
-                else:
-                    rospy.logerr(m)
-            else:
-                s = False
-                m = "shape_type or projection_group_name or shape_id request is empty"
-        else:
+        if not req.hide.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
-            m = "add request not True"
-
+            m = "hide request not True or shape_type or projection_group_name or shape_id request is empty"
+            return ProjectionElementResponse(Bool(s),String(m))
+        
+        s,m = self.projector.hide_shape(proj_elem_params)
+        if not s:
+            rospy.logerr(m)
+            return ProjectionElementResponse(Bool(s),String(m))
+                    
+        m = "Shape hidden correctly"
+        rospy.loginfo(m)
         return ProjectionElementResponse(Bool(s),String(m))
 
     def unhide_shape_cb(self,req):
         rospy.loginfo("Received request to unhide shape.")
 
-        proj_elem_params = ProjectionElementParameters(req)
-        proj_elem_params.set_params()
+        proj_elem_params = ProjectionElementParameters()
+        proj_elem_params.set_params(req)
 
-        if req.unhide.data:
-            if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:
-                s,m = self.projector.unhide_shape(proj_elem_params)
-                if s:
-                    rospy.loginfo(m)
-                else:
-                    rospy.logerr(m)
-            else:
-                s = False
-                m = "shape_type or projection_group_name or shape_id request is empty"
-        else:
+        if not req.unhide.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
-            m = "add request not True"
+            m = "unhide request not True or shape_type or projection_group_name or shape_id request is empty"
+            return ProjectionElementResponse(Bool(s),String(m))
 
+        s,m = self.projector.unhide_shape(proj_elem_params)
+        if not s:
+            rospy.logerr(m)
+            return ProjectionElementResponse(Bool(s),String(m))
+
+        m = "Shape unhidden correctly"
+        rospy.loginfo(m)
         return ProjectionElementResponse(Bool(s),String(m))
 
     def remove_shape_cb(self,req):
         rospy.loginfo("Received request to remove shape.")
 
-        proj_elem_params = ProjectionElementParameters(req)
-        proj_elem_params.set_params()
+        proj_elem_params = ProjectionElementParameters()
+        proj_elem_params.set_params(req)
 
-        if req.unhide.data:
-            if req.shape_type.data and req.projection_group_name.data and req.shape_id.data:
-                s,m = self.projector.remove_shape(proj_elem_params)
-                if s:
-                    rospy.loginfo(m)
-                else:
-                    rospy.logerr(m)
-            else:
-                s = False
-                m = "shape_type or projection_group_name or shape_id request is empty"
-        else:
+        if not req.remove.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
-            m = "add request not True"
+            m = "remove request not True or shape_type or projection_group_name or shape_id request is empty"
+            return ProjectionElementResponse(Bool(s),String(m))
+        
+        s,m = self.projector.remove_shape(proj_elem_params)
+        if not s:
+            rospy.logerr(m)
+            return ProjectionElementResponse(Bool(s),String(m))
 
+        m = "Shape removed correctly"
+        rospy.loginfo(m)
         return ProjectionElementResponse(Bool(s),String(m))
 
 
