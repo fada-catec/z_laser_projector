@@ -3,7 +3,8 @@
 import sys
 import time
 import math
-from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl, ProjectionElementParameters
+from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from zlp import CoordinateSystemParameters, ProjectionElementParameters
 
 class ProjectorManager:
     
@@ -11,8 +12,8 @@ class ProjectorManager:
         self.projector_IP = projector_IP
         self.server_IP = server_IP
         self.connection_port = connection_port
-        # self.license_path = "/lic/1900027652.lic"
         self.projector_id = ""
+        self.coordinate_system = ""
 
         self.projector_client = ProjectorClient() 
 
@@ -44,10 +45,13 @@ class ProjectorManager:
         self.cs_element = CoordinateSystem(self.projector_id, module_id, thrift_client)
         self.projection_element = ProjectionElementControl(module_id,thrift_client)
 
+        if not self.coordinate_system:
+            message = message + "\nNo Current Coordinate System set so far."
+
         return success,message
 
-    def start_projection(self,coord_sys):
-        success,message = self.projector_client.start_project(coord_sys)
+    def start_projection(self):
+        success,message = self.projector_client.start_project(self.coordinate_system)
         return success,message 
 
     def stop_projection(self): 
@@ -59,30 +63,46 @@ class ProjectorManager:
         return cs_list,success,message
 
     def define_coordinate_system(self,cs_params):
-        
-        coord_sys,s,m = self.cs_element.define_cs(cs_params)
-        if s:
-            s,m = self.set_coordinate_system(coord_sys)
-            if s:
-                s,m = self.cs_element.register_cs(coord_sys)
-                m = "Coordinate system defined, set and registered"
+        coord_sys,success,message = self.cs_element.define_cs(cs_params)
+        if success:
+            success,message = self.cs_element.register_cs(coord_sys)
+            if success:
+                success,message = self.set_coordinate_system(coord_sys)
+                message = "Coordinate system defined, registered and set."
 
-        return coord_sys,s,m
+        return success,message
 
     def set_coordinate_system(self,coord_sys): 
         success,message = self.cs_element.set_cs(coord_sys)
+        if success:
+            self.coordinate_system = coord_sys
         return success,message
 
-    def show_coordinate_system(self,coord_sys,secs):
-        success,message = self.cs_element.show_cs(coord_sys, secs)
+    def show_coordinate_system(self,secs):
+        if not self.coordinate_system:
+            success = False
+            message = "Coordinate system cannot be showed because there is none or the current is not set first."
+            message = message + "\n NOTE: Check if the coordinate system is set first."
+            return success,message
+        
+        success,message = self.cs_element.show_cs(self.coordinate_system, secs)
         return success,message
 
     def remove_coordinate_system(self,coord_sys):
         success,message = self.cs_element.remove_cs(coord_sys)
+        if success:
+            self.coordinate_system = ""
+            message = "Coordinate system removed. Define or set new one."
+
         return success,message
 
-    def create_polyline(self,coord_sys,proj_elem_params):
-        success,message = self.projection_element.define_polyline(coord_sys,proj_elem_params)
+    def create_polyline(self,proj_elem_params):
+        if not self.coordinate_system:
+            success = False
+            message = "There is not a current coordinate system. Define or set one first."
+            return success,message
+
+        success,message = self.projection_element.define_polyline(self.coordinate_system,proj_elem_params)
         return success,message
 
     def hide_shape(self,proj_elem_params): 
@@ -97,56 +117,134 @@ class ProjectorManager:
         success,message = self.projection_element.delete_shape(proj_elem_params)
         return success,message
 
-    def cs_axes_create(self,coord_sys,cs_params):
+    def cs_axes_create(self,cs_params):
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.shape_type            = "polyline"
-        proj_elem_params.projection_group_name = coord_sys + "_origin"
+        proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
         proj_elem_params.x                     = cs_params.T1_x
         proj_elem_params.y                     = cs_params.T1_y
-        proj_elem_params.length                = 50
+        proj_elem_params.length                = 100
         
         proj_elem_params.shape_id              = "axis_x"
         proj_elem_params.angle                 = 0
 
-        s,m = self.projection_element.define_polyline(coord_sys, proj_elem_params) 
-        if s:
-            proj_elem_params.shape_id              = "axis_y"
-            proj_elem_params.angle                 = 90
-            s,m = self.projection_element.define_polyline(coord_sys, proj_elem_params)
-            if s:
-                self.start_projection(coord_sys)
-                time.sleep(5)
-                self.stop_projection()
-                
-                s,m = self.hide_shape(proj_elem_params)
-                if s:
-                    proj_elem_params.shape_id = "axis_x"
-                    s,m = self.hide_shape(proj_elem_params)
-                    if s:
-                        m = "Coordinate system origin axes created correctly"
+        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params) 
+        if success:
+            proj_elem_params.shape_id = "axis_y"
+            proj_elem_params.angle    = 90
+            success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+        
+        if success:
+            proj_elem_params.x        = cs_params.T1_x + 100
+            proj_elem_params.y        = cs_params.T1_y
+            proj_elem_params.length   = 30
+            proj_elem_params.shape_id = "axis_x_arrow1"
+            proj_elem_params.angle    = 180 - 15
+            success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+        
+        if success:
+            proj_elem_params.shape_id = "axis_x_arrow2"
+            proj_elem_params.angle    = 180 + 15
+            success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+        
+        if success:
+            proj_elem_params.x        = cs_params.T1_x
+            proj_elem_params.y        = cs_params.T1_y + 100
+            proj_elem_params.length   = 20
+            proj_elem_params.shape_id = "axis_y_arrow1"
+            proj_elem_params.angle    = 270 - 15
+            success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+        
+        if success:
+            proj_elem_params.shape_id = "axis_y_arrow2"
+            proj_elem_params.angle    = 270 + 15
+            success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+        
+        if success:
+            self.start_projection()
+            time.sleep(5)
+            self.stop_projection()
+                                
+        success,message = self.hide_shape(proj_elem_params)
+        if success:
+            proj_elem_params.shape_id = "axis_x"
+            success,message = self.hide_shape(proj_elem_params)
 
-        return s,m
+        if success:
+            proj_elem_params.shape_id = "axis_x_arrow1"
+            success,message = self.hide_shape(proj_elem_params)
 
-    def cs_axes_unhide(self,coord_sys):
+        if success:
+            proj_elem_params.shape_id = "axis_x_arrow2"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_y_arrow1"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_y_arrow2"
+            success,message = self.hide_shape(proj_elem_params)
+        
+        if success:
+            message = "Coordinate system origin axes created correctly"
+
+        return success,message
+
+    def cs_axes_unhide(self):
         proj_elem_params = ProjectionElementParameters()
-
         proj_elem_params.shape_type            = "polyline"
-        proj_elem_params.projection_group_name = coord_sys + "_origin"
+        proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
         proj_elem_params.shape_id              = "axis_x"
-        s,m = self.unhide_shape(proj_elem_params)
-        if s:
-            proj_elem_params.shape_id              = "axis_y"
-            s,m = self.unhide_shape(proj_elem_params)
-            if s:
-                self.start_projection(coord_sys)
-                time.sleep(5)
-                self.stop_projection()
-                
-                s,m = self.hide_shape(proj_elem_params)
-                if s:
-                    proj_elem_params.shape_id              = "axis_x"
-                    s,m = self.hide_shape(proj_elem_params)
-                    if s:
-                        m = "Coordinate system origin axes showed correctly"
+        
+        success,message = self.unhide_shape(proj_elem_params)
+        if success:
+            proj_elem_params.shape_id = "axis_y"
+            success,message = self.unhide_shape(proj_elem_params)
 
-        return s,m
+        if success:
+            proj_elem_params.shape_id = "axis_x_arrow1"
+            success,message = self.unhide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_x_arrow2"
+            success,message = self.unhide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_y_arrow1"
+            success,message = self.unhide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_y_arrow2"
+            success,message = self.unhide_shape(proj_elem_params)
+        
+        if success:
+            self.start_projection()
+            time.sleep(5)
+            self.stop_projection()
+                
+        success,message = self.hide_shape(proj_elem_params)
+        if success:
+            proj_elem_params.shape_id = "axis_x"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_x_arrow1"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_x_arrow2"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_y_arrow1"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "axis_y_arrow2"
+            success,message = self.hide_shape(proj_elem_params)
+        
+        if success:
+            message = "Coordinate system origin axes showed correctly"
+
+        return success,message

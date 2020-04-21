@@ -4,8 +4,10 @@
     This module contains utility classes and methods which ease the usage of the thrift interface to ZLP Service."""
 
 import os
+import sys
 import time
 import math
+import numpy as np
 import socket
 import copy
 import logging
@@ -375,15 +377,26 @@ class ProjectorClient(object):
                 bool success: success value
                 string message: information message"""
         try:
-            ref_obj_name = "RefObj_" + coord_sys
-            ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
-            if ref_obj.activated == False or len(self.__thrift_client.GetGeoTreeIds()) <= len(self.__thrift_client.GetCoordinatesystemList()):
+            if not coord_sys:
                 success = False
-                message = "Coordinate_system is not activated or nothing to project"
+                message = "None Coordinate System set"
             else:
-                self.__thrift_client.TriggerProjection()
-                success = True
-                message = "Projecting"
+                ref_obj_name = "RefObj_" + coord_sys
+                ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
+
+                geo_tree_list = self.__thrift_client.GetGeoTreeIds()
+                matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType == 1024]
+                polylines = [self.__thrift_client.GetProjectionElement(name) for name in matches]
+                polylines_actives = ([proj_elem for proj_elem in polylines 
+                                                    if proj_elem.activated == True and proj_elem.coordinateSystemList[0] == coord_sys])
+
+                if ref_obj.activated == False or not polylines_actives:
+                    success = False
+                    message = "Coordinate_system is not activated or nothing to project"
+                else:
+                    self.__thrift_client.TriggerProjection()
+                    success = True
+                    message = "Projecting elements from [" + coord_sys + "] coordinate system."
         
         except Exception as e:
             success = False
@@ -452,18 +465,19 @@ class CoordinateSystemParameters(object):
         
             Args:
                 struct cs: struct with the necessary parameters to create the coordinate system"""
-        self.name    = cs.name_cs.data
-        self.d       = cs.distance.data
-        self.x1      = cs.p1.x
-        self.y1      = cs.p1.y
-        self.x2      = cs.p2.x
-        self.y2      = cs.p2.y
-        self.x3      = cs.p3.x
-        self.y3      = cs.p3.y
-        self.x4      = cs.p4.x
-        self.y4      = cs.p4.y
-        self.T1_x    = cs.T1.x
-        self.T1_y    = cs.T1.y
+        self.name         = cs.name_cs.data
+        self.d            = cs.distance.data
+        self.x1           = cs.p1.x
+        self.y1           = cs.p1.y
+        self.x2           = cs.p2.x
+        self.y2           = cs.p2.y
+        self.x3           = cs.p3.x
+        self.y3           = cs.p3.y
+        self.x4           = cs.p4.x
+        self.y4           = cs.p4.y
+        self.T1_x         = cs.T1.x
+        self.T1_y         = cs.T1.y
+        self.scale_factor = cs.scale_factor.data
 
 class ProjectionElementParameters(object):
     """This class is used as data structure with the necessary information to create a projection element."""
@@ -578,16 +592,39 @@ class CoordinateSystem(object):
             reference_object.coordinateSystem = cs.name
             reference_object.projectorID = self.projector_id
             
+            scale_factor = cs.scale_factor
             T1_x = cs.T1_x
             T1_y = cs.T1_y
-            T2_x = T1_x + abs((cs.x2 - cs.x1))
-            T2_y = T1_y + abs((cs.y2 - cs.y1))
-            T3_x = T1_x + abs((cs.x3 - cs.x1))
-            T3_y = T1_y + abs((cs.y3 - cs.y1))
-            T4_x = T1_x + abs((cs.x4 - cs.x1))
-            T4_y = T1_y + abs((cs.y4 - cs.y1))
+            T2_x = T1_x + scale_factor * (cs.x1 - cs.x2) # abs((cs.x2 - cs.x1)) ??
+            T2_y = T1_y + scale_factor * (cs.y1 - cs.y2)
+            T3_x = T1_x + scale_factor * (cs.x1 - cs.x3)
+            T3_y = T1_y + scale_factor * (cs.y1 - cs.y3)
+            T4_x = T1_x + scale_factor * (cs.x1 - cs.x4)
+            T4_y = T1_y + scale_factor * (cs.y1 - cs.y4)
 
-            # TODO scale_factor = ??? T_x,y * 2 manteniendo la proporción
+            if abs(cs.x1 - cs.x2) > sys.float_info.epsilon:
+                rot_angle = math.atan((cs.y1 - cs.y2)/(cs.x1 - cs.x2))
+            else:
+                rot_angle = (math.pi/2)*math.copysign(1, cs.y1 - cs.y2)
+            
+            rot_matrix = np.array([[ math.cos(rot_angle), -math.sin(rot_angle)], 
+                                   [ math.sin(rot_angle),  math.cos(rot_angle)]])
+            rot_inverse = np.linalg.inv(rot_matrix)
+
+            T2 = np.array([[T2_x],[T2_y]])
+            rotated = rot_inverse.dot(T2)
+            T2_x = float(rotated[0])
+            T2_y = float(rotated[1])
+
+            T3 = np.array([[T3_x],[T3_y]])
+            rotated = rot_inverse.dot(T3)
+            T3_x = float(rotated[0])
+            T3_y = float(rotated[1])
+
+            T4 = np.array([[T4_x],[T4_y]])
+            rotated = rot_inverse.dot(T4)
+            T4_x = float(rotated[0])
+            T4_y = float(rotated[1])
 
             reference_object.refPointList = [   self.create_reference_point("T1", T1_x, T1_y),
                                                 self.create_reference_point("T2", T2_x, T2_y),
@@ -604,8 +641,8 @@ class CoordinateSystem(object):
             reference_object = self.__define_reference_point(reference_object,cross_size,1,d,cs.x2,cs.y2)
             reference_object = self.__define_reference_point(reference_object,cross_size,2,d,cs.x3,cs.y3)
             reference_object = self.__define_reference_point(reference_object,cross_size,3,d,cs.x4,cs.y4)
-            
-            self.__add_ref_object(reference_object)
+
+            self.__ref_obj_state(False,reference_object)
 
             success = True
             message = "Cordinate system defined correctly"
@@ -635,41 +672,6 @@ class CoordinateSystem(object):
         reference_object.refPointList[n].activated = True
         reference_object.refPointList[n].crossSize = cross_size
         return reference_object
-
-    def __add_ref_object(self,ref_obj):
-        """Add new coordinate system to the list.
-
-            Args:
-                struct ref_obj: current reference object structure of the generated coordinate system"""
-        self.reference_object_list.append(ref_obj)
-
-    def set_cs(self,coord_sys): 
-        """Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.
-
-            Args:
-                string coord_sys: name of the new coordinate system
-            
-            Returns:
-                bool success: success value
-                string message: information message"""
-        try:
-            ref_obj_name = "RefObj_" + coord_sys 
-
-            for i in range (0,len(self.reference_object_list)):
-                if self.reference_object_list[i].name == ref_obj_name:
-                    index = i
-                else:
-                    self.__ref_obj_state(False,self.reference_object_list[i])
-            
-            self.__ref_obj_state(True,self.reference_object_list[index])
-            success = True
-            message = coord_sys + " set as current coordinate system"
-
-        except Exception as e:
-            success = False 
-            message = e
-
-        return success,message
 
     def __ref_obj_state(self, state, ref_obj):
         """Activate or deactivate a reference object.
@@ -710,6 +712,33 @@ class CoordinateSystem(object):
 
         return success,message
 
+    def set_cs(self,coord_sys): 
+        """Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.
+
+            Args:
+                string coord_sys: name of the new coordinate system
+            
+            Returns:
+                bool success: success value
+                string message: information message"""
+        try:
+            geo_tree_list = self.__thrift_client.GetGeoTreeIds()
+            matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType == 4096]
+            coordinate_systems = [self.__thrift_client.GetReferenceobject(name) for name in matches]
+            
+            [self.__ref_obj_state(False, cs) for cs in coordinate_systems]
+            ref_obj_name = "RefObj_" + coord_sys
+            [self.__ref_obj_state(True, cs) for cs in coordinate_systems if cs.name == ref_obj_name]
+
+            success = True
+            message = coord_sys + " set as current coordinate system"
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
     def show_cs(self,coord_sys,secs):
         """Project a coordinate system on the projection surface.
 
@@ -726,7 +755,7 @@ class CoordinateSystem(object):
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
             
             success = True
-            message = "Finished to show coordinate system"
+            message = ("Finished to show [{}] coordinate system".format(coord_sys))
         
         except Exception as e:
             success = False 
@@ -747,7 +776,7 @@ class CoordinateSystem(object):
             reference_object_name = "RefObj_" + coord_sys
             self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
             success = True
-            message = "Coordinate system [" + coord_sys + "] removed."
+            message = "Coordinate system [" + coord_sys + "] removed. Set other coordinate system or define a new one before continue."
 
         except Exception as e:
             success = False 
@@ -832,6 +861,8 @@ class ProjectionElementControl(object):
 
             linestring = [ self.__geometry_tool.create_3d_point(x, y),
                            self.__geometry_tool.create_3d_point(x+length*math.cos(angle*math.pi/180), y+length*math.sin(angle*math.pi/180))]
+
+            print("line: {}".format(linestring))
             
             polyline.polylineList = [linestring]
             polyline.activated = True
@@ -840,7 +871,7 @@ class ProjectionElementControl(object):
             self.__thrift_client.SetPolyLine(polyline)
             
             success = True
-            message = polyline_name + " polyline created."
+            message = polyline_name + " polyline created at [" + coord_sys + "] coordinate system."
 
         except Exception as e:
             success = False 
@@ -867,12 +898,14 @@ class ProjectionElementControl(object):
             if shape_type == "polyline":
                 name = projection_group + "/my_" + shape_type + "_" + id
                 polyline = self.__thrift_client.GetPolyLine(name)
-                polyline.activated = False
-                self.__thrift_client.SetPolyLine(polyline)
-                
-                success = True
-                message = "Polyline " + name + " deactivated."
-
+                if polyline:
+                    polyline.activated = False
+                    self.__thrift_client.SetPolyLine(polyline)
+                    success = True
+                    message = "Polyline " + name + " deactivated."
+                else:
+                    success = False
+                    message = "Polyline " + name + " does not exist."
             else:
                 success = False
                 message = "Shape name does not exist."
@@ -902,12 +935,14 @@ class ProjectionElementControl(object):
             if shape_type == "polyline":
                 name = projection_group + "/my_" + shape_type + "_" + id
                 polyline = self.__thrift_client.GetPolyLine(name)
-                polyline.activated = True
-                self.__thrift_client.SetPolyLine(polyline)
-                
-                success = True
-                message = "Polyline " + name + " reactivated."
-
+                if polyline:
+                    polyline.activated = True
+                    self.__thrift_client.SetPolyLine(polyline)
+                    success = True
+                    message = "Polyline " + name + " reactivated."
+                else:
+                    success = False
+                    message = "Shape name does not exist."
             else:
                 success = False
                 message = "Shape name does not exist."
@@ -934,10 +969,15 @@ class ProjectionElementControl(object):
             projection_group = proj_elem_params.projection_group_name
             id               = proj_elem_params.shape_id
 
-            self.__thrift_client.RemoveGeoTreeElem(projection_group + "/my_" + shape_type + "_" + id)
-            success = True
-            message = "Shape removed"
-
+            name = projection_group + "/my_" + shape_type + "_" + id
+            shape = self.__thrift_client.GetPolyLine(name)
+            if shape:
+                self.__thrift_client.RemoveGeoTreeElem(name)
+                success = True
+                message = "Shape removed"
+            else:
+                success = False
+                message = "Shape name does not exist."
         except Exception as e:
             success = False 
             message = e

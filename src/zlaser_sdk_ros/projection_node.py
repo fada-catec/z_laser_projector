@@ -21,9 +21,9 @@ class ProjectionNode:
         rospy.loginfo("MAIN")
         rospack = rospkg.RosPack()
         self.pkg_path = rospack.get_path('zlaser_sdk_ros')
-        self.lic_path = self.pkg_path + "/lic/1900027652.lic"
-        self.coordinate_system = ""
 
+        self.lic_path = self.pkg_path + "/lic/1900027652.lic"
+        
         projector_IP = "192.168.10.10"
         server_IP = "192.168.10.11"
         connection_port = 9090
@@ -119,7 +119,7 @@ class ProjectionNode:
         s,m = self.projector.load_license(self.lic_path)
         if not s: 
             rospy.logerr(m)
-            rospy.logwarn("Load license again: \n\n rosservice call /projector_srv/load_license")
+            rospy.logwarn("Load license again: \n\n rosservice call /projector_srv/setup")
             return TriggerResponse(s,m)
 
         rospy.loginfo(m)
@@ -131,15 +131,12 @@ class ProjectionNode:
         m = "Projector setup correct: activated, connected and license loaded."
         rospy.loginfo(m)
 
-        if not self.coordinate_system:
-            rospy.loginfo("No Current Coordinate System set so far.")
-        
         return TriggerResponse(s,m)
 
     def projection_start_cb(self,req):
         rospy.loginfo("Received request to start projection")
         
-        s,m = self.projector.start_projection(self.coordinate_system)
+        s,m = self.projector.start_projection()
         if s:
             rospy.loginfo(m)
         else:
@@ -163,17 +160,17 @@ class ProjectionNode:
         
         cs_params = CoordinateSystemParameters(req)
 
-        self.coordinate_system,s,m = self.projector.define_coordinate_system(cs_params)
+        s,m = self.projector.define_coordinate_system(cs_params)
         if not s:
             rospy.logerr(m)
             return CsRefPointsResponse(Bool(s),String(m))
         
-        s,m = self.projector.show_coordinate_system(self.coordinate_system,5)
+        s,m = self.projector.show_coordinate_system(5)
         if not s:
             rospy.logerr(m)
             return CsRefPointsResponse(Bool(s),String(m))
         
-        s,m = self.projector.cs_axes_create(self.coordinate_system,cs_params)
+        s,m = self.projector.cs_axes_create(cs_params)
         if not s:
             rospy.logerr(m)
             return CsRefPointsResponse(Bool(s),String(m))
@@ -198,7 +195,6 @@ class ProjectionNode:
                 rospy.logerr(m)
                 return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
-        rospy.loginfo("coordinate systems list: {}".format(cs_list))
         cs_list = [String(cs_name) for cs_name in cs_list]
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
@@ -218,9 +214,6 @@ class ProjectionNode:
             rospy.logerr(m)
             return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
-        self.coordinate_system = req.cs_name.data
-        m = "Coordinate system set correctly."
-        rospy.loginfo(m)
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def show_coord_sys_cb(self,req):
@@ -234,17 +227,17 @@ class ProjectionNode:
             m = "show_current request not True or secs request is empty"
             return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
-        s,m = self.projector.show_coordinate_system(self.coordinate_system,req.secs.data)
+        s,m = self.projector.show_coordinate_system(req.secs.data)
         if not s:
             rospy.logerr(m)
             return CoordinateSystemResponse(Bool(s),String(m),cs_list)
    
-        s,m = self.projector.cs_axes_unhide(self.coordinate_system)
+        s,m = self.projector.cs_axes_unhide()
         if not s:
             rospy.logerr(m)
             return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
-        m = "Coordinate system showed correctly"
+        m = "Coordinate system showed correctly."
         rospy.loginfo(m)
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
@@ -264,10 +257,6 @@ class ProjectionNode:
             rospy.logerr(m)
             return CoordinateSystemResponse(Bool(s),String(m),cs_list)
         
-        self.coordinate_system = ""
-        m = "Coordinate system removed correctly"
-        rospy.loginfo(m)
-        rospy.loginfo("Set other coordinate system or define a new one before continue")
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def add_shape_cb(self,req):
@@ -278,20 +267,20 @@ class ProjectionNode:
         
         if not req.add.data or not (req.shape_type.data and req.projection_group_name.data and req.shape_id.data):
             s = False
-            m = "add request not True or shape_type or projection_group_name or shape_id request is empty"
+            m = "add request not True or shape_type or projection_group_name or shape_id request is empty."
             return ProjectionElementResponse(Bool(s),String(m))
 
         if req.shape_type.data == "polyline":
-            rospy.loginfo("Creating polyline shape")
-            s,m = self.projector.create_polyline(self.coordinate_system,proj_elem_params)
+            rospy.loginfo("Creating polyline shape.")
+            s,m = self.projector.create_polyline(proj_elem_params)
             if not s:
                 rospy.logerr(m)
                 return ProjectionElementResponse(Bool(s),String(m))
-            m = "Shape added correctly"
+            m = "Polyline added correctly."
             rospy.loginfo(m)
         else: 
             s = False
-            m = "shape_type does not match any"
+            m = "shape_type does not match any category."
 
         return ProjectionElementResponse(Bool(s),String(m))
     
@@ -310,9 +299,7 @@ class ProjectionNode:
         if not s:
             rospy.logerr(m)
             return ProjectionElementResponse(Bool(s),String(m))
-                    
-        m = "Shape hidden correctly"
-        rospy.loginfo(m)
+            
         return ProjectionElementResponse(Bool(s),String(m))
 
     def unhide_shape_cb(self,req):
@@ -331,8 +318,6 @@ class ProjectionNode:
             rospy.logerr(m)
             return ProjectionElementResponse(Bool(s),String(m))
 
-        m = "Shape unhidden correctly"
-        rospy.loginfo(m)
         return ProjectionElementResponse(Bool(s),String(m))
 
     def remove_shape_cb(self,req):
@@ -351,10 +336,7 @@ class ProjectionNode:
             rospy.logerr(m)
             return ProjectionElementResponse(Bool(s),String(m))
 
-        m = "Shape removed correctly"
-        rospy.loginfo(m)
         return ProjectionElementResponse(Bool(s),String(m))
-
 
 def main():
     ProjectionNode()
