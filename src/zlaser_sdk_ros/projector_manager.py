@@ -3,8 +3,8 @@
 import sys
 import time
 import math
-from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from zlp import CoordinateSystemParameters, ProjectionElementParameters
+from zlaser_sdk_ros.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from zlaser_sdk_ros.zlp import CoordinateSystemParameters, ProjectionElementParameters
 
 class ProjectorManager:
     
