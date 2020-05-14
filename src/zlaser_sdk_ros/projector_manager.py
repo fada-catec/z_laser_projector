@@ -4,7 +4,7 @@ import sys
 import time
 import math
 from zlaser_sdk_ros.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from zlaser_sdk_ros.zlp import CoordinateSystemParameters, ProjectionElementParameters
+from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
 
 class ProjectorManager:
     
@@ -127,8 +127,8 @@ class ProjectorManager:
         
         proj_elem_params.shape_id              = "axis_x"
         proj_elem_params.angle                 = 0
-
         success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params) 
+        
         if success:
             proj_elem_params.shape_id = "axis_y"
             proj_elem_params.angle    = 90
@@ -166,12 +166,9 @@ class ProjectorManager:
             self.stop_projection()
                                 
         success,message = self.hide_shape(proj_elem_params)
-        if success:
-            proj_elem_params.shape_id = "axis_x"
-            success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_x_arrow1"
+            proj_elem_params.shape_id = "axis_y_arrow1"
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
@@ -179,11 +176,15 @@ class ProjectorManager:
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_y_arrow1"
+            proj_elem_params.shape_id = "axis_x_arrow1"
+            success,message = self.hide_shape(proj_elem_params)
+        
+        if success:
+            proj_elem_params.shape_id = "axis_y"
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_y_arrow2"
+            proj_elem_params.shape_id = "axis_x"
             success,message = self.hide_shape(proj_elem_params)
         
         if success:
@@ -195,9 +196,10 @@ class ProjectorManager:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.shape_type            = "polyline"
         proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
-        proj_elem_params.shape_id              = "axis_x"
         
+        proj_elem_params.shape_id              = "axis_x"
         success,message = self.unhide_shape(proj_elem_params)
+        
         if success:
             proj_elem_params.shape_id = "axis_y"
             success,message = self.unhide_shape(proj_elem_params)
@@ -222,14 +224,11 @@ class ProjectorManager:
             self.start_projection()
             time.sleep(5)
             self.stop_projection()
-                
+        
         success,message = self.hide_shape(proj_elem_params)
-        if success:
-            proj_elem_params.shape_id = "axis_x"
-            success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_x_arrow1"
+            proj_elem_params.shape_id = "axis_y_arrow1"
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
@@ -237,11 +236,15 @@ class ProjectorManager:
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_y_arrow1"
+            proj_elem_params.shape_id = "axis_x_arrow1"
+            success,message = self.hide_shape(proj_elem_params)
+        
+        if success:
+            proj_elem_params.shape_id = "axis_y"
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_y_arrow2"
+            proj_elem_params.shape_id = "axis_x"
             success,message = self.hide_shape(proj_elem_params)
         
         if success:

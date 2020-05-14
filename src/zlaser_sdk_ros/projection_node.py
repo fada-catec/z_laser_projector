@@ -7,8 +7,8 @@ import time
 import numpy as np
 from std_srvs.srv import Trigger, TriggerResponse
 from std_msgs.msg import Bool, String
-from projector_manager import ProjectorManager
-from zlp import CoordinateSystemParameters, ProjectionElementParameters
+from zlaser_sdk_ros.projector_manager import ProjectorManager
+from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from zlaser_sdk_ros.srv import CsRefPoints, CsRefPointsResponse, CoordinateSystem, CoordinateSystemResponse
 from zlaser_sdk_ros.srv import ProjectionElement, ProjectionElementResponse
@@ -158,7 +158,8 @@ class ProjectionNode:
     def manual_define_coord_sys_cb(self,req):
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end.")
         
-        cs_params = CoordinateSystemParameters(req)
+        cs_params = CoordinateSystemParameters()
+        cs_params.set_params(req)
 
         s,m = self.projector.define_coordinate_system(cs_params)
         if not s:

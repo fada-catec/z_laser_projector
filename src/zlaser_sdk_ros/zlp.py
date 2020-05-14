@@ -457,54 +457,6 @@ class GeometryTool(object):
                 struct thrift_interface.Vector3D: struct with the values of the 3 axis (x,y,z)"""
         return thrift_interface.Vector3D(x, y, z)
 
-class CoordinateSystemParameters(object):
-    """This class is used as data structure with the necessary information to define a coordinate system."""
-    
-    def __init__(self,cs):
-        """Initialize the CoordinateSystemParameters object.
-        
-            Args:
-                struct cs: struct with the necessary parameters to create the coordinate system"""
-        self.name         = cs.name_cs.data
-        self.d            = cs.distance.data
-        self.x1           = cs.p1.x
-        self.y1           = cs.p1.y
-        self.x2           = cs.p2.x
-        self.y2           = cs.p2.y
-        self.x3           = cs.p3.x
-        self.y3           = cs.p3.y
-        self.x4           = cs.p4.x
-        self.y4           = cs.p4.y
-        self.T1_x         = cs.T1.x
-        self.T1_y         = cs.T1.y
-        self.scale_factor = cs.scale_factor.data
-
-class ProjectionElementParameters(object):
-    """This class is used as data structure with the necessary information to create a projection element."""
-
-    def __init__(self):
-        """Initialize the ProjectionElementParameters object.
-        
-            Args:
-                struct proj_elem: struct with the necessary parameters to create the projection element"""
-        self.shape_type            = ""
-        self.projection_group_name = ""
-        self.shape_id              = ""
-        self.x                     = 0.0
-        self.y                     = 0.0
-        self.angle                 = 0.0
-        self.length                = 0.0
-
-    def set_params(self,proj_elem):
-        """Set the ProjectionElementParameters values."""
-        self.shape_type            = proj_elem.shape_type.data
-        self.projection_group_name = proj_elem.projection_group_name.data
-        self.shape_id              = proj_elem.shape_id.data
-        self.x                     = proj_elem.x.data
-        self.y                     = proj_elem.y.data
-        self.angle                 = proj_elem.angle.data
-        self.length                = proj_elem.length.data
-
 class CoordinateSystem(object):
     """This class implement the functions related with coordinate systems management."""
     
