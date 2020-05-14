@@ -813,8 +813,6 @@ class ProjectionElementControl(object):
 
             linestring = [ self.__geometry_tool.create_3d_point(x, y),
                            self.__geometry_tool.create_3d_point(x+length*math.cos(angle*math.pi/180), y+length*math.sin(angle*math.pi/180))]
-
-            print("line: {}".format(linestring))
             
             polyline.polylineList = [linestring]
             polyline.activated = True

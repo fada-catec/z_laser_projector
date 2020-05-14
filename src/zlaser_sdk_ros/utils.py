@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 
-from std_msgs.msg import Bool, String, Float64, Int16
-
 class CoordinateSystemParameters:
     """This class is used as data structure with the necessary information to define a coordinate system."""
     
     def __init__(self):
         """Initialize the CoordinateSystemParameters object."""
-        self.name         = String()
-        self.d            = Float64()
+        self.name         = str()
+        self.d            = float()
         self.x1           = float()
         self.y1           = float()
         self.x2           = float()
@@ -19,13 +17,13 @@ class CoordinateSystemParameters:
         self.y4           = float()
         self.T1_x         = float()
         self.T1_y         = float()
-        self.scale_factor = Int16()
+        self.scale_factor = int()
 
-    def set_params(self,cs):
-        """Set the CoordinateSystemParameters values.
+    def set_request_params(self,cs):
+        """Set the CoordinateSystemParameters values by ROS service request (CsRefPoints.srv).
         
             Args:
-                struct cs: struct with the necessary parameters to create the coordinate system"""
+                struct cs: struct with the values of the parameters, stated by the ROS service call"""
         self.name         = cs.name_cs.data
         self.d            = cs.distance.data
         self.x1           = cs.p1.x
@@ -45,19 +43,19 @@ class ProjectionElementParameters:
 
     def __init__(self):
         """Initialize the ProjectionElementParameters object."""
-        self.shape_type            = String()
-        self.projection_group_name = String()
-        self.shape_id              = String()
-        self.x                     = Float64()
-        self.y                     = Float64()
-        self.angle                 = Float64()
-        self.length                = Float64()
+        self.shape_type            = str()
+        self.projection_group_name = str()
+        self.shape_id              = str()
+        self.x                     = float()
+        self.y                     = float()
+        self.angle                 = float()
+        self.length                = float()
 
-    def set_params(self,proj_elem):
-        """Set the ProjectionElementParameters values.
+    def set_request_params(self,proj_elem):
+        """Set the ProjectionElementParameters values by ROS service request (ProjectionElement.srv).
         
             Args:
-                struct proj_elem: struct with the necessary parameters to create the projection element"""
+                struct proj_elem: struct with the values of the parameters, stated by the ROS service call"""
         self.shape_type            = proj_elem.shape_type.data
         self.projection_group_name = proj_elem.projection_group_name.data
         self.shape_id              = proj_elem.shape_id.data

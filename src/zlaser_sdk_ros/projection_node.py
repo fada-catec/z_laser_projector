@@ -159,7 +159,7 @@ class ProjectionNode:
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end.")
         
         cs_params = CoordinateSystemParameters()
-        cs_params.set_params(req)
+        cs_params.set_request_params(req)
 
         s,m = self.projector.define_coordinate_system(cs_params)
         if not s:
@@ -264,7 +264,7 @@ class ProjectionNode:
         rospy.loginfo("Received request to add a shape to the current coordinate system.")
 
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.set_params(req)
+        proj_elem_params.set_request_params(req)
         
         if not req.add.data or not (req.shape_type.data and req.projection_group_name.data and req.shape_id.data):
             s = False
@@ -289,7 +289,7 @@ class ProjectionNode:
         rospy.loginfo("Received request to hide shape.")
 
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.set_params(req)
+        proj_elem_params.set_request_params(req)
 
         if not req.hide.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
@@ -307,7 +307,7 @@ class ProjectionNode:
         rospy.loginfo("Received request to unhide shape.")
 
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.set_params(req)
+        proj_elem_params.set_request_params(req)
 
         if not req.unhide.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
@@ -325,7 +325,7 @@ class ProjectionNode:
         rospy.loginfo("Received request to remove shape.")
 
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.set_params(req)
+        proj_elem_params.set_request_params(req)
 
         if not req.remove.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
