@@ -90,7 +90,7 @@ This will launch all laser projector services.
 
 ### Package libraries
 
-In order to only use the libraries in another package or script after install de python extension [projector_manager](#method-3:-install-libraries-as-python-extensions) or after install the z_laser_projector package, you can import the libraries:
+In order to only use the libraries in another package or script after install de python extension [projector_manager](#Method-3:-Install-libraries-as-python-extensions) or after install the z_laser_projector package, you can import the libraries:
 ```
 #!/usr/bin/env python3
 from zlaser_sdk_ros.projector_manager import ProjectorManager
