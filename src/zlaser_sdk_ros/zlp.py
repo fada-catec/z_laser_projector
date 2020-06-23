@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Helper module for python thrift interface to ZLP Service.
-    This module contains utility classes and methods which ease the usage of the thrift interface to ZLP Service."""
+"""Helper module for python thrift interface to ZLP Service. 
+This module contains utility classes and methods which ease the usage of the thrift interface to ZLP Service."""
 
 import os
 import sys
@@ -62,17 +62,19 @@ class ThriftClient(TClient):
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
         """Initialize the ThriftClient object.
 
-            Args:
-                object event_handler: ClientEventChannel thrift interface"""
+        Args:
+            event_handler (object): ClientEventChannel thrift interface
+        """
         self._event_channel = None
         self._event_channel_handler = event_handler
 
     def init_client(self, ip, port):
-        """Establish a connection to thrift server of ZLP Service.
+        """Establish a connection to thrift server of ZLP Service. Init client opening sockets and init events handler.
             
-            Args:
-                string ip: ipv6 network address of ZLP-Service
-                string port: port number on which ZLP-Service listens for requests"""
+        Args:
+            ip (str): ipv6 network address of ZLP-Service
+            port (str): port number on which ZLP-Service listens for requests
+        """
         client_socket = TSocket(ip, port, socket_family=socket.AF_INET, socket_timeout=50000)
         transport = TBufferedTransportFactory().get_transport(client_socket)
         protocol = TBinaryProtocolFactory().get_protocol(transport)
@@ -137,8 +139,9 @@ class ProjectorClient(object):
     def get_thrift_client(self):
         """Return the object generated to communicate with the projector.
             
-            Returns:
-                object ThriftClient(): object with the generated client to communicate with the projector"""
+        Returns:
+            object: object with the generated client to communicate with the projector
+        """
         try:
             return self.__thrift_client
         
@@ -148,13 +151,14 @@ class ProjectorClient(object):
     def connect(self,server_IP,connection_port):
         """Create and connect the client to thrift server (located at projector) of ZLP-Service and establish an event channel if needed.
 
-            Args:
-                string server_IP: ipv6 network address of ZLP-Service
-                string connection_port: port number on which ZLP-Service listens for requests
+        Args:
+            server_IP (str): ipv6 network address of ZLP-Service
+            connection_port (str): port number on which ZLP-Service listens for requests
 
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             self.__thrift_client.init_client(server_IP, connection_port)
             self.__thrift_client.init_event_channel()
@@ -170,9 +174,10 @@ class ProjectorClient(object):
     def disconnect(self):
         """Disconnect from ZLP Service thrift server and close own event server.
         
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try: 
             self.__thrift_client.RemoveGeoTreeElem("") 
             self.__thrift_client.FunctionModuleRelease(self.module_id)
@@ -195,13 +200,13 @@ class ProjectorClient(object):
     def scan_projectors(self, scan_addresses=""):
         """Scan the network for projectors. Get a list of active projectors.
 
-            Args:
-                string scan_addresses: addresses or address to scan
+        Args:
+            scan_addresses (str): addresses or address to scan
 
-            Returns:
-                list serial_list: serial numbers of the found projectors
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[list, bool, str]: the first value in the returned tuple is a list of serial numbers of the projectors found, the second a bool success value and 
+            the third value in the tuple is an information message string
+        """
         try:
             self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
             self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scanAddresses", scan_addresses)
@@ -228,13 +233,13 @@ class ProjectorClient(object):
     def activate_projector(self,projector_IP):
         """Set properties to activate a projector.
         
-            Args:
-                string projector_IP: address of the projector to scan
+        Args:
+            projector_IP (str): address of the projector to scan
 
-            Returns:
-                string projector_id: serial number of the found projector
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[str, bool, str]: the first value in the returned tuple is the serial number string of the activated projector,
+            the second a bool success value and the third value in the tuple is an information message string
+        """
         try:
             projectors,s,m = self.scan_projectors(projector_IP)
             if s:
@@ -257,9 +262,10 @@ class ProjectorClient(object):
     def deactivate_projector(self):
         """Set properties to deactivate a projector.
         
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
             self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
@@ -281,12 +287,13 @@ class ProjectorClient(object):
     def transfer_license(self, lic_path):
         """Transfer license file to projector.
         
-            Args:
-                string lic_path: license file path
+        Args:
+            lic_path (str): license file path
 
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             license_path = os.path.abspath(lic_path)
             license_file = os.path.basename(license_path)
@@ -312,14 +319,15 @@ class ProjectorClient(object):
     def transfer_file(self, local_path, remote_file, overwrite=False):
         """Transfer data of the local license file to remote file at ZLP-Service.
         
-            Args:
-                string local_path: normalized absolutized version of the pathname path 
-                string remote_file: base name of a normalized absolutized version of the pathname path
-                bool overwrite: overwrite data over remote file parameter
+        Args:
+            local_path (str): normalized absolutized version of the pathname path 
+            remote_file (str): base name of a normalized absolutized version of the pathname path
+            overwrite (bool): overwrite data over remote file parameter
 
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             content = open(local_path, 'r').read()
             self.__thrift_client.TransferDataToFile(content, remote_file, overwrite)
@@ -334,9 +342,11 @@ class ProjectorClient(object):
 
     def check_license(self):
         """Check if license is valid.
-        
-            Returns:
-                bool thrift_client.CheckLicense(): return True for success, False otherwise """
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             success = self.__thrift_client.CheckLicense()
             if success:
@@ -351,11 +361,11 @@ class ProjectorClient(object):
 
     def function_module_create(self):
         """Create function module to operate with GeoTreeElements (coordinate systems and shapes).
-        
-            Returns:
-                string module_id: function module identification name
-                bool success: success value
-                string message: information message"""
+
+        Returns:
+            tuple[str, bool, str]: the first value in the returned tuple is the function module identification name string, 
+            the second is a bool success value and the third value in the tuple is an information message string
+        """
         try:
             self.module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
             success = True
@@ -370,12 +380,13 @@ class ProjectorClient(object):
     def start_project(self, coord_sys):
         """Start projection on the surface of all figures (shapes) that belong to the active coordinate system.
             
-            Args:
-                string coord_sys: name of the current coordinate system
+        Args:
+            coord_sys (str): name of the current coordinate system
 
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             if not coord_sys:
                 success = False
@@ -406,10 +417,11 @@ class ProjectorClient(object):
 
     def stop_project(self): 
         """Stop projection of all figures.
-            
-            Returns:
-                bool success: success value
-                string message: information message"""
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
             self.__thrift_client.SetProperty(projector_property_path + ".cmdShowProjection.show", "0")
@@ -429,32 +441,35 @@ class GeometryTool(object):
     def create_matrix4x4(self):
         """Initialize 4x4 matrix.
             
-            Returns:
-                struct mat: matrix struct initialized with empty values"""
+        Returns:
+            object: matrix struct initialized with empty values
+        """
         mat = thrift_interface.Matrix4x4(list())
         return mat
 
     def create_2d_point(self, x=0, y=0):
         """Initialize 2-dimension array.
             
-            Args:
-                double x: x position value
-                double y: y position value
+        Args:
+            x (float): x position value
+            y (float): y position value
 
-            Returns:
-                bool thrift_interface.Vector2D: struct with the values of the 2 axis (x,y)"""
+        Returns:
+            object: struct with the values of the 2 axis (x,y)
+        """
         return thrift_interface.Vector2D(x, y)
 
     def create_3d_point(self, x=0, y=0, z=0):
         """Initialize 3-dimension array.
             
-            Args:
-                double x: x position value
-                double y: y position value
-                double z: z position value
+        Args:
+            x (float): x position value
+            y (float): y position value
+            z (float): z position value
 
-            Returns:
-                struct thrift_interface.Vector3D: struct with the values of the 3 axis (x,y,z)"""
+        Returns:
+            object: struct with the values of the 3 axis (x,y,z)
+        """
         return thrift_interface.Vector3D(x, y, z)
 
 class CoordinateSystem(object):
@@ -463,10 +478,11 @@ class CoordinateSystem(object):
     def __init__(self, projector_id, module_id, thrift_client):
         """Initialize the CoordinateSystem object.
         
-            Args:
-                string projector_id: serial number of the projector
-                string module_id: function module identification name
-                object thrift_client: object with the generated client to communicate with the projector"""
+        Args:
+            rojector_id (str): serial number of the projector
+            module_id (str): function module identification name
+            thrift_client (object): object with the generated client to communicate with the projector
+        """
         self.__thrift_client = thrift_client 
         self.__geometry_tool = GeometryTool()
 
@@ -476,11 +492,11 @@ class CoordinateSystem(object):
 
     def coordinate_system_list(self):
         """Get list of current available coordinate systems from projector.
-        
-            Returns:
-                list cs_list: names list of available coordinate systems
-                bool success: success value
-                string message: information message"""
+
+        Returns:
+            tuple[list, bool, str]: the first value in the returned tuple is a names' list of available coordinate systems, 
+            the second is a bool success value and the third value in the tuple is an information message string
+        """
         try:
             cs_list = self.__thrift_client.GetCoordinatesystemList()
             success = True
@@ -496,8 +512,9 @@ class CoordinateSystem(object):
     def create_reference_object(self):
         """Generate new reference object.
             
-            Returns:
-                struct ref_obj: reference object struct fields initialized"""
+        Returns:
+            object: reference object struct fields initialized
+        """
         ref_obj = thrift_interface.Referenceobject()
         ref_obj.name = ""
         ref_obj.activated = False
@@ -510,15 +527,16 @@ class CoordinateSystem(object):
     def create_reference_point(self, name, x, y, z=0, active=True):
         """Generate new reference point.
 
-            Args:
-                string name: reference point name
-                double x: x position value
-                double y: y position value
-                double z: z position value
-                bool active: activate reference point parameter
-            
-            Returns:
-                struct ref_point: reference point struct fields initialized"""
+        Args:
+            name (str): reference point name
+            x (float): x position value
+            y (float): y position value
+            z (float): z position value
+            active (bool): activate reference point parameter
+        
+        Returns:
+            object: reference point struct fields initialized
+        """
         ref_point = thrift_interface.Referencepoint()
         ref_point.name = name
         ref_point.refPoint = self.__geometry_tool.create_3d_point(x, y, z)
@@ -531,13 +549,13 @@ class CoordinateSystem(object):
     def define_cs(self,cs):
         """Generate new coordinate system.
 
-            Args:
-                struct cs: struct with the necessary parameters to create the coordinate system 
-            
-            Returns:
-                string cs.name: name of the coordinate system generated
-                bool success: success value
-                string message: information message"""
+        Args:
+            cs (object): struct with the necessary parameters to create the coordinate system 
+
+        Returns:
+            tuple[str, bool, str]: the first value in the returned tuple is the name string of the coordinate system generated, 
+            the second is a bool success value and the third value in the tuple is an information message string
+        """
         try:
             reference_object = self.create_reference_object()
             reference_object.name = "RefObj_" + cs.name
@@ -547,36 +565,21 @@ class CoordinateSystem(object):
             scale_factor = cs.scale_factor
             T1_x = cs.T1_x
             T1_y = cs.T1_y
-            T2_x = T1_x + scale_factor * (cs.x1 - cs.x2) # abs((cs.x2 - cs.x1)) ??
-            T2_y = T1_y + scale_factor * (cs.y1 - cs.y2)
-            T3_x = T1_x + scale_factor * (cs.x1 - cs.x3)
-            T3_y = T1_y + scale_factor * (cs.y1 - cs.y3)
-            T4_x = T1_x + scale_factor * (cs.x1 - cs.x4)
-            T4_y = T1_y + scale_factor * (cs.y1 - cs.y4)
+            T2_x = T1_x + scale_factor
+            T2_y = 0
+            T3_x = T1_x + scale_factor
+            T3_y = T1_y + scale_factor
+            T4_x = 0
+            T4_y = T1_y + scale_factor
+            T = [T1_x, T1_y, T2_x, T2_y, T3_x, T3_y, T4_x, T4_y]
 
-            if abs(cs.x1 - cs.x2) > sys.float_info.epsilon:
-                rot_angle = math.atan((cs.y1 - cs.y2)/(cs.x1 - cs.x2))
-            else:
-                rot_angle = (math.pi/2)*math.copysign(1, cs.y1 - cs.y2)
+            rot_angle = 180/math.pi*math.atan2((cs.y1 - cs.y2),(cs.x1 - cs.x2))
+            print('Reference system rotation angle: {}'.format(rot_angle))
             
-            rot_matrix = np.array([[ math.cos(rot_angle), -math.sin(rot_angle)], 
-                                   [ math.sin(rot_angle),  math.cos(rot_angle)]])
-            rot_inverse = np.linalg.inv(rot_matrix)
-
-            T2 = np.array([[T2_x],[T2_y]])
-            rotated = rot_inverse.dot(T2)
-            T2_x = float(rotated[0])
-            T2_y = float(rotated[1])
-
-            T3 = np.array([[T3_x],[T3_y]])
-            rotated = rot_inverse.dot(T3)
-            T3_x = float(rotated[0])
-            T3_y = float(rotated[1])
-
-            T4 = np.array([[T4_x],[T4_y]])
-            rotated = rot_inverse.dot(T4)
-            T4_x = float(rotated[0])
-            T4_y = float(rotated[1])
+            # rot_matrix = np.array([[ math.cos(rot_angle), -math.sin(rot_angle)], 
+            #                        [ math.sin(rot_angle),  math.cos(rot_angle)]])
+            # rot_inverse = np.linalg.inv(rot_matrix)
+            # T2 = np.array([[T2_x],[T2_y]]), rotated = rot_inverse.dot(T2), T2_x = float(rotated[0]), T2_y = float(rotated[1])
 
             reference_object.refPointList = [   self.create_reference_point("T1", T1_x, T1_y),
                                                 self.create_reference_point("T2", T2_x, T2_y),
@@ -603,21 +606,22 @@ class CoordinateSystem(object):
             success = False 
             message = e
 
-        return cs.name,success,message
+        return cs.name,T,success,message
 
     def __define_reference_point(self,reference_object,cross_size,n,d,x,y):
         """Fill other fields of the coordinate system structure.
 
-            Args:
-                struct reference_object: current coordinate system struct
-                struct cross_size: struct with the dimensions of the crosses
-                int n: vector index
-                float d: distance between the projection surface and the projector
-                float x: value of the x-axis coordinate
-                float y: value of the y-axis coordinate
-            
-            Returns:
-                struct reference_object: coordinate system parameters structure updated """
+        Args:
+            reference_object (object): current coordinate system struct
+            cross_size (object): struct with the dimensions of the crosses
+            n (int): vector index
+            d (float): distance between the projection surface and the projector
+            x (float): value of the x-axis coordinate
+            y (float): value of the y-axis coordinate
+        
+        Returns:
+            object: coordinate system parameters structure updated
+        """
         reference_object.refPointList[n].tracePoint.x = x
         reference_object.refPointList[n].tracePoint.y = y
         reference_object.refPointList[n].distance = d
@@ -628,9 +632,10 @@ class CoordinateSystem(object):
     def __ref_obj_state(self, state, ref_obj):
         """Activate or deactivate a reference object.
 
-            Args:
-                bool state: activation/deactivation parameter
-                struct reference_object: reference object to be activated/deactivated"""
+        Args:
+            state (bool): activation/deactivation parameter
+            reference_object (object): reference object to be activated/deactivated
+        """
         ref_obj.activated = state
         self.__thrift_client.SetReferenceobject(ref_obj)
         self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj.name)
@@ -640,12 +645,13 @@ class CoordinateSystem(object):
     def register_cs(self,coord_sys):
         """Register the new coordinate system at the projector once it has been generated and activated.
 
-            Args:
-                string coord_sys: name of the coordinate system
-            
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Args:
+            coord_sys (str): name of the coordinate system
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
             self.__thrift_client.FunctionModuleRun(self.module_id)
@@ -667,12 +673,13 @@ class CoordinateSystem(object):
     def set_cs(self,coord_sys): 
         """Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.
 
-            Args:
-                string coord_sys: name of the new coordinate system
-            
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Args:
+            coord_sys (str): name of the new coordinate system
+        
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             geo_tree_list = self.__thrift_client.GetGeoTreeIds()
             matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType == 4096]
@@ -694,13 +701,14 @@ class CoordinateSystem(object):
     def show_cs(self,coord_sys,secs):
         """Project a coordinate system on the projection surface.
 
-            Args:
-                string coord_sys: name of the coordinate system
-                int secs: number of seconds the projection lasts
+        Args:
+            coord_sys (str): name of the coordinate system
+            secs (int): number of seconds the projection lasts
 
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
             time.sleep(secs)
@@ -718,12 +726,13 @@ class CoordinateSystem(object):
     def remove_cs(self,coord_sys):
         """Delete a coordinate system.
             
-            Args:
-                string coord_sys: name of the coordinate system
+        Args:
+            coord_sys (str): name of the coordinate system
                 
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             reference_object_name = "RefObj_" + coord_sys
             self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
@@ -742,9 +751,10 @@ class ProjectionElementControl(object):
     def __init__(self,module_id, thrift_client):
         """Initialize the ProjectionElementControl object.
         
-            Args:
-                string module_id: function module identification name
-                object thrift_client: object with the generated client to communicate with the projector"""
+        Args:
+            module_id (str): function module identification name
+            thrift_client (object): object with the generated client to communicate with the projector
+        """
         self.__thrift_client = thrift_client
         self.__geometry_tool = GeometryTool()
         self.module_id = module_id
@@ -759,11 +769,12 @@ class ProjectionElementControl(object):
     def init_projection_element(self, elem):
         """Initialize new projection element.
 
-            Args:
-                struct elem: projection element struct to initialize
+        Args:
+            elem (object): projection element struct to initialize
             
-            Returns:
-                struct elem: projection element struct with fields initialized"""
+        Returns:
+            object: projection element struct with fields initialized
+        """
         elem.coordinateSystemList = copy.deepcopy(self.default_projection_element.coordinateSystemList)
         elem.projectorIDList = copy.deepcopy(self.default_projection_element.projectorIDList)
         elem.userTrans = copy.deepcopy(self.default_projection_element.userTrans)
@@ -772,13 +783,14 @@ class ProjectionElementControl(object):
         return elem
 
     def create_polyline(self, name):
-        """Generate new polyline.
+        """Generate a new line object.
             
-            Args:
-                string name:  polyline name
-            
-            Returns:
-                struct polyline: polyline struct with fields initialized"""
+        Args:
+            name (str): line name
+        
+        Returns:
+            object: polyline struct with fields initialized
+        """
         polyline = thrift_interface.Polyline()
         polyline = self.init_projection_element(polyline)
         polyline.name = name
@@ -786,20 +798,16 @@ class ProjectionElementControl(object):
         return polyline
 
     def define_polyline(self,coord_sys,proj_elem_params):
-        """Create a new line to project.
+        """Create a new line as projection figure.
 
-            Args:
-                string coord_sys: name of coordinate system which the new projection element will be added
-                string projection_group: name of the projection group
-                string id: name of the shape identificator
-                float x: position at x-axis of the line initial point
-                float y: position at y-axis of the line initial point
-                float angle: line angle value
-                float length: length of the line
+        Args:
+            coord_sys (str): name of coordinate system which the new projection figure will be added
+            proj_elem_params (list): list with the necessary parameters to identify and define a line as a new projection figure
                 
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             projection_group = proj_elem_params.projection_group_name
             id               = proj_elem_params.shape_id
@@ -830,16 +838,15 @@ class ProjectionElementControl(object):
         return success,message
 
     def deactivate_shape(self,proj_elem_params): 
-        """Hide (deactivate) a figure from a group of the active coordinate system.
+        """Hide (deactivate) a projection figure from the current reference system.
 
-            Args:
-                string projection_group: name of the projection group
-                string shape_name: type of figure (polyline, circle, etc.)
-                string id: name of the shape identificator
-                
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Args:
+            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             shape_type       = proj_elem_params.shape_type
             projection_group = proj_elem_params.projection_group_name
@@ -867,16 +874,15 @@ class ProjectionElementControl(object):
         return success,message
 
     def reactivate_shape(self,proj_elem_params): 
-        """Unhide (activate) a figure from a group of the active coordinate system.
+        """Unhide (activate hidden) a projection figure from the current reference system.
 
-            Args:
-                string projection_group: name of the projection group
-                string shape_name: type of figure (polyline, circle, etc.)
-                string id: name of the shape identificator
-                
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Args:
+            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             shape_type       = proj_elem_params.shape_type
             projection_group = proj_elem_params.projection_group_name
@@ -904,16 +910,15 @@ class ProjectionElementControl(object):
         return success,message
 
     def delete_shape(self,proj_elem_params):
-        """Delete a figure from the active coordinate system.
+        """Delete a projection figure from the current reference system.
 
-            Args:
-                string projection_group: name of the projection group
-                string shape_name: type of figure (polyline, circle, etc.)
-                string id: name of the shape identificator
-                
-            Returns:
-                bool success: success value
-                string message: information message"""
+        Args:
+            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         try:
             shape_type       = proj_elem_params.shape_type
             projection_group = proj_elem_params.projection_group_name
@@ -933,4 +938,3 @@ class ProjectionElementControl(object):
             message = e
 
         return success,message
-

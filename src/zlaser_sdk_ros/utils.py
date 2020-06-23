@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Complementary module with useful classes to support the usage of zlp library."""
+
 class CoordinateSystemParameters:
     """This class is used as data structure with the necessary information to define a coordinate system."""
     
@@ -22,8 +24,9 @@ class CoordinateSystemParameters:
     def set_request_params(self,cs):
         """Set the CoordinateSystemParameters values by ROS service request (CsRefPoints.srv).
         
-            Args:
-                struct cs: struct with the values of the parameters, stated by the ROS service call"""
+        Args:
+            cs (object): struct with the values of the parameters, stated by the ROS service call
+        """
         self.name         = cs.name_cs.data
         self.d            = cs.distance.data
         self.x1           = cs.p1.x
@@ -54,8 +57,9 @@ class ProjectionElementParameters:
     def set_request_params(self,proj_elem):
         """Set the ProjectionElementParameters values by ROS service request (ProjectionElement.srv).
         
-            Args:
-                struct proj_elem: struct with the values of the parameters, stated by the ROS service call"""
+        Args:
+            proj_elem (object): struct with the values of the parameters, stated by the ROS service call
+        """
         self.shape_type            = proj_elem.shape_type.data
         self.projection_group_name = proj_elem.projection_group_name.data
         self.shape_id              = proj_elem.shape_id.data

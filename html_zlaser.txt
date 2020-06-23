@@ -18,11 +18,15 @@ Source: git https://github.com/fada-catec/--------.git (branch: master)
 ZLP1 is a eye-safe laser projector (laser class 2M) used to project desired objects and figures as an optical guidance system in industrial applications like pick-and-place, logistics, and workstations, endeavouring to enlarge and optimize the production and workflow. 
 
 . {{attachment:zlaser_applic.png||height="250px",width="600px"}}
-<<Youtube(zznQPPagasI&)>>
-https://www.youtube.com/watch?v=uZy0WAPN304
-https://www.youtube.com/watch?v=CvjINQtj5ZU
+
+<<Youtube(uZy0WAPN304)>>
+
 
 This device is the smallest laser projector in the [[https://z-laser.com/en/product-area-laser-projectors/|Z-LASER ZLP]] family. 
+
+
+https://www.youtube.com/watch?v=uZy0WAPN304
+https://www.youtube.com/watch?v=CvjINQtj5ZU
 
 
 === Software architecture ===

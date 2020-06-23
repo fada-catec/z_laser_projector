@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 
+"""Central node that provides a collection of services that allows to operate and control the ZLP1 laser projector and simplify the task of 
+developing further advanced features."""
+
 import rospy
 import rospkg
 import os
 import time
 import numpy as np
 
-from zlaser_sdk_ros.projector_manager import ProjectorManager
-from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
+# from zlaser_sdk_ros.projector_manager import ProjectorManager
+# from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
+from projector_manager import ProjectorManager
+from utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from std_msgs.msg import Bool, String
 from std_srvs.srv import Trigger, TriggerResponse
@@ -15,8 +20,10 @@ from zlaser_sdk_ros.srv import CsRefPoints, CsRefPointsResponse, CoordinateSyste
 from zlaser_sdk_ros.srv import ProjectionElement, ProjectionElementResponse
 
 class ProjectionNode:
+    """This class initilizes the services and implements the functionalities of the projection_node."""
+    
     def __init__(self):
-
+        """Initialize the ProjectionNode object."""
         self.node_name = 'projection_node'
         rospy.init_node(self.node_name)
         rospy.loginfo("MAIN")
@@ -52,6 +59,12 @@ class ProjectionNode:
         rospy.spin()
 
     def connection_cb(self,req):
+        """Callback of ROS service to connect to the thrift server of ZLP-Service opening sockets and activating the device.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to connect and activate projector.")
 
         s,m = self.projector.client_server_connect()
@@ -69,6 +82,12 @@ class ProjectionNode:
         return TriggerResponse(s,m)
 
     def disconnection_cb(self,req):
+        """Callback of ROS service to deactivate projector and disconnect from service.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to disconnect projector.")
         
         s,m = self.projector.deactivate()
@@ -86,6 +105,12 @@ class ProjectionNode:
         return TriggerResponse(s,m)
 
     def transfer_license_cb(self,req):
+        """Callback of ROS service to transfer license file to service and check correct loading.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to load license file.")
 
         s,m = self.projector.load_license(self.lic_path)
@@ -104,6 +129,12 @@ class ProjectionNode:
         return TriggerResponse(s,m)
 
     def setup_cb(self,req):
+        """Callback of ROS service that packs basic services: connect to service, activate projector and transfer license.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to setup projector")
 
         s,m = self.projector.client_server_connect()
@@ -135,6 +166,12 @@ class ProjectionNode:
         return TriggerResponse(s,m)
 
     def projection_start_cb(self,req):
+        """Callback of ROS service to start projection of figures associated to the current coordinate system (see set_cs service) on the surface.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to start projection")
         
         s,m = self.projector.start_projection()
@@ -146,6 +183,12 @@ class ProjectionNode:
         return TriggerResponse(s,m)
     
     def projection_stop_cb(self,req):
+        """Callback of ROS service to stop all figures projection.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to stop projection")
         
         s,m = self.projector.stop_projection()
@@ -157,6 +200,15 @@ class ProjectionNode:
         return TriggerResponse(s,m)
 
     def manual_define_coord_sys_cb(self,req):
+        """Callback of ROS service to define a new reference system, stating the points coordinates manually by the user.
+
+        Args:
+            req (list): coordinates of reference system points
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end.")
         
         cs_params = CoordinateSystemParameters()
@@ -171,7 +223,12 @@ class ProjectionNode:
         if not s:
             rospy.logerr(m)
             return CsRefPointsResponse(Bool(s),String(m))
-        
+
+        s,m = self.projector.cs_frame_create(cs_params)
+        if not s:
+            rospy.logerr(m)
+            return CsRefPointsResponse(Bool(s),String(m))
+
         s,m = self.projector.cs_axes_create(cs_params)
         if not s:
             rospy.logerr(m)
@@ -182,6 +239,15 @@ class ProjectionNode:
         return CsRefPointsResponse(Bool(s),String(m))
 
     def get_coord_sys_list_cb(self,req):
+        """Callback of ROS service to get the list of defined coordinate systems.
+
+        Args:
+            req (list): flag for asking get coordinate systems list
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to get the coordinate system list at projector")
         
         cs_list = []
@@ -201,6 +267,16 @@ class ProjectionNode:
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def set_coord_sys_cb(self,req):
+        """Callback of ROS service to set the current coordinate system which some services as add_shape or projection_start automatically apply to. 
+        The rest of defined systems stay on background until any is set again.
+
+        Args:
+            req (object): name of coordinate system 
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to set coordinate system.")
 
         cs_list = []
@@ -219,6 +295,15 @@ class ProjectionNode:
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def show_coord_sys_cb(self,req):
+        """Callback of ROS service to project reference points and origin axis of current coordinate system.
+
+        Args:
+            req (object): seconds of projection duration
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Request to project current coordinate system.")
 
         cs_list = []
@@ -233,7 +318,12 @@ class ProjectionNode:
         if not s:
             rospy.logerr(m)
             return CoordinateSystemResponse(Bool(s),String(m),cs_list)
-   
+
+        s,m = self.projector.cs_frame_unhide()
+        if not s:
+            rospy.logerr(m)
+            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+
         s,m = self.projector.cs_axes_unhide()
         if not s:
             rospy.logerr(m)
@@ -244,6 +334,15 @@ class ProjectionNode:
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def remove_coord_sys_cb(self,req):
+        """Callback of ROS service to remove current coordinate system.
+
+        Args:
+            req (object): name of coordinate system
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to remove coordinate system")
         
         cs_list = []
@@ -262,6 +361,16 @@ class ProjectionNode:
         return CoordinateSystemResponse(Bool(s),String(m),cs_list)
 
     def add_shape_cb(self,req):
+        """Callback of ROS service to define properties of a new figure (line, circle, etc.) and add it to the figures list associated to the current 
+        coordinate system.
+
+        Args:
+            req (object): figure parameters
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to add a shape to the current coordinate system.")
 
         proj_elem_params = ProjectionElementParameters()
@@ -287,6 +396,15 @@ class ProjectionNode:
         return ProjectionElementResponse(Bool(s),String(m))
     
     def hide_shape_cb(self,req):
+        """Callback of ROS service to hide specific figure from current coordinate system.
+
+        Args:
+            req (object): figure indentifiers
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to hide shape.")
 
         proj_elem_params = ProjectionElementParameters()
@@ -305,6 +423,15 @@ class ProjectionNode:
         return ProjectionElementResponse(Bool(s),String(m))
 
     def unhide_shape_cb(self,req):
+        """Callback of ROS service to unhide specific figure from current coordinate system.
+
+        Args:
+            req (object): figure indentifiers
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to unhide shape.")
 
         proj_elem_params = ProjectionElementParameters()
@@ -323,6 +450,15 @@ class ProjectionNode:
         return ProjectionElementResponse(Bool(s),String(m))
 
     def remove_shape_cb(self,req):
+        """Callback of ROS service to remove specific figure from current coordinate system.
+
+        Args:
+            req (object): figure indentifiers
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
         rospy.loginfo("Received request to remove shape.")
 
         proj_elem_params = ProjectionElementParameters()
@@ -341,6 +477,7 @@ class ProjectionNode:
         return ProjectionElementResponse(Bool(s),String(m))
 
 def main():
+    """Init ROS node"""
     ProjectionNode()
 
 if __name__ == '__main__':

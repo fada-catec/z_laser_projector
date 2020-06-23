@@ -1,0 +1,557 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>projection_node module &mdash; zlaser_sdk_ros 0.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/jquery.fancybox.min.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/glpi.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="zlaser_sdk_ros 0.0.0 documentation" href="index.html"/>
+        <link rel="up" title="zlaser_sdk_ros" href="modules.html"/>
+        <link rel="prev" title="projector_manager module" href="projector_manager.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> zlaser_sdk_ros
+          
+
+          
+          </a>
+
+          
+            
+              <div class="version">
+                0.0.0
+
+                
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">zlaser_sdk_ros</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="zlp.html">zlp module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="projector_manager.html">projector_manager module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">projection_node module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">zlaser_sdk_ros</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">zlaser_sdk_ros</a> &raquo;</li>
+        
+      <li>projection_node module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/projection_node.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="breadcrumb navigation">
+      
+      
+        <a href="projector_manager.html" class="btn btn-neutral" title="projector_manager module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+  </div>
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-projection_node">
+<span id="projection-node-module"></span><h1>projection_node module<a class="headerlink" href="#module-projection_node" title="Permalink to this headline">¶</a></h1>
+<p>Central node that provides a collection of services that allows to operate and control the ZLP1 laser projector and simplify the task of
+developing further advanced features.</p>
+<dl class="class">
+<dt id="projection_node.ProjectionNode">
+<em class="property">class </em><code class="descclassname">projection_node.</code><code class="descname">ProjectionNode</code><a class="reference internal" href="_modules/projection_node.html#ProjectionNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class initilizes the services and implements the functionalities of the projection_node.</p>
+<dl class="method">
+<dt id="projection_node.ProjectionNode.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the ProjectionNode object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.connection_cb">
+<code class="descname">connection_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.connection_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.connection_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to connect to the thrift server of ZLP-Service opening sockets and activating the device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.disconnection_cb">
+<code class="descname">disconnection_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.disconnection_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.disconnection_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to deactivate projector and disconnect from service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.transfer_license_cb">
+<code class="descname">transfer_license_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.transfer_license_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.transfer_license_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to transfer license file to service and check correct loading.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.setup_cb">
+<code class="descname">setup_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.setup_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.setup_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service that packs basic services: connect to service, activate projector and transfer license.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.projection_start_cb">
+<code class="descname">projection_start_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.projection_start_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.projection_start_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to start projection of figures associated to the current coordinate system (see set_cs service) on the surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.projection_stop_cb">
+<code class="descname">projection_stop_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.projection_stop_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.projection_stop_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to stop all figures projection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.manual_define_coord_sys_cb">
+<code class="descname">manual_define_coord_sys_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.manual_define_coord_sys_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.manual_define_coord_sys_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to define a new reference system, stating the points coordinates manually by the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – coordinates of reference system points</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.get_coord_sys_list_cb">
+<code class="descname">get_coord_sys_list_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.get_coord_sys_list_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.get_coord_sys_list_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to get the list of defined coordinate systems.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – flag for asking get coordinate systems list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.set_coord_sys_cb">
+<code class="descname">set_coord_sys_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.set_coord_sys_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.set_coord_sys_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to set the current coordinate system which some services as add_shape or projection_start automatically apply to.
+The rest of defined systems stay on background until any is set again.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – name of coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.show_coord_sys_cb">
+<code class="descname">show_coord_sys_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.show_coord_sys_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.show_coord_sys_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to project reference points and origin axis of current coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – seconds of projection duration</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.remove_coord_sys_cb">
+<code class="descname">remove_coord_sys_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.remove_coord_sys_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.remove_coord_sys_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to remove current coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – name of coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.add_shape_cb">
+<code class="descname">add_shape_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.add_shape_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.add_shape_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to define properties of a new figure (line, circle, etc.) and add it to the figures list associated to the current
+coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – figure parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.hide_shape_cb">
+<code class="descname">hide_shape_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.hide_shape_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.hide_shape_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to hide specific figure from current coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – figure indentifiers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.unhide_shape_cb">
+<code class="descname">unhide_shape_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.unhide_shape_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.unhide_shape_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to unhide specific figure from current coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – figure indentifiers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="projection_node.ProjectionNode.remove_shape_cb">
+<code class="descname">remove_shape_cb</code><span class="sig-paren">(</span><em>req</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#ProjectionNode.remove_shape_cb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.ProjectionNode.remove_shape_cb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback of ROS service to remove specific figure from current coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>req</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – figure indentifiers</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is an information
+message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="projection_node.main">
+<code class="descclassname">projection_node.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection_node.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection_node.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Init ROS node</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="projector_manager.html" class="btn btn-neutral" title="projector_manager module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Rafa.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+      <script type="text/javascript" src="_static/jquery.fancybox.min.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+  <script type="text/javascript">
+    $(function(){
+      $('.image-reference').fancybox();
+    })
+  </script>
+
+</body>
+</html>

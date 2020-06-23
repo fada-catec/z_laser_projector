@@ -1,0 +1,25 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- roscpp
+- message_runtime
+- std_msgs
+- python-catkin-pkg
+- rospy
+- tf
+- message_generation
+description: Collect projector functionalities
+license: TODO
+maintainers: Ines M. Lara <imlara@catec.aero>
+msgs:
+- RefPoint
+package_type: package
+repo_url: ''
+srvs:
+- ProjectionElement
+- CoordinateSystem
+- CsRefPoints
+url: ''
