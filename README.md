@@ -21,14 +21,17 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
 ### Step 2: Install dependencies
 
 - This software runs on **python 3**. Install dependencies by using `pip3`
+
      ```
      sudo apt-get install python3-pip
      ```
 - thriftpy
+
      ```
      pip3 install thriftpy
      ```
 - numpy
+
      ```
      pip3 install numpy
      ```
@@ -36,12 +39,14 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
 ### Step 3: Install z_laser_projector ROS package
 
 - Create a [catkin](http://wiki.ros.org/catkin#Installing_catkin) workspace
+
      ```
      mkdir -p ~/catkin_ws/src
      cd ~/catkin_ws/
      catkin_make
      ```
 - Clone and compile the latest z_laser_projector ROS package
+
      ```
      cd ~/catkin_ws/src/
      git clone https://github.com/fada-catec/z_laser_projector.git
@@ -49,6 +54,7 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
      catkin_make
      ```
 - Don't forget to source workspace:
+
      ```
      source ~/catkin_ws/devel/setup.bash
      ```
