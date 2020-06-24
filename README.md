@@ -25,11 +25,13 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
      ```
      sudo apt-get install python3-pip
      ```
+
 - thriftpy
 
      ```
      pip3 install thriftpy
      ```
+
 - numpy
 
      ```
@@ -45,6 +47,7 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
      cd ~/catkin_ws/
      catkin_make
      ```
+
 - Clone and compile the latest z_laser_projector ROS package
 
      ```
@@ -53,6 +56,7 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
      cd ~/catkin_ws
      catkin_make
      ```
+     
 - Don't forget to source workspace:
 
      ```
