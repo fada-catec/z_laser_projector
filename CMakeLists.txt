@@ -19,6 +19,7 @@ catkin_python_setup()
 add_message_files(
    FILES
    RefPoint.msg
+   LineProjElem.msg
 )
 
 add_service_files(

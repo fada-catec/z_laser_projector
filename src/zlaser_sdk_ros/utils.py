@@ -70,8 +70,8 @@ class ProjectionElementParameters:
         self.angle                 = float()
         self.length                = float()
 
-    def set_request_params(self,proj_elem):
-        """Set the ProjectionElementParameters values by ROS service request (ProjectionElement.srv).
+    def set_line_params(self,proj_elem):
+        """Set the ProjectionElementParameters values by ROS topic request (ProjectionElement.srv)????????????.
         
         Args:
             proj_elem (object): struct with the values of the parameters, stated by the ROS service call
@@ -83,3 +83,13 @@ class ProjectionElementParameters:
         self.y                     = proj_elem.y.data
         self.angle                 = proj_elem.angle.data
         self.length                = proj_elem.length.data
+
+    def set_request_params(self,proj_elem):
+        """Set the ProjectionElementParameters values by ROS service request (ProjectionElement.srv).
+        
+        Args:
+            proj_elem (object): struct with the values of the parameters, stated by the ROS service call
+        """
+        self.shape_type            = proj_elem.shape_type.data
+        self.projection_group_name = proj_elem.projection_group_name.data
+        self.shape_id              = proj_elem.shape_id.data

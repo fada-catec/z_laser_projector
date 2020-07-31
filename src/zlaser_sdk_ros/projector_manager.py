@@ -20,10 +20,8 @@ task of developing advanced applications."""
 import sys
 import time
 import math
-# from zlaser_sdk_ros.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
-# from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
-from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from utils import CoordinateSystemParameters, ProjectionElementParameters
+from zlaser_sdk_ros.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
 
 class ProjectorManager:
     """This class uses the methods from the libraries imported."""
@@ -35,7 +33,7 @@ class ProjectorManager:
         self.connection_port = connection_port
         self.projector_id = ""
         self.coordinate_system = ""
-        self.T_current = []
+        self.current_user_T_points = []
 
         self.projector_client = ProjectorClient() 
 
@@ -59,26 +57,6 @@ class ProjectorManager:
         success,message = self.projector_client.disconnect()
         return success,message
 
-    def activate(self):
-        """Activate projector.
-
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
-        """
-        self.projector_id,success,message = self.projector_client.activate_projector(self.projector_IP)
-        return success,message
-
-    def deactivate(self):
-        """Deactivate projector.
-
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
-        """
-        success,message = self.projector_client.deactivate_projector()
-        return success,message
-
     def load_license(self,license_path):
         """Transfer license file to service and check correct loading.
 
@@ -89,8 +67,31 @@ class ProjectorManager:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
             message string
         """
-        self.projector_client.transfer_license(license_path)
-        success,message = self.projector_client.check_license()
+        success,message = self.projector_client.transfer_license(license_path)
+        return success,message
+    
+    def activate(self):
+        """Activate projector.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        self.projector_id,success,message = self.projector_client.activate_projector(self.projector_IP)
+        if success:
+            success,message = self.projector_client.check_license()
+            if success:
+                message = "Projector properly activated."
+        return success,message
+
+    def deactivate(self):
+        """Deactivate projector.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        success,message = self.projector_client.deactivate_projector()
         return success,message
 
     def geotree_operator_create(self):
@@ -151,13 +152,26 @@ class ProjectorManager:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
             message string
         """
-        coord_sys,self.T_current,success,message = self.cs_element.define_cs(cs_params)
+        coord_sys,self.current_user_T_points,success,message = self.cs_element.define_cs(cs_params)
         if success:
-            success,message = self.cs_element.register_cs(coord_sys)
+            success,message = self.register_coordinate_system(coord_sys)
             if success:
                 success,message = self.set_coordinate_system(coord_sys)
                 message = "Coordinate system defined, registered and set."
 
+        return success,message
+
+    def register_coordinate_system(self,coord_sys):
+        """Register new coordinate reference system.
+
+        Args:
+            cs_params (list): list of parameters from the new defined reference system
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        success,message = self.cs_element.register_cs(coord_sys)
         return success,message
 
     def set_coordinate_system(self,coord_sys):
@@ -207,7 +221,7 @@ class ProjectorManager:
         success,message = self.cs_element.remove_cs(coord_sys)
         if success:
             self.coordinate_system = ""
-            self.T_current = []
+            self.current_user_T_points = []
             message = "Coordinate system removed. Define or set new one."
 
         return success,message
@@ -435,7 +449,7 @@ class ProjectorManager:
         proj_elem_params.shape_type            = "polyline"
         proj_elem_params.projection_group_name = self.coordinate_system + "_frame"
 
-        T = self.T_current
+        T = self.current_user_T_points
         proj_elem_params.x                     = T[0]
         proj_elem_params.y                     = T[1]
         proj_elem_params.length                = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)

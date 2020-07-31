@@ -28,7 +28,7 @@ import numpy as np
 import socket
 import copy
 import logging
-from threading import Thread
+import threading 
 
 import thriftpy
 from thriftpy.protocol import TBinaryProtocolFactory
@@ -106,7 +106,7 @@ class ThriftClient(TClient):
             server_socket.client_timeout = 1000*60*10 
             self._event_channel = TSimpleServer(processor, server_socket)
 
-            t = Thread(target=self._event_channel.serve, daemon=True)
+            t = threading.Thread(target=self._event_channel.serve, daemon=True)
             t.start()
 
             time.sleep(1)
@@ -152,6 +152,8 @@ class ProjectorClient(object):
         self.module_id = ""
 
         self.__thrift_client = ThriftClient()
+
+        self.cv = threading.Condition()
 
     def get_thrift_client(self):
         """Return the object generated to communicate with the projector.
@@ -214,6 +216,62 @@ class ProjectorClient(object):
 
         return success,message
 
+    def transfer_license(self, lic_path):
+        """Transfer license file to projector.
+        Transfer data of the local license file to remote file at ZLP-Service.
+        
+        local_path (str): normalized absolutized version of the pathname path 
+        remote_file (str): base name of a normalized absolutized version of the pathname path
+        overwrite (bool): overwrite data over remote file parameter
+        
+        Args:
+            lic_path (str): license file path
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        try:
+            license_path = os.path.abspath(lic_path)
+            license_file = os.path.basename(license_path)
+            content = open(license_path, 'r').read()
+
+            self.__thrift_client.TransferDataToFile(content, license_file, True)
+        
+        except thrift_interface.CantWriteFile as e:
+            success = False
+            message = e
+        
+        except FileNotFoundError as e:
+            success = False
+            message = e
+
+        self.__thrift_client.LoadLicense(license_file)
+
+        success = True
+        message = "License transfered."
+        
+        return success,message
+
+    def check_license(self):
+        """Check if license is valid.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        try:
+            success = self.__thrift_client.CheckLicense()
+            if success:
+                message = "License is valid"
+            else:
+                message = "License is not valid"
+        except Exception as e:
+            success = False
+            message = e
+
+        return success,message
+
     def scan_projectors(self, scan_addresses=""):
         """Scan the network for projectors. Get a list of active projectors.
 
@@ -246,6 +304,11 @@ class ProjectorClient(object):
             message = e
 
         return serial_list,success,message
+    
+    def property_changed_callback(self, prop, value):
+        self.cv.acquire()
+        self.cv.notify()
+        self.cv.release()
 
     def activate_projector(self,projector_IP):
         """Set properties to activate a projector.
@@ -260,10 +323,16 @@ class ProjectorClient(object):
         try:
             projectors,s,m = self.scan_projectors(projector_IP)
             if s:
+                self.__thrift_client.set_property_changed_callback(self.property_changed_callback)
+                self.__thrift_client.RegisterForChangedProperty("config.licenseState.IsValid")
+
+                self.cv.acquire()
                 self.projector_id = projectors[0]
                 self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.serial", self.projector_id)
                 self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector.active", "1")
                 self.__thrift_client.SetProperty("config.projectorManager.cmdActivateProjector", "1")
+                self.cv.wait()
+                self.cv.release()
                 success = True 
                 message = "Projector activated"
             else:
@@ -297,81 +366,6 @@ class ProjectorClient(object):
 
         except Exception as e:
             success = False 
-            message = e
-
-        return success,message
-
-    def transfer_license(self, lic_path):
-        """Transfer license file to projector.
-        
-        Args:
-            lic_path (str): license file path
-
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
-        """
-        try:
-            license_path = os.path.abspath(lic_path)
-            license_file = os.path.basename(license_path)
-            s,m = self.transfer_file(license_path, license_file, True)
-            if s:
-                self.__thrift_client.LoadLicense(license_file)
-                success = True 
-                message = "License transfered"
-            else:
-                success = False 
-                message = m
-        
-        except thrift_interface.CantWriteFile as e:
-            success = False
-            message = e
-        
-        except FileNotFoundError as e:
-            success = False
-            message = e
-        
-        return success,message
-
-    def transfer_file(self, local_path, remote_file, overwrite=False):
-        """Transfer data of the local license file to remote file at ZLP-Service.
-        
-        Args:
-            local_path (str): normalized absolutized version of the pathname path 
-            remote_file (str): base name of a normalized absolutized version of the pathname path
-            overwrite (bool): overwrite data over remote file parameter
-
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
-        """
-        try:
-            content = open(local_path, 'r').read()
-            self.__thrift_client.TransferDataToFile(content, remote_file, overwrite)
-            success = True
-            message = "File transfered"
-        
-        except Exception as e:
-            success = False
-            message = e
-
-        return success,message
-
-    def check_license(self):
-        """Check if license is valid.
-
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
-        """
-        try:
-            success = self.__thrift_client.CheckLicense()
-            if success:
-                message = "License is valid"
-            else:
-                message = "License is not valid"
-        except Exception as e:
-            success = False
             message = e
 
         return success,message
@@ -496,7 +490,7 @@ class CoordinateSystem(object):
         """Initialize the CoordinateSystem object.
         
         Args:
-            rojector_id (str): serial number of the projector
+            projector_id (str): serial number of the projector
             module_id (str): function module identification name
             thrift_client (object): object with the generated client to communicate with the projector
         """
