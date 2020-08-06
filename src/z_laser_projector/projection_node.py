@@ -54,24 +54,24 @@ class ProjectionNode:
         connection_port = 9090
         self.projector = ProjectorManager(projector_IP, server_IP, connection_port)
 
-        self.connect      = rospy.Service('/projector_srv/connect', Trigger, self.connection_cb)
-        self.disconnect   = rospy.Service('/projector_srv/disconnect', Trigger, self.disconnection_cb)
-        self.start_proj   = rospy.Service('/projector_srv/projection_start', Trigger, self.projection_start_cb)
-        self.stop_proj    = rospy.Service('/projector_srv/projection_stop', Trigger, self.projection_stop_cb)
+        self.connect       = rospy.Service('connect', Trigger, self.connection_cb)
+        self.disconnect    = rospy.Service('disconnect', Trigger, self.disconnection_cb)
+        self.start_proj    = rospy.Service('projection_start', Trigger, self.projection_start_cb)
+        self.stop_proj     = rospy.Service('projection_stop', Trigger, self.projection_stop_cb)
+ 
+        self.manual_cs     = rospy.Service('man_def_cs', CsRefPoints, self.manual_define_coord_sys_cb)
+ 
+        self.get_cs_list   = rospy.Service('cs_list', CoordinateSystem, self.get_coord_sys_list_cb)
+        self.set_cs        = rospy.Service('set_cs', CoordinateSystem, self.set_coord_sys_cb)
+        self.show_cs       = rospy.Service('show_current_cs', CoordinateSystem, self.show_coord_sys_cb)
+        self.rem_cs        = rospy.Service('remove_coord_sys', CoordinateSystem, self.remove_coord_sys_cb)
 
-        self.manual_cs    = rospy.Service('/projector_srv/man_def_cs', CsRefPoints, self.manual_define_coord_sys_cb)
-
-        self.get_cs_list  = rospy.Service('/projector_srv/cs_list', CoordinateSystem, self.get_coord_sys_list_cb)
-        self.set_cs       = rospy.Service('/projector_srv/set_cs', CoordinateSystem, self.set_coord_sys_cb)
-        self.show_cs      = rospy.Service('/projector_srv/show_current_cs', CoordinateSystem, self.show_coord_sys_cb)
-        self.rem_cs       = rospy.Service('/projector_srv/remove_coord_sys', CoordinateSystem, self.remove_coord_sys_cb)
-
-        self.add_line      = rospy.Subscriber("/projector/add_line", LineProjElem, self.add_line_cb)
-
-        self.hide_shape    = rospy.Service('/projector_srv/hide_shape', ProjectionElement, self.hide_shape_cb)
-        self.unhide_shape  = rospy.Service('/projector_srv/unhide_shape', ProjectionElement, self.unhide_shape_cb)
-        self.remove_shape  = rospy.Service('/projector_srv/remove_shape', ProjectionElement, self.remove_shape_cb)
+        self.hide_shape    = rospy.Service('hide_shape', ProjectionElement, self.hide_shape_cb)
+        self.unhide_shape  = rospy.Service('unhide_shape', ProjectionElement, self.unhide_shape_cb)
+        self.remove_shape  = rospy.Service('remove_shape', ProjectionElement, self.remove_shape_cb)
         
+        self.add_line      = rospy.Subscriber("add_line", LineProjElem, self.add_line_cb)
+
         rospy.spin()
 
     def connection_cb(self,req):
