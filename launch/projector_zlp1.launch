@@ -1,5 +1,9 @@
 <launch>
 
-    <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" ns="projector_zlp1" output="screen"/>
+    <arg name="namespace" value="projector_zlp1"/>
+
+    <rosparam file="$(find z_laser_projector)/config/projector_config.yaml" ns="$(arg namespace)"/>
+
+    <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" ns="$(arg namespace)" output="screen"/>
 
 </launch>

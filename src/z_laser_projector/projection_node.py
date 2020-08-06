@@ -44,16 +44,16 @@ class ProjectionNode:
     def __init__(self):
         """Initialize the ProjectionNode object."""
         rospy.init_node('projection_node')
-
+     
+        projector_IP    = rospy.get_param('projector_IP', "192.168.10.10") 
+        server_IP       = rospy.get_param('server_IP', "192.168.10.11") 
+        connection_port = rospy.get_param('connection_port', 9090) 
+        license_file    = rospy.get_param('license_file', "1900027652.lic") 
+        
         rospack = rospkg.RosPack()
-        self.pkg_path = rospack.get_path('z_laser_projector')
+        pkg_path = rospack.get_path('z_laser_projector')
+        self.lic_path = pkg_path + "/lic/" + license_file
 
-        self.lic_path = self.pkg_path + "/lic/1900027652.lic"
-        
-        projector_IP = "192.168.10.10"
-        server_IP = "192.168.10.11"
-        connection_port = 9090
-        
         self.projector = ProjectorManager(projector_IP, server_IP, connection_port, self.lic_path)
         rospy.loginfo("Preparing projector...")
         success, message = self.projector.connect_and_setup()
@@ -105,7 +105,6 @@ class ProjectionNode:
         s,m = self.projector.load_license(self.lic_path)
         if not s: 
             rospy.logerr(m)
-            rospy.logwarn("Load license again: \n\n rosservice call /projector_srv/connect")
             return TriggerResponse(s,m)
         
         s,m = self.projector.activate()

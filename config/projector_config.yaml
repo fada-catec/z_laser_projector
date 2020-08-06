@@ -1,0 +1,4 @@
+projector_IP: "192.168.10.10"
+server_IP: "192.168.10.11"
+connection_port: 9090
+license_file: "1900027652.lic"
