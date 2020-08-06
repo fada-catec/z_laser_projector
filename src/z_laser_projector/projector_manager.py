@@ -26,16 +26,42 @@ from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElemen
 class ProjectorManager:
     """This class uses the methods from the libraries imported."""
 
-    def __init__(self, projector_IP = "192.168.10.10", server_IP = "192.168.10.11", connection_port = 9090):
+    def __init__(self, projector_IP = "192.168.10.10", server_IP = "192.168.10.11", connection_port = 9090, lic_path=""):
         """Initialize the ProjectorManager object."""
         self.projector_IP = projector_IP
         self.server_IP = server_IP
         self.connection_port = connection_port
+        self.license_path = lic_path
         self.projector_id = ""
         self.coordinate_system = ""
         self.current_user_T_points = []
 
         self.projector_client = ProjectorClient() 
+
+    def connect_and_setup(self):
+        """Prepare projector to be used: connect, load license and activate.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        success,message = self.client_server_connect()
+        if not success:
+            return success,message
+
+        success,message = self.load_license(self.license_path)
+        if not success: 
+            return success,message
+        
+        success,message = self.activate()
+        if not success:
+            return success,message
+
+        success,message = self.geotree_operator_create()
+        if not success:
+            return success,message
+
+        return True, "Projector ready"
 
     def client_server_connect(self):
         """Connect to thrift server of ZLP-Service.

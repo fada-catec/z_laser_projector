@@ -53,15 +53,23 @@ class ProjectionNode:
         projector_IP = "192.168.10.10"
         server_IP = "192.168.10.11"
         connection_port = 9090
-        self.projector = ProjectorManager(projector_IP, server_IP, connection_port)
+        
+        self.projector = ProjectorManager(projector_IP, server_IP, connection_port, self.lic_path)
+        rospy.loginfo("Preparing projector...")
+        success, message = self.projector.connect_and_setup()
+        if success:
+            rospy.loginfo(message)
+        else:
+            rospy.logerr(message)
+            rospy.logerr("Set up failed")
 
         self.connect       = rospy.Service('connect', Trigger, self.connection_cb)
         self.disconnect    = rospy.Service('disconnect', Trigger, self.disconnection_cb)
         self.start_proj    = rospy.Service('projection_start', Trigger, self.projection_start_cb)
         self.stop_proj     = rospy.Service('projection_stop', Trigger, self.projection_stop_cb)
- 
+
         self.manual_cs     = rospy.Service('define_coordinate_system', CoordinateSystem, self.manual_define_coord_sys_cb)
- 
+
         self.get_cs_list   = rospy.Service('coordinate_system_list', CoordinateSystemList, self.get_coord_sys_list_cb)
 
         self.set_cs        = rospy.Service('set_coordinate_system', CoordinateSystemName, self.set_coord_sys_cb)
@@ -73,6 +81,8 @@ class ProjectionNode:
         self.remove_shape  = rospy.Service('remove_shape', ProjectionElement, self.remove_shape_cb)
         
         self.add_line      = rospy.Subscriber("add_line", Line, self.add_line_cb)
+
+        rospy.on_shutdown(self.shutdown_handler)
 
         rospy.spin()
 
@@ -424,6 +434,16 @@ class ProjectionNode:
             return ProjectionElementResponse(Bool(s),String(m))
 
         return ProjectionElementResponse(Bool(s),String(m))
+
+    def shutdown_handler(self):
+        rospy.loginfo("Disconnecting before shutdown...")
+        s,m = self.projector.deactivate()
+        if not s:
+            rospy.logerr(m)
+        
+        s,m = self.projector.client_server_disconnect()
+        if not s:
+            rospy.logerr(m)
 
 def main():
     """Init ROS node"""
