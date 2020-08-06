@@ -31,8 +31,8 @@ from projector_manager import ProjectorManager
 from utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from std_msgs.msg import Bool, String
-from z_laser_projector.msg import Line
 from std_srvs.srv import Trigger, TriggerResponse
+from z_laser_projector.msg import Line, ReferencePoint
 from z_laser_projector.srv import CoordinateSystem, CoordinateSystemResponse
 from z_laser_projector.srv import CoordinateSystemName, CoordinateSystemNameResponse
 from z_laser_projector.srv import CoordinateSystemList, CoordinateSystemListResponse
@@ -44,25 +44,32 @@ class ProjectionNode:
     def __init__(self):
         """Initialize the ProjectionNode object."""
         rospy.init_node('projection_node')
-     
+
         projector_IP    = rospy.get_param('projector_IP', "192.168.10.10") 
         server_IP       = rospy.get_param('server_IP', "192.168.10.11") 
         connection_port = rospy.get_param('connection_port', 9090) 
         license_file    = rospy.get_param('license_file', "1900027652.lic") 
-        
+        load_cs         = rospy.get_param('load_coordinate_system', True) 
+
+        # define license file path
         rospack = rospkg.RosPack()
         pkg_path = rospack.get_path('z_laser_projector')
         self.lic_path = pkg_path + "/lic/" + license_file
-
+        # Create ProjectorManager instance
         self.projector = ProjectorManager(projector_IP, server_IP, connection_port, self.lic_path)
-        rospy.loginfo("Preparing projector...")
-        success, message = self.projector.connect_and_setup()
-        if success:
-            rospy.loginfo(message)
-        else:
-            rospy.logerr(message)
-            rospy.logerr("Set up failed")
+        # Connect, load license and activate projector
+        error = self.setup_projector()
+        # If set by user, create a coordinate system
+        if not error and load_cs:
+            self.create_initial_coordinate_system()
+        # Create services to interact with projector
+        self.open_services()
+        # Create handler to close connection when exiting node
+        rospy.on_shutdown(self.shutdown_handler)
 
+        rospy.spin()
+
+    def open_services(self):
         self.connect       = rospy.Service('connect', Trigger, self.connection_cb)
         self.disconnect    = rospy.Service('disconnect', Trigger, self.disconnection_cb)
         self.start_proj    = rospy.Service('projection_start', Trigger, self.projection_start_cb)
@@ -81,10 +88,6 @@ class ProjectionNode:
         self.remove_shape  = rospy.Service('remove_shape', ProjectionElement, self.remove_shape_cb)
         
         self.add_line      = rospy.Subscriber("add_line", Line, self.add_line_cb)
-
-        rospy.on_shutdown(self.shutdown_handler)
-
-        rospy.spin()
 
     def connection_cb(self,req):
         """Callback of ROS service to connect to the thrift server of ZLP-Service opening sockets and activating the device.
@@ -433,6 +436,51 @@ class ProjectionNode:
             return ProjectionElementResponse(Bool(s),String(m))
 
         return ProjectionElementResponse(Bool(s),String(m))
+
+    def read_coordinate_system(self):
+        rospy.loginfo("Reading coordinate system data")
+        cs_params = CoordinateSystemParameters()
+        cs_params.name        = rospy.get_param('coordinate_system_name', "default_cs")
+        cs_params.resolution  = rospy.get_param('coordinate_system_resolution', 1000)
+        cs_params.d           = rospy.get_param('coordinate_system_distance', 1500)
+        cs_params.x1          = rospy.get_param('P1/x', -100)
+        cs_params.y1          = rospy.get_param('P1/y', -100)
+        cs_params.x2          = rospy.get_param('P2/x', -100)
+        cs_params.y2          = rospy.get_param('P2/y',  100)
+        cs_params.x3          = rospy.get_param('P3/x',  100)
+        cs_params.y3          = rospy.get_param('P3/y',  100)
+        cs_params.x4          = rospy.get_param('P4/x',  100)
+        cs_params.y4          = rospy.get_param('P4/y', -100)
+        cs_params.T1_x        = rospy.get_param('T1/x',    0)
+        cs_params.T1_y        = rospy.get_param('T1/y',    0)
+        return cs_params
+
+    def setup_projector(self):
+        rospy.loginfo("Setting projector up")
+        success, message = self.projector.connect_and_setup()
+        if success:
+            rospy.loginfo(message)
+            return False
+        else:
+            rospy.logerr(message)
+            rospy.logerr("Set up failed")
+            return True
+
+    def create_initial_coordinate_system(self):
+        cs_params = self.read_coordinate_system()
+        success, message = self.projector.define_coordinate_system(cs_params)
+        if not success:
+            rospy.logerr(message)
+        else:
+            success, message = self.projector.cs_frame_create(cs_params)
+        if not success:
+            rospy.logerr(message)
+        else:
+            success, message = self.projector.cs_axes_create(cs_params)
+        if not success:
+            rospy.logerr(message)
+        else:
+            rospy.loginfo("Created coordinate system: {}".format(cs_params.name))
 
     def shutdown_handler(self):
         rospy.loginfo("Disconnecting before shutdown...")
