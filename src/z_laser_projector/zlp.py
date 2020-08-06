@@ -573,15 +573,15 @@ class CoordinateSystem(object):
             reference_object.coordinateSystem = cs.name
             reference_object.projectorID = self.projector_id
             
-            scale_factor = cs.scale_factor
+            resolution = cs.resolution
             T1_x = cs.T1_x
             T1_y = cs.T1_y
-            T2_x = T1_x + scale_factor
+            T2_x = T1_x + resolution
             T2_y = 0
-            T3_x = T1_x + scale_factor
-            T3_y = T1_y + scale_factor
+            T3_x = T1_x + resolution
+            T3_y = T1_y + resolution
             T4_x = 0
-            T4_y = T1_y + scale_factor
+            T4_y = T1_y + resolution
             T = [T1_x, T1_y, T2_x, T2_y, T3_x, T3_y, T4_x, T4_y]
 
             rot_angle = 180/math.pi*math.atan2((cs.y1 - cs.y2),(cs.x1 - cs.x2))

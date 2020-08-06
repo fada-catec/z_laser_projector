@@ -35,7 +35,7 @@ class CoordinateSystemParameters:
         self.y4           = float()
         self.T1_x         = float()
         self.T1_y         = float()
-        self.scale_factor = int()
+        self.resolution = int()
 
     def set_request_params(self,cs):
         """Set the CoordinateSystemParameters values by ROS service request (CoordinateSystem.srv).
@@ -55,7 +55,7 @@ class CoordinateSystemParameters:
         self.y4           = cs.p4.y
         self.T1_x         = cs.T1.x
         self.T1_y         = cs.T1.y
-        self.scale_factor = cs.scale_factor.data
+        self.resolution = cs.resolution.data
 
 class ProjectionElementParameters:
     """This class is used as data structure with the necessary information to create a projection element."""

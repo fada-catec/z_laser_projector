@@ -5,7 +5,7 @@ z_laser_projector/ReferencePoint p2
 z_laser_projector/ReferencePoint p3
 z_laser_projector/ReferencePoint p4
 z_laser_projector/ReferencePoint T1
-std_msgs/Int16 scale_factor
+std_msgs/Int16 resolution
 
 ---
 

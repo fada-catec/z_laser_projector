@@ -298,7 +298,7 @@ class ProjectorManager:
         proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
         proj_elem_params.x                     = cs_params.T1_x
         proj_elem_params.y                     = cs_params.T1_y
-        proj_elem_params.length                = cs_params.scale_factor/2
+        proj_elem_params.length                = cs_params.resolution/2
         
         proj_elem_params.shape_id              = "axis_x"
         proj_elem_params.angle                 = 0
@@ -310,9 +310,9 @@ class ProjectorManager:
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
         
         if success:
-            proj_elem_params.x        = cs_params.T1_x + cs_params.scale_factor/2
+            proj_elem_params.x        = cs_params.T1_x + cs_params.resolution/2
             proj_elem_params.y        = cs_params.T1_y
-            proj_elem_params.length   = cs_params.scale_factor/12
+            proj_elem_params.length   = cs_params.resolution/12
             proj_elem_params.shape_id = "axis_x_arrow1"
             proj_elem_params.angle    = 180 - 15
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
@@ -324,8 +324,8 @@ class ProjectorManager:
         
         if success:
             proj_elem_params.x        = cs_params.T1_x
-            proj_elem_params.y        = cs_params.T1_y + cs_params.scale_factor/2
-            proj_elem_params.length   = cs_params.scale_factor/14
+            proj_elem_params.y        = cs_params.T1_y + cs_params.resolution/2
+            proj_elem_params.length   = cs_params.resolution/14
             proj_elem_params.shape_id = "axis_y_arrow1"
             proj_elem_params.angle    = 270 - 15
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
