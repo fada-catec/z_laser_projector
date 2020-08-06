@@ -41,9 +41,8 @@ class ProjectionNode:
     
     def __init__(self):
         """Initialize the ProjectionNode object."""
-        self.node_name = 'projection_node'
-        rospy.init_node(self.node_name)
-        rospy.loginfo("MAIN")
+        rospy.init_node('projection_node')
+
         rospack = rospkg.RosPack()
         self.pkg_path = rospack.get_path('z_laser_projector')
 
