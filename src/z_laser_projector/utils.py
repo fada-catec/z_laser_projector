@@ -76,7 +76,7 @@ class ProjectionElementParameters:
         Args:
             proj_elem (object): struct with the values of the parameters, stated by the ROS service call
         """
-        self.shape_type            = proj_elem.shape_type.data
+        self.shape_type            = "polyline"
         self.projection_group_name = proj_elem.projection_group_name.data
         self.shape_id              = proj_elem.shape_id.data
         self.x                     = proj_elem.x.data
