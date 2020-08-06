@@ -5,4 +5,3 @@ std_msgs/Int16 secs
 
 std_msgs/Bool success
 std_msgs/String message
-std_msgs/String[] cs_list

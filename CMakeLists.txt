@@ -24,10 +24,11 @@ add_message_files(
 
 add_service_files(
    FILES
-   CoordinateSystem.srv
    ProjectionElement.srv
+   CoordinateSystem.srv
    CoordinateSystemName.srv
-)
+   CoordinateSystemList.srv
+   )
 
 generate_messages(
    DEPENDENCIES
