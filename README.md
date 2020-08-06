@@ -80,7 +80,7 @@ To consider:
 You can launch the ROS node included in this package, which opens ROS services to operate de projector. 
 
 ```
-roslaunch zlaser_sdk_ros projector_zlp1.launch
+roslaunch z_laser_projector projector_zlp1.launch
 ```
 
 ### Package libraries
@@ -88,8 +88,8 @@ roslaunch zlaser_sdk_ros projector_zlp1.launch
 If you perfer to include some projector functionalities into your custom node, import the librearies instead:
 ```
 #!/usr/bin/env python3
-from zlaser_sdk_ros.projector_manager import ProjectorManager
-from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_projector.projector_manager import ProjectorManager
+from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters
 ```
 
 ## Available services

@@ -20,8 +20,8 @@ task of developing advanced applications."""
 import sys
 import time
 import math
-from zlaser_sdk_ros.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_projector.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters
 
 class ProjectorManager:
     """This class uses the methods from the libraries imported."""

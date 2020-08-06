@@ -25,16 +25,16 @@ import os
 import time
 import numpy as np
 
-# from zlaser_sdk_ros.projector_manager import ProjectorManager
-# from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
+# from z_laser_projector.projector_manager import ProjectorManager
+# from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters
 from projector_manager import ProjectorManager
 from utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from std_msgs.msg import Bool, String
-from zlaser_sdk_ros.msg import LineProjElem
+from z_laser_projector.msg import LineProjElem
 from std_srvs.srv import Trigger, TriggerResponse
-from zlaser_sdk_ros.srv import CsRefPoints, CsRefPointsResponse, CoordinateSystem, CoordinateSystemResponse
-from zlaser_sdk_ros.srv import ProjectionElement, ProjectionElementResponse
+from z_laser_projector.srv import CsRefPoints, CsRefPointsResponse, CoordinateSystem, CoordinateSystemResponse
+from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
 
 class ProjectionNode:
     """This class initilizes the services and implements the functionalities of the projection_node."""
@@ -45,7 +45,7 @@ class ProjectionNode:
         rospy.init_node(self.node_name)
         rospy.loginfo("MAIN")
         rospack = rospkg.RosPack()
-        self.pkg_path = rospack.get_path('zlaser_sdk_ros')
+        self.pkg_path = rospack.get_path('z_laser_projector')
 
         self.lic_path = self.pkg_path + "/lic/1900027652.lic"
         

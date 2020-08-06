@@ -1,6 +1,6 @@
 <launch>
 
     <!-- <node name="interface_menu_control" pkg="interfaz_menu" type="menu_control.py" output="screen"/> -->
-    <node name="projection_node" pkg="zlaser_sdk_ros" type="projection_node.py" output="screen"/>
+    <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" output="screen"/>
 
 </launch>

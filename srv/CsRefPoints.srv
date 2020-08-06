@@ -1,10 +1,10 @@
 std_msgs/String name_cs
 std_msgs/Float64 distance
-zlaser_sdk_ros/RefPoint p1
-zlaser_sdk_ros/RefPoint p2
-zlaser_sdk_ros/RefPoint p3
-zlaser_sdk_ros/RefPoint p4
-zlaser_sdk_ros/RefPoint T1
+z_laser_projector/RefPoint p1
+z_laser_projector/RefPoint p2
+z_laser_projector/RefPoint p3
+z_laser_projector/RefPoint p4
+z_laser_projector/RefPoint T1
 std_msgs/Int16 scale_factor
 
 ---

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>zlaser_sdk_ros</name>
+  <name>z_laser_projector</name>
   <version>0.0.0</version>
   <description>Collect projector functionalities</description>
 
