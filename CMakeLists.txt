@@ -18,15 +18,15 @@ catkin_python_setup()
 
 add_message_files(
    FILES
-   RefPoint.msg
-   LineProjElem.msg
+   ReferencePoint.msg
+   Line.msg
 )
 
 add_service_files(
    FILES
-   CsRefPoints.srv
-   ProjectionElement.srv
    CoordinateSystem.srv
+   ProjectionElement.srv
+   CoordinateSystemName.srv
 )
 
 generate_messages(

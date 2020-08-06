@@ -38,7 +38,7 @@ class CoordinateSystemParameters:
         self.scale_factor = int()
 
     def set_request_params(self,cs):
-        """Set the CoordinateSystemParameters values by ROS service request (CsRefPoints.srv).
+        """Set the CoordinateSystemParameters values by ROS service request (CoordinateSystem.srv).
         
         Args:
             cs (object): struct with the values of the parameters, stated by the ROS service call

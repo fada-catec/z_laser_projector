@@ -1,13 +1,13 @@
-std_msgs/Bool get_list
-std_msgs/Bool set
-std_msgs/Bool show_current
-std_msgs/Bool remove
-
-std_msgs/String cs_name
-std_msgs/Int16 secs
+std_msgs/String name_cs
+std_msgs/Float64 distance
+z_laser_projector/ReferencePoint p1
+z_laser_projector/ReferencePoint p2
+z_laser_projector/ReferencePoint p3
+z_laser_projector/ReferencePoint p4
+z_laser_projector/ReferencePoint T1
+std_msgs/Int16 scale_factor
 
 ---
 
-std_msgs/Bool success
+std_msgs/Bool cs_created
 std_msgs/String message
-std_msgs/String[] cs_list

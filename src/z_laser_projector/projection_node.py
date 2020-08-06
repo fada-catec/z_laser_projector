@@ -31,9 +31,9 @@ from projector_manager import ProjectorManager
 from utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from std_msgs.msg import Bool, String
-from z_laser_projector.msg import LineProjElem
+from z_laser_projector.msg import Line
 from std_srvs.srv import Trigger, TriggerResponse
-from z_laser_projector.srv import CsRefPoints, CsRefPointsResponse, CoordinateSystem, CoordinateSystemResponse
+from z_laser_projector.srv import CoordinateSystem, CoordinateSystemResponse, CoordinateSystemName, CoordinateSystemNameResponse
 from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
 
 class ProjectionNode:
@@ -58,18 +58,18 @@ class ProjectionNode:
         self.start_proj    = rospy.Service('projection_start', Trigger, self.projection_start_cb)
         self.stop_proj     = rospy.Service('projection_stop', Trigger, self.projection_stop_cb)
  
-        self.manual_cs     = rospy.Service('man_def_cs', CsRefPoints, self.manual_define_coord_sys_cb)
+        self.manual_cs     = rospy.Service('define_coordinate_system', CoordinateSystem, self.manual_define_coord_sys_cb)
  
-        self.get_cs_list   = rospy.Service('cs_list', CoordinateSystem, self.get_coord_sys_list_cb)
-        self.set_cs        = rospy.Service('set_cs', CoordinateSystem, self.set_coord_sys_cb)
-        self.show_cs       = rospy.Service('show_current_cs', CoordinateSystem, self.show_coord_sys_cb)
-        self.rem_cs        = rospy.Service('remove_coord_sys', CoordinateSystem, self.remove_coord_sys_cb)
+        self.set_cs        = rospy.Service('set_coordinate_system', CoordinateSystemName, self.set_coord_sys_cb)
+        self.get_cs_list   = rospy.Service('coordinate_system_list', CoordinateSystemName, self.get_coord_sys_list_cb)
+        self.rem_cs        = rospy.Service('remove_coordinate_system', CoordinateSystemName, self.remove_coord_sys_cb)
+        self.show_cs       = rospy.Service('show_current_coordinate_system', CoordinateSystemName, self.show_coord_sys_cb)
 
         self.hide_shape    = rospy.Service('hide_shape', ProjectionElement, self.hide_shape_cb)
         self.unhide_shape  = rospy.Service('unhide_shape', ProjectionElement, self.unhide_shape_cb)
         self.remove_shape  = rospy.Service('remove_shape', ProjectionElement, self.remove_shape_cb)
         
-        self.add_line      = rospy.Subscriber("add_line", LineProjElem, self.add_line_cb)
+        self.add_line      = rospy.Subscriber("add_line", Line, self.add_line_cb)
 
         rospy.spin()
 
@@ -184,26 +184,26 @@ class ProjectionNode:
         s,m = self.projector.define_coordinate_system(cs_params)
         if not s:
             rospy.logerr(m)
-            return CsRefPointsResponse(Bool(s),String(m))
+            return CoordinateSystemResponse(Bool(s),String(m))
         
         s,m = self.projector.show_coordinate_system(5)
         if not s:
             rospy.logerr(m)
-            return CsRefPointsResponse(Bool(s),String(m))
+            return CoordinateSystemResponse(Bool(s),String(m))
 
         s,m = self.projector.cs_frame_create(cs_params)
         if not s:
             rospy.logerr(m)
-            return CsRefPointsResponse(Bool(s),String(m))
+            return CoordinateSystemResponse(Bool(s),String(m))
 
         s,m = self.projector.cs_axes_create(cs_params)
         if not s:
             rospy.logerr(m)
-            return CsRefPointsResponse(Bool(s),String(m))
+            return CoordinateSystemResponse(Bool(s),String(m))
             
         m = "Coordinate system correctly defined"
         rospy.loginfo(m)
-        return CsRefPointsResponse(Bool(s),String(m))
+        return CoordinateSystemResponse(Bool(s),String(m))
 
     def get_coord_sys_list_cb(self,req):
         """Callback of ROS service to get the list of defined coordinate systems.
@@ -223,15 +223,15 @@ class ProjectionNode:
         if not req.get_list.data:
             s = False
             m = "get_list request not True"
-            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         cs_list,s,m = self.projector.get_coordinate_systems()
         if not s:
                 rospy.logerr(m)
-                return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+                return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         cs_list = [String(cs_name) for cs_name in cs_list]
-        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+        return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
     def set_coord_sys_cb(self,req):
         """Callback of ROS service to set the current coordinate system which some services as add_shape or projection_start automatically apply to. 
@@ -252,14 +252,14 @@ class ProjectionNode:
         if not req.set.data or not req.cs_name.data:
             s = False
             m = "set request is not True or cs_name request is empty"
-            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         s,m = self.projector.set_coordinate_system(req.cs_name.data)
         if not s:
             rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
-        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+        return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
     def show_coord_sys_cb(self,req):
         """Callback of ROS service to project reference points and origin axis of current coordinate system.
@@ -279,12 +279,12 @@ class ProjectionNode:
         if not req.show_current.data or not req.secs.data:
             s = False
             m = "show_current request not True or secs request is empty"
-            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         s,m = self.projector.show_coordinate_system(req.secs.data)
         if not s:
             rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         s,m = self.projector.cs_frame_unhide()
         if not s:
@@ -298,7 +298,7 @@ class ProjectionNode:
 
         m = "Coordinate system showed correctly."
         rospy.loginfo(m)
-        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+        return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
     def remove_coord_sys_cb(self,req):
         """Callback of ROS service to remove current coordinate system.
@@ -318,14 +318,14 @@ class ProjectionNode:
         if not req.remove.data or not req.cs_name.data:
             s = False
             m = "set request not True or cs_name request is empty"
-            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
         
         s,m = self.projector.remove_coordinate_system(req.cs_name.data)
         if not s:
             rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
         
-        return CoordinateSystemResponse(Bool(s),String(m),cs_list)
+        return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
     def add_line_cb(self,msg):
         """Callback of ROS topic to define a new line projection figure and add it to the figures list associated to the current 
