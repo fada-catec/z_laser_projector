@@ -369,9 +369,9 @@ class ProjectionNode:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.set_request_params(req)
 
-        if not req.hide.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
+        if not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
-            m = "hide request not True or shape_type or projection_group_name or shape_id request is empty"
+            m = "shape_type or projection_group_name or shape_id request is empty"
             return ProjectionElementResponse(Bool(s),String(m))
         
         s,m = self.projector.hide_shape(proj_elem_params)
@@ -396,9 +396,9 @@ class ProjectionNode:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.set_request_params(req)
 
-        if not req.unhide.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
+        if not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
-            m = "unhide request not True or shape_type or projection_group_name or shape_id request is empty"
+            m = "shape_type or projection_group_name or shape_id request is empty"
             return ProjectionElementResponse(Bool(s),String(m))
 
         s,m = self.projector.unhide_shape(proj_elem_params)
@@ -423,9 +423,9 @@ class ProjectionNode:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.set_request_params(req)
 
-        if not req.remove.data or not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
+        if not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
             s = False
-            m = "remove request not True or shape_type or projection_group_name or shape_id request is empty"
+            m = "shape_type or projection_group_name or shape_id request is empty"
             return ProjectionElementResponse(Bool(s),String(m))
         
         s,m = self.projector.remove_shape(proj_elem_params)

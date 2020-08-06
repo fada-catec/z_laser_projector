@@ -270,7 +270,7 @@ class ProjectorManager:
         success,message = self.projection_element.define_polyline(self.coordinate_system,proj_elem_params)
         return success,message
 
-    def hide_shape(self,proj_elem_params):
+    def hide_shape(self, proj_elem_params):
         """Hide a figure from current reference system.
 
         Args:

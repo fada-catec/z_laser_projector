@@ -821,13 +821,13 @@ class ProjectionElementControl(object):
         """
         try:
             projection_group = proj_elem_params.projection_group_name
-            id               = proj_elem_params.shape_id
+            shape_id         = proj_elem_params.shape_id
             x                = proj_elem_params.x
             y                = proj_elem_params.y
             angle            = proj_elem_params.angle
             length           = proj_elem_params.length
 
-            polyline_name = projection_group + "/my_polyline_" + id
+            polyline_name = projection_group + "/my_polyline_" + shape_id
             polyline = self.create_polyline(polyline_name)
 
             linestring = [ self.__geometry_tool.create_3d_point(x, y),
@@ -848,23 +848,23 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def deactivate_shape(self,proj_elem_params): 
+    def deactivate_shape(self, shape_params): 
         """Hide (deactivate) a projection figure from the current reference system.
 
         Args:
-            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            shape_params (list): list with the necessary parameters to identify the projection figure
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
             message string
         """
         try:
-            shape_type       = proj_elem_params.shape_type
-            projection_group = proj_elem_params.projection_group_name
-            id               = proj_elem_params.shape_id
+            shape_type       = shape_params.shape_type
+            projection_group = shape_params.projection_group_name
+            shape_id         = shape_params.shape_id
 
             if shape_type == "polyline":
-                name = projection_group + "/my_" + shape_type + "_" + id
+                name = projection_group + "/my_" + shape_type + "_" + shape_id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
                     polyline.activated = False
@@ -884,23 +884,23 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def reactivate_shape(self,proj_elem_params): 
+    def reactivate_shape(self, shape_params): 
         """Unhide (activate hidden) a projection figure from the current reference system.
 
         Args:
-            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            shape_params (list): list with the necessary parameters to identify the projection figure
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
             message string
         """
         try:
-            shape_type       = proj_elem_params.shape_type
-            projection_group = proj_elem_params.projection_group_name
-            id               = proj_elem_params.shape_id
+            shape_type       = shape_params.shape_type
+            projection_group = shape_params.projection_group_name
+            shape_id         = shape_params.shape_id
 
             if shape_type == "polyline":
-                name = projection_group + "/my_" + shape_type + "_" + id
+                name = projection_group + "/my_" + shape_type + "_" + shape_id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
                     polyline.activated = True
@@ -920,22 +920,22 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def delete_shape(self,proj_elem_params):
+    def delete_shape(self, shape_params):
         """Delete a projection figure from the current reference system.
 
         Args:
-            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            shape_params (list): list with the necessary parameters to identify the projection figure
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
             message string
         """
         try:
-            shape_type       = proj_elem_params.shape_type
-            projection_group = proj_elem_params.projection_group_name
-            id               = proj_elem_params.shape_id
+            shape_type       = shape_params.shape_type
+            projection_group = shape_params.projection_group_name
+            shape_id         = shape_params.shape_id
 
-            name = projection_group + "/my_" + shape_type + "_" + id
+            name = projection_group + "/my_" + shape_type + "_" + shape_id
             shape = self.__thrift_client.GetPolyLine(name)
             if shape:
                 self.__thrift_client.RemoveGeoTreeElem(name)
