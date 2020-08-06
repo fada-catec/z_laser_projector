@@ -220,15 +220,10 @@ class ProjectionNode:
         cs_list = []
         cs_list = [String(cs_name) for cs_name in cs_list]
         
-        if not req.get_list.data:
-            s = False
-            m = "get_list request not True"
-            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
-
         cs_list,s,m = self.projector.get_coordinate_systems()
         if not s:
-                rospy.logerr(m)
-                return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
+            rospy.logerr(m)
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         cs_list = [String(cs_name) for cs_name in cs_list]
         return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
@@ -247,11 +242,10 @@ class ProjectionNode:
         rospy.loginfo("Received request to set coordinate system.")
 
         cs_list = []
-        cs_list = [String(cs_name) for cs_name in cs_list]
 
-        if not req.set.data or not req.cs_name.data:
+        if not req.cs_name.data:
             s = False
-            m = "set request is not True or cs_name request is empty"
+            m = "Please, specify cs_name"
             return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         s,m = self.projector.set_coordinate_system(req.cs_name.data)
@@ -274,11 +268,15 @@ class ProjectionNode:
         rospy.loginfo("Request to project current coordinate system.")
 
         cs_list = []
-        cs_list = [String(cs_name) for cs_name in cs_list]
 
-        if not req.show_current.data or not req.secs.data:
+        if req.secs.data == 0:
             s = False
-            m = "show_current request not True or secs request is empty"
+            m = "Please, specify seconds"
+            return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
+
+        if not req.cs_name.data:
+            s = False
+            m = "Please, specify cs_name"
             return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
 
         s,m = self.projector.show_coordinate_system(req.secs.data)
@@ -313,11 +311,10 @@ class ProjectionNode:
         rospy.loginfo("Received request to remove coordinate system")
         
         cs_list = []
-        cs_list = [String(cs_name) for cs_name in cs_list]
 
-        if not req.remove.data or not req.cs_name.data:
+        if not req.cs_name.data:
             s = False
-            m = "set request not True or cs_name request is empty"
+            m = "Please, specify cs_name"
             return CoordinateSystemNameResponse(Bool(s),String(m),cs_list)
         
         s,m = self.projector.remove_coordinate_system(req.cs_name.data)
