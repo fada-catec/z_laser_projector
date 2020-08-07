@@ -560,15 +560,15 @@ class ProjectorManager:
         success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "T1_T2"
-            success,message = self.hide_shape(proj_elem_params)
-
-        if success:
             proj_elem_params.shape_id = "T2_T3"
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
             proj_elem_params.shape_id = "T3_T4"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "T4_T1"
             success,message = self.hide_shape(proj_elem_params)
         
         if success:
