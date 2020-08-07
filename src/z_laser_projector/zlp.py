@@ -403,7 +403,7 @@ class ProjectorClient(object):
                 success = False
                 message = "None Coordinate System set"
             else:
-                ref_obj_name = "RefObj_" + coord_sys
+                ref_obj_name = self.ref_obj_prefix + coord_sys
                 ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
 
                 geo_tree_list = self.__thrift_client.GetGeoTreeIds()
@@ -497,6 +497,8 @@ class CoordinateSystem(object):
         self.__thrift_client = thrift_client 
         self.__geometry_tool = GeometryTool()
 
+        self.ref_obj_prefix = "ref_obj_"
+
         self.projector_id = projector_id
         self.module_id = module_id
         self.reference_object_list = []
@@ -569,7 +571,7 @@ class CoordinateSystem(object):
         """
         try:
             reference_object = self.create_reference_object()
-            reference_object.name = "RefObj_" + cs.name
+            reference_object.name = self.ref_obj_prefix + cs.name
             reference_object.coordinateSystem = cs.name
             reference_object.projectorID = self.projector_id
             
@@ -577,15 +579,15 @@ class CoordinateSystem(object):
             T1_x = cs.T1_x
             T1_y = cs.T1_y
             T2_x = T1_x + resolution
-            T2_y = 0
-            T3_x = T1_x + resolution
+            T2_y = T1_y
+            T3_x = T2_x
             T3_y = T1_y + resolution
-            T4_x = 0
-            T4_y = T1_y + resolution
+            T4_x = T1_x
+            T4_y = T3_y
             T = [T1_x, T1_y, T2_x, T2_y, T3_x, T3_y, T4_x, T4_y]
 
             rot_angle = 180/math.pi*math.atan2((cs.y1 - cs.y2),(cs.x1 - cs.x2))
-            print('Reference system rotation angle: {}'.format(rot_angle))
+            # print('Reference system rotation angle: {}'.format(rot_angle))
             
             # rot_matrix = np.array([[ math.cos(rot_angle), -math.sin(rot_angle)], 
             #                        [ math.sin(rot_angle),  math.cos(rot_angle)]])
@@ -697,7 +699,7 @@ class CoordinateSystem(object):
             coordinate_systems = [self.__thrift_client.GetReferenceobject(name) for name in matches]
             
             [self.__ref_obj_state(False, cs) for cs in coordinate_systems]
-            ref_obj_name = "RefObj_" + coord_sys
+            ref_obj_name = self.ref_obj_prefix + coord_sys
             [self.__ref_obj_state(True, cs) for cs in coordinate_systems if cs.name == ref_obj_name]
 
             success = True
@@ -745,7 +747,7 @@ class CoordinateSystem(object):
             message string
         """
         try:
-            reference_object_name = "RefObj_" + coord_sys
+            reference_object_name = self.ref_obj_prefix + coord_sys
             self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
             success = True
             message = "Coordinate system [" + coord_sys + "] removed. Set other coordinate system or define a new one before continue."
