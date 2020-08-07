@@ -89,6 +89,8 @@ class ProjectionNode:
         
         self.add_line      = rospy.Subscriber("add_line", Line, self.add_line_cb)
 
+        rospy.loginfo("Use ROS Services: \n\t\t\trosservice list")
+
     def connection_cb(self,req):
         """Callback of ROS service to connect to the thrift server of ZLP-Service opening sockets and activating the device.
         Callback of ROS service to transfer license file to service and check correct loading.
@@ -99,30 +101,17 @@ class ProjectionNode:
             information message string
         """
         rospy.loginfo("Received request to connect projector.")
-
-        s,m = self.projector.client_server_connect()
-        if not s:
-            rospy.logerr(m)
-            return TriggerResponse(s,m)
-
-        s,m = self.projector.load_license(self.lic_path)
-        if not s: 
-            rospy.logerr(m)
-            return TriggerResponse(s,m)
+        try:
+            self.projector.client_server_connect()       
+            self.projector.load_license(self.lic_path)
+            self.projector.activate()
+            self.projector.geotree_operator_create()
+            rospy.loginfo("Projector connected.")
+            return TriggerResponse(True, "Projector connected.")
         
-        s,m = self.projector.activate()
-        if not s:
-            rospy.logerr(m)
-            return TriggerResponse(s,m)
-
-        s,m = self.projector.geotree_operator_create()
-        if not s:
-            rospy.logerr(m)
-            return TriggerResponse(s,m)
-        
-        m = "Projector properly connected."
-        rospy.loginfo(m)
-        return TriggerResponse(s,m)
+        except Exception as e:
+            rospy.logerr(e)
+            return TriggerResponse(False, str(e))
 
     def disconnection_cb(self,req):
         """Callback of ROS service to deactivate projector and disconnect from service.
@@ -132,20 +121,15 @@ class ProjectionNode:
             message string
         """
         rospy.loginfo("Received request to disconnect projector.")
-        
-        s,m = self.projector.deactivate()
-        if not s:
-            rospy.logerr(m)
-            return TriggerResponse(s,m)
-        
-        s,m = self.projector.client_server_disconnect()
-        if not s:
-            rospy.logerr(m)
-            return TriggerResponse(s,m)
+        try:
+            self.projector.deactivate()
+            self.projector.client_server_disconnect()
+            rospy.loginfo("Projector disconnected.")
+            return TriggerResponse(True, "Projector disconnected.")
 
-        m = "Projector deactivated and disconnected."
-        rospy.loginfo(m)
-        return TriggerResponse(s,m)
+        except Exception as e:
+            rospy.logerr(e)
+            return TriggerResponse(False, str(e))
 
     def projection_start_cb(self,req):
         """Callback of ROS service to start projection of figures associated to the current coordinate system (see set_cs service) on the surface.
@@ -155,14 +139,13 @@ class ProjectionNode:
             message string
         """
         rospy.loginfo("Received request to start projection")
-        
-        s,m = self.projector.start_projection()
-        if s:
-            rospy.loginfo(m)
-        else:
-            rospy.logerr(m)
-        
-        return TriggerResponse(s,m)
+        try:
+            self.projector.start_projection()
+            return TriggerResponse(True, "Projection started.")
+
+        except Exception as e:
+            rospy.logerr(e)
+            return TriggerResponse(False, str(e))
     
     def projection_stop_cb(self,req):
         """Callback of ROS service to stop all figures projection.
@@ -172,14 +155,13 @@ class ProjectionNode:
             message string
         """
         rospy.loginfo("Received request to stop projection")
-        
-        s,m = self.projector.stop_projection()
-        if s:
-            rospy.loginfo(m)
-        else:
-            rospy.logerr(m)
-        
-        return TriggerResponse(s,m)
+        try:
+            self.projector.stop_projection()
+            return TriggerResponse(True, "Projection stoped.")
+
+        except Exception as e:
+            rospy.logerr(e)
+            return TriggerResponse(False, str(e))
 
     def manual_define_coord_sys_cb(self,req):
         """Callback of ROS service to define a new reference system, stating the points coordinates manually by the user.
@@ -195,30 +177,18 @@ class ProjectionNode:
         
         cs_params = CoordinateSystemParameters()
         cs_params.set_request_params(req)
+        try:
+            self.projector.define_coordinate_system(cs_params)
+            self.projector.show_coordinate_system(5)
+            self.projector.cs_frame_create(cs_params)
+            self.projector.cs_axes_create(cs_params)    
+            message = "Coordinate system correctly defined"
+            rospy.loginfo("Coordinate system correctly defined")
+            return CoordinateSystemResponse(Bool(True),String(message))
 
-        s,m = self.projector.define_coordinate_system(cs_params)
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-        
-        s,m = self.projector.show_coordinate_system(5)
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-
-        s,m = self.projector.cs_frame_create(cs_params)
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-
-        s,m = self.projector.cs_axes_create(cs_params)
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-            
-        m = "Coordinate system correctly defined"
-        rospy.loginfo(m)
-        return CoordinateSystemResponse(Bool(s),String(m))
+        except Exception as e:
+            rospy.logerr(e)
+            return CoordinateSystemResponse(Bool(False), String(str(e)))
 
     def get_coord_sys_list_cb(self,req):
         """Callback of ROS service to get the list of defined coordinate systems.
@@ -234,14 +204,14 @@ class ProjectionNode:
         
         cs_list = []
         cs_list = [String(cs_name) for cs_name in cs_list]
-        
-        cs_list,s,m = self.projector.get_coordinate_systems()
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemListResponse(Bool(s),String(m),cs_list)
+        try:
+            cs_list = self.projector.get_coordinate_systems()
+            cs_list = [String(cs_name) for cs_name in cs_list]
+            return CoordinateSystemListResponse(Bool(True),String("Coordinate system list:"),cs_list)
 
-        cs_list = [String(cs_name) for cs_name in cs_list]
-        return CoordinateSystemListResponse(Bool(s),String(m),cs_list)
+        except Exception as e:
+            rospy.logerr(e)
+            return CoordinateSystemListResponse(Bool(False),String(str(e)),cs_list)
 
     def set_coord_sys_cb(self,req):
         """Callback of ROS service to set the current coordinate system which some services as add_shape or projection_start automatically apply to. 
@@ -255,18 +225,16 @@ class ProjectionNode:
             message string
         """
         rospy.loginfo("Received request to set coordinate system.")
-
         if not req.cs_name.data:
-            s = False
-            m = "Please, specify cs_name"
-            return CoordinateSystemNameResponse(Bool(s),String(m))
+            return CoordinateSystemNameResponse(Bool(False),String("Please, specify cs_name"))
 
-        s,m = self.projector.set_coordinate_system(req.cs_name.data)
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemNameResponse(Bool(s),String(m))
-
-        return CoordinateSystemNameResponse(Bool(s),String(m))
+        try:
+            self.projector.set_coordinate_system(req.cs_name.data)
+            return CoordinateSystemNameResponse(Bool(True),String("Set coordinate system"))
+                    
+        except Exception as e:
+            rospy.logerr(e)
+            return CoordinateSystemNameResponse(Bool(False),String(str(e)))
 
     def show_coord_sys_cb(self,req):
         """Callback of ROS service to project reference points and origin axes of current coordinate system.
@@ -279,44 +247,25 @@ class ProjectionNode:
             message string
         """
         rospy.loginfo("Request to project current coordinate system.")
-
         if req.secs.data == 0:
-            s = False
-            m = "Please, specify seconds"
-            return CoordinateSystemNameResponse(Bool(s),String(m))
+            return CoordinateSystemNameResponse(Bool(False),String("Please, specify seconds"))
 
-        s,m = self.projector.show_coordinate_system(req.secs.data)
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemNameResponse(Bool(s),String(m))
+        try:
+            self.projector.show_coordinate_system(req.secs.data)
+            self.projector.cs_frame_unhide()
+            self.projector.cs_axes_unhide()
+        
+            self.projector.start_projection()
+            rospy.sleep(req.secs.data)
+            self.projector.stop_projection()
 
-        s,m = self.projector.cs_frame_unhide()
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-
-        s,m = self.projector.cs_axes_unhide()
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-
-        self.projector.start_projection()
-        rospy.sleep(req.secs.data)
-        self.projector.stop_projection()
-
-        s,m = self.projector.cs_frame_hide()
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-
-        s,m = self.projector.cs_axes_hide()
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemResponse(Bool(s),String(m))
-
-        m = "Coordinate system showed correctly."
-        rospy.loginfo(m)
-        return CoordinateSystemNameResponse(Bool(s),String(m))
+            self.projector.cs_frame_hide()  
+            self.projector.cs_axes_hide()
+            return CoordinateSystemNameResponse(Bool(True),String("Coordinate system showed"))
+        
+        except Exception as e:
+            rospy.logerr(e)
+            return CoordinateSystemNameResponse(Bool(False),String(str(e)))
 
     def remove_coord_sys_cb(self,req):
         """Callback of ROS service to remove current coordinate system.
@@ -329,19 +278,17 @@ class ProjectionNode:
             message string
         """
         rospy.loginfo("Received request to remove coordinate system")
-        
         if not req.cs_name.data:
-            s = False
-            m = "Please, specify cs_name"
-            return CoordinateSystemNameResponse(Bool(s),String(m))
+            return CoordinateSystemNameResponse(Bool(False),String("Please, specify cs_name"))
         
-        s,m = self.projector.remove_coordinate_system(req.cs_name.data)
-        if not s:
-            rospy.logerr(m)
-            return CoordinateSystemNameResponse(Bool(s),String(m))
+        try:
+            self.projector.remove_coordinate_system(req.cs_name.data)
+            return CoordinateSystemNameResponse(Bool(True),String("Removed coordinate system"))
         
-        return CoordinateSystemNameResponse(Bool(s),String(m))
-
+        except Exception as e:
+            rospy.logerr(e)
+            return CoordinateSystemNameResponse(Bool(False),String(str(e)))
+    
     def add_line_cb(self,msg):
         """Callback of ROS topic to define a new line projection figure and add it to the figures list associated to the current 
         coordinate system.
@@ -359,16 +306,16 @@ class ProjectionNode:
         proj_elem_params.set_line_params(msg)
         
         if not msg.group_name.data or not msg.shape_id.data:
-            s = False
-            m = "group_name or shape_id request is empty."
-            return ProjectionElementResponse(Bool(s),String(m))
+            return ProjectionElementResponse(Bool(False),String("group_name or shape_id request is empty."))
 
-        s,m = self.projector.create_polyline(proj_elem_params)
-        if s:
-            m = "Line added correctly."
-            rospy.loginfo(m)
-        else:
-            rospy.logerr(m)
+        try:
+            self.projector.create_polyline(proj_elem_params)
+            rospy.loginfo("Line added correctly.")
+            return ProjectionElementResponse(Bool(True),String("Line added correctly."))
+        
+        except Exception as e:
+            rospy.logerr(e)
+            return ProjectionElementResponse(Bool(False),String(str(e)))
 
     def hide_shape_cb(self,req):
         """Callback of ROS service to hide specific figure from current coordinate system.
@@ -386,16 +333,15 @@ class ProjectionNode:
         proj_elem_params.set_request_params(req)
 
         if not req.shape_type.data or not req.group_name.data or not req.shape_id.data:
-            s = False
-            m = "shape_type or group_name or shape_id request is empty"
-            return ProjectionElementResponse(Bool(s),String(m))
-        
-        s,m = self.projector.hide_shape(proj_elem_params)
-        if not s:
-            rospy.logerr(m)
-            return ProjectionElementResponse(Bool(s),String(m))
-            
-        return ProjectionElementResponse(Bool(s),String(m))
+            return ProjectionElementResponse(Bool(False),String("shape_type or group_name or shape_id request is empty"))
+
+        try:        
+            self.projector.hide_shape(proj_elem_params)
+            return ProjectionElementResponse(Bool(True),String("Hide shape"))
+
+        except Exception as e:
+            rospy.logerr(e)
+            return ProjectionElementResponse(Bool(False),String(str(e)))
 
     def unhide_shape_cb(self,req):
         """Callback of ROS service to unhide specific figure from current coordinate system.
@@ -413,16 +359,15 @@ class ProjectionNode:
         proj_elem_params.set_request_params(req)
 
         if not req.shape_type.data or not req.group_name.data or not req.shape_id.data:
-            s = False
-            m = "shape_type or group_name or shape_id request is empty"
-            return ProjectionElementResponse(Bool(s),String(m))
+            return ProjectionElementResponse(Bool(False),String("shape_type or group_name or shape_id request is empty"))
 
-        s,m = self.projector.unhide_shape(proj_elem_params)
-        if not s:
-            rospy.logerr(m)
-            return ProjectionElementResponse(Bool(s),String(m))
+        try:        
+            self.projector.unhide_shape(proj_elem_params)
+            return ProjectionElementResponse(Bool(True),String("Hide shape"))
 
-        return ProjectionElementResponse(Bool(s),String(m))
+        except Exception as e:
+            rospy.logerr(e)
+            return ProjectionElementResponse(Bool(False),String(str(e)))
 
     def remove_shape_cb(self,req):
         """Callback of ROS service to remove specific figure from current coordinate system.
@@ -440,16 +385,15 @@ class ProjectionNode:
         proj_elem_params.set_request_params(req)
 
         if not req.shape_type.data or not req.group_name.data or not req.shape_id.data:
-            s = False
-            m = "shape_type or group_name or shape_id request is empty"
-            return ProjectionElementResponse(Bool(s),String(m))
-        
-        s,m = self.projector.remove_shape(proj_elem_params)
-        if not s:
-            rospy.logerr(m)
-            return ProjectionElementResponse(Bool(s),String(m))
+            return ProjectionElementResponse(Bool(False),String("shape_type or group_name or shape_id request is empty"))
 
-        return ProjectionElementResponse(Bool(s),String(m))
+        try:        
+            self.projector.remove_shape(proj_elem_params)
+            return ProjectionElementResponse(Bool(True),String("Hide shape"))
+
+        except Exception as e:
+            rospy.logerr(e)
+            return ProjectionElementResponse(Bool(False),String(str(e)))
 
     def read_coordinate_system(self):
         rospy.loginfo("Reading coordinate system data")
@@ -471,40 +415,36 @@ class ProjectionNode:
 
     def setup_projector(self):
         rospy.loginfo("Setting projector up")
-        success, message = self.projector.connect_and_setup()
-        if success:
-            rospy.loginfo(message)
-            return False
-        else:
-            rospy.logerr(message)
-            rospy.logerr("Set up failed")
-            return True
+        try:
+            self.projector.connect_and_setup()
+            rospy.loginfo("Projector connected.")
+        
+        except Exception as e:
+            rospy.logerr(e)
 
     def create_initial_coordinate_system(self):
         cs_params = self.read_coordinate_system()
-        success, message = self.projector.define_coordinate_system(cs_params)
-        if not success:
-            rospy.logerr(message)
-        else:
-            success, message = self.projector.cs_frame_create(cs_params)
-        if not success:
-            rospy.logerr(message)
-        else:
-            success, message = self.projector.cs_axes_create(cs_params)
-        if not success:
-            rospy.logerr(message)
-        else:
+        try:
+            self.projector.define_coordinate_system(cs_params)
+            self.projector.show_coordinate_system(5)
+            self.projector.cs_frame_create(cs_params)
+            self.projector.cs_axes_create(cs_params)    
             rospy.loginfo("Created coordinate system: {}".format(cs_params.name))
+
+        except Exception as e:
+            rospy.logerr(e)
 
     def shutdown_handler(self):
         rospy.loginfo("Disconnecting before shutdown...")
-        s,m = self.projector.deactivate()
-        if not s:
-            rospy.logerr(m)
-        
-        s,m = self.projector.client_server_disconnect()
-        if not s:
-            rospy.logerr(m)
+        try:
+            self.projector.deactivate()
+            self.projector.client_server_disconnect()
+            rospy.loginfo("Projector disconnected.")
+            return TriggerResponse(True, "Projector disconnected.")
+
+        except Exception as e:
+            rospy.logerr(e)
+            return TriggerResponse(False, str(e))
 
 def main():
     """Init ROS node"""
