@@ -1,0 +1,20 @@
+projector_IP: "192.168.10.10"
+server_IP: "192.168.10.11"
+connection_port: 9090
+license_file: "1900027652.lic"
+
+load_coordinate_system: True
+
+coordinate_system_name: "factory_cs"
+coordinate_system_resolution: 1000
+coordinate_system_distance: 1300 
+
+# Projector Reference System {P}
+P1: {x:   0, y:   0}
+P2: {x: 100, y:   0}
+P3: {x: 100, y: 100}
+P4: {x:   0, y: 100}
+
+# User Reference System {T}
+T1: {x: 0, y: 0}
+  # T2, T3, T4 will be defined with the resolution

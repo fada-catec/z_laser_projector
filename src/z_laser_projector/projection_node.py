@@ -269,7 +269,7 @@ class ProjectionNode:
         return CoordinateSystemNameResponse(Bool(s),String(m))
 
     def show_coord_sys_cb(self,req):
-        """Callback of ROS service to project reference points and origin axis of current coordinate system.
+        """Callback of ROS service to project reference points and origin axes of current coordinate system.
 
         Args:
             req (object): seconds of projection duration
@@ -296,6 +296,20 @@ class ProjectionNode:
             return CoordinateSystemResponse(Bool(s),String(m))
 
         s,m = self.projector.cs_axes_unhide()
+        if not s:
+            rospy.logerr(m)
+            return CoordinateSystemResponse(Bool(s),String(m))
+
+        self.projector.start_projection()
+        rospy.sleep(req.secs.data)
+        self.projector.stop_projection()
+
+        s,m = self.projector.cs_frame_hide()
+        if not s:
+            rospy.logerr(m)
+            return CoordinateSystemResponse(Bool(s),String(m))
+
+        s,m = self.projector.cs_axes_hide()
         if not s:
             rospy.logerr(m)
             return CoordinateSystemResponse(Bool(s),String(m))

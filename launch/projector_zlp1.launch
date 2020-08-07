@@ -4,6 +4,7 @@
 
     <group ns="$(arg namespace)">
     
+        <!-- <rosparam file="$(find z_laser_projector)/config/factory_coordinate_system.yaml"/> -->
         <rosparam file="$(find z_laser_projector)/config/projector_config.yaml"/>
 
         <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" output="screen"/>

@@ -322,71 +322,56 @@ class ProjectorManager:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.shape_type            = "polyline"
         proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
-        proj_elem_params.x                     = cs_params.T1_x
-        proj_elem_params.y                     = cs_params.T1_y
+        proj_elem_params.x                     = 0
+        proj_elem_params.y                     = 0
         proj_elem_params.length                = cs_params.resolution/2
         
-        proj_elem_params.shape_id              = "axis_x"
-        proj_elem_params.angle                 = 0
+        proj_elem_params.shape_id     = "axis_x"
+        proj_elem_params.angle        = 0
         success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params) 
+        if success:
+            success,message = self.hide_shape(proj_elem_params)
         
         if success:
             proj_elem_params.shape_id = "axis_y"
             proj_elem_params.angle    = 90
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
         
         if success:
-            proj_elem_params.x        = cs_params.T1_x + cs_params.resolution/2
-            proj_elem_params.y        = cs_params.T1_y
-            proj_elem_params.length   = cs_params.resolution/12
             proj_elem_params.shape_id = "axis_x_arrow1"
+            proj_elem_params.x        = cs_params.resolution/2
+            proj_elem_params.y        = 0
+            proj_elem_params.length   = cs_params.resolution/12
             proj_elem_params.angle    = 180 - 15
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
         
         if success:
             proj_elem_params.shape_id = "axis_x_arrow2"
             proj_elem_params.angle    = 180 + 15
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
         
         if success:
-            proj_elem_params.x        = cs_params.T1_x
-            proj_elem_params.y        = cs_params.T1_y + cs_params.resolution/2
-            proj_elem_params.length   = cs_params.resolution/14
             proj_elem_params.shape_id = "axis_y_arrow1"
+            proj_elem_params.x        = 0
+            proj_elem_params.y        = cs_params.resolution/2
+            proj_elem_params.length   = cs_params.resolution/14
             proj_elem_params.angle    = 270 - 15
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
         
         if success:
             proj_elem_params.shape_id = "axis_y_arrow2"
             proj_elem_params.angle    = 270 + 15
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        
-        if success:
-            self.start_projection()
-            time.sleep(5)
-            self.stop_projection()
-                                
-        success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "axis_y_arrow1"
-            success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "axis_x_arrow2"
-            success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "axis_x_arrow1"
-            success,message = self.hide_shape(proj_elem_params)
-        
-        if success:
-            proj_elem_params.shape_id = "axis_y"
-            success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "axis_x"
-            success,message = self.hide_shape(proj_elem_params)
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
         
         if success:
             message = "Coordinate system origin axes created correctly"
@@ -401,10 +386,10 @@ class ProjectorManager:
             message string
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.shape_type            = "polyline"
         proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
+        proj_elem_params.shape_type = "polyline"
         
-        proj_elem_params.shape_id              = "axis_x"
+        proj_elem_params.shape_id     = "axis_x"
         success,message = self.unhide_shape(proj_elem_params)
         
         if success:
@@ -428,37 +413,48 @@ class ProjectorManager:
             success,message = self.unhide_shape(proj_elem_params)
         
         if success:
-            self.start_projection()
-            time.sleep(5)
-            self.stop_projection()
+            message = "Coordinate system origin axes unhided"
+
+        return success,message
+
+    def cs_axes_hide(self):
+        """Hide user reference system origin axes, project them and hide after.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        proj_elem_params = ProjectionElementParameters()
+        proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
+        proj_elem_params.shape_type = "polyline"
         
+        proj_elem_params.shape_id     = "axis_x"        
         success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_y_arrow1"
+            proj_elem_params.shape_id = "axis_y"
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success: 
+            proj_elem_params.shape_id = "axis_x_arrow1"
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
             proj_elem_params.shape_id = "axis_x_arrow2"
             success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "axis_x_arrow1"
-            success,message = self.hide_shape(proj_elem_params)
         
         if success:
-            proj_elem_params.shape_id = "axis_y"
+            proj_elem_params.shape_id = "axis_y_arrow1"
             success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            proj_elem_params.shape_id = "axis_x"
+            proj_elem_params.shape_id = "axis_y_arrow2"
             success,message = self.hide_shape(proj_elem_params)
         
         if success:
-            message = "Coordinate system origin axes showed correctly"
+            message = "Coordinate system origin axes hided"
 
         return success,message
-
 
     def cs_frame_create(self,cs_params):
         """Create frame lines projection figures of user reference system, project them and hide them after.
@@ -476,62 +472,47 @@ class ProjectorManager:
         proj_elem_params.projection_group_name = self.coordinate_system + "_frame"
 
         T = self.current_user_T_points
-        proj_elem_params.x                     = T[0]
-        proj_elem_params.y                     = T[1]
-        proj_elem_params.length                = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
-        proj_elem_params.shape_id              = "T1_T2"
-        proj_elem_params.angle                 = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
+        proj_elem_params.shape_id     = "T1_T2"
+        proj_elem_params.x            = T[0]
+        proj_elem_params.y            = T[1]
+        proj_elem_params.length       = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
+        proj_elem_params.angle        = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
         success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params) 
-        
         if success:
+            success,message = self.hide_shape(proj_elem_params)
+
+        if success:
+            proj_elem_params.shape_id = "T2_T3"
             proj_elem_params.x        = T[2]
             proj_elem_params.y        = T[3]
             proj_elem_params.length   = math.sqrt((T[4]-T[2])**2+(T[5]-T[3])**2)
-            proj_elem_params.shape_id = "T2_T3"
             proj_elem_params.angle    = 180/math.pi*math.atan2((T[5]-T[3]),(T[4]-T[2]))
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
+
         if success:
+            proj_elem_params.shape_id = "T3_T4"
             proj_elem_params.x        = T[4]
             proj_elem_params.y        = T[5]
             proj_elem_params.length   = math.sqrt((T[6]-T[4])**2+(T[7]-T[5])**2)
-            proj_elem_params.shape_id = "T3_T4"
             proj_elem_params.angle    = 180/math.pi*math.atan2((T[7]-T[5]),(T[6]-T[4]))
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
 
         if success:
+            proj_elem_params.shape_id = "T4_T1"
             proj_elem_params.x        = T[6]
             proj_elem_params.y        = T[7]
             proj_elem_params.length   = math.sqrt((T[0]-T[6])**2+(T[1]-T[7])**2)
-            proj_elem_params.shape_id = "T4_T1"
             proj_elem_params.angle    = 180/math.pi*math.atan2((T[1]-T[7]),(T[0]-T[6]))
             success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+            if success:
+                success,message = self.hide_shape(proj_elem_params)
 
         if success:
-            self.start_projection()
-            time.sleep(5)
-            self.stop_projection()
-
-        success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "T1_T2"
-            success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "T2_T3"
-            success,message = self.hide_shape(proj_elem_params)
-
-        if success:
-            proj_elem_params.shape_id = "T3_T4"
-            success,message = self.hide_shape(proj_elem_params)
-        
-        if success:
-            proj_elem_params.shape_id = "T4_T1"
-            success,message = self.hide_shape(proj_elem_params)
-        
-        if success:
-            message = "User System frame's lines created correctly"
+            message = "User System frame's lines unhide"
 
         return success,message
 
@@ -543,10 +524,10 @@ class ProjectorManager:
             message string
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.shape_type            = "polyline"
         proj_elem_params.projection_group_name = self.coordinate_system + "_frame"
+        proj_elem_params.shape_type = "polyline"
         
-        proj_elem_params.shape_id              = "T1_T2"
+        proj_elem_params.shape_id     = "T1_T2"
         success,message = self.unhide_shape(proj_elem_params)
         
         if success:
@@ -561,11 +542,21 @@ class ProjectorManager:
             proj_elem_params.shape_id = "T4_T1"
             success,message = self.unhide_shape(proj_elem_params)
         
-        if success:
-            self.start_projection()
-            time.sleep(5)
-            self.stop_projection()
+        return success,message
+
+
+    def cs_frame_hide(self):
+        """Hide frame lines of user reference system, project them and hide after.
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        proj_elem_params = ProjectionElementParameters()
+        proj_elem_params.projection_group_name = self.coordinate_system + "_frame"
+        proj_elem_params.shape_type = "polyline"
         
+        proj_elem_params.shape_id     = "T1_T2"
         success,message = self.hide_shape(proj_elem_params)
 
         if success:
@@ -581,6 +572,6 @@ class ProjectorManager:
             success,message = self.hide_shape(proj_elem_params)
         
         if success:
-            message = "User System frame's lines showed correctly"
+            message = "User System frame's lines hide"
 
         return success,message
