@@ -403,8 +403,7 @@ class ProjectorClient(object):
                 success = False
                 message = "None Coordinate System set"
             else:
-                ref_obj_name = self.ref_obj_prefix + coord_sys
-                ref_obj = self.__thrift_client.GetGeoTreeElement(ref_obj_name)
+                ref_obj = self.__thrift_client.GetGeoTreeElement(coord_sys)
 
                 geo_tree_list = self.__thrift_client.GetGeoTreeIds()
                 matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType == 1024]
@@ -497,8 +496,6 @@ class CoordinateSystem(object):
         self.__thrift_client = thrift_client 
         self.__geometry_tool = GeometryTool()
 
-        self.ref_obj_prefix = "ref_obj_"
-
         self.projector_id = projector_id
         self.module_id = module_id
         self.reference_object_list = []
@@ -571,7 +568,7 @@ class CoordinateSystem(object):
         """
         try:
             reference_object = self.create_reference_object()
-            reference_object.name = self.ref_obj_prefix + cs.name
+            reference_object.name = cs.name
             reference_object.coordinateSystem = cs.name
             reference_object.projectorID = self.projector_id
             
@@ -699,8 +696,7 @@ class CoordinateSystem(object):
             coordinate_systems = [self.__thrift_client.GetReferenceobject(name) for name in matches]
             
             [self.__ref_obj_state(False, cs) for cs in coordinate_systems]
-            ref_obj_name = self.ref_obj_prefix + coord_sys
-            [self.__ref_obj_state(True, cs) for cs in coordinate_systems if cs.name == ref_obj_name]
+            [self.__ref_obj_state(True, cs)  for cs in coordinate_systems if cs.name == coord_sys]
 
             success = True
             message = coord_sys + " set as current coordinate system"
@@ -747,8 +743,7 @@ class CoordinateSystem(object):
             message string
         """
         try:
-            reference_object_name = self.ref_obj_prefix + coord_sys
-            self.__thrift_client.RemoveGeoTreeElem(reference_object_name)
+            self.__thrift_client.RemoveGeoTreeElem(coord_sys)
             success = True
             message = "Coordinate system [" + coord_sys + "] removed. Set other coordinate system or define a new one before continue."
 
