@@ -53,7 +53,7 @@ class EventChannelInterfaceHandler(object):
         self.service_state_changed_callback = lambda x, y: None
         self.function_module_changed_callback = lambda x, y, z: None
         self.rc_command_received_callback = lambda a, b, c, d, e: None
-        self.onReflectionStateChanged_callback = lambda a, b: None
+        self.on_reflection_state_changed_callback = lambda a, b: None
 
     def PropertyChanged(self, name, value):
         self.property_changed_callback(name, value)
@@ -71,7 +71,7 @@ class EventChannelInterfaceHandler(object):
         self.rc_command_received_callback(rc_id, command, toggle, projector, timestamp)
 
     def onReflectionStateChanged(self, elementName, state):
-        self.onReflectionStateChanged_callback(elementName, state)
+        self.on_reflection_state_changed_callback(elementName, state)
 
 class ThriftClient(TClient):
     """This class implement the functions to carry out the connection with the ZLP Service."""
@@ -139,7 +139,7 @@ class ThriftClient(TClient):
 
     def set_reflection_state_changed_callback(self, callback):
         if self._event_channel_handler:
-            self._event_channel_handler.onReflectionStateChanged_callback = callback
+            self._event_channel_handler.on_reflection_state_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
@@ -465,7 +465,7 @@ class GeometryTool(object):
             y (float): y position value
 
         Returns:
-            object: struct with the values of the 2 axis (x,y)
+            object: struct with the values of the 2 axes (x,y)
         """
         return thrift_interface.Vector2D(x, y)
 
@@ -478,7 +478,7 @@ class GeometryTool(object):
             z (float): z position value
 
         Returns:
-            object: struct with the values of the 3 axis (x,y,z)
+            object: struct with the values of the 3 axes (x,y,z)
         """
         return thrift_interface.Vector3D(x, y, z)
 
@@ -591,10 +591,10 @@ class CoordinateSystem(object):
             # rot_inverse = np.linalg.inv(rot_matrix)
             # T2 = np.array([[T2_x],[T2_y]]), rotated = rot_inverse.dot(T2), T2_x = float(rotated[0]), T2_y = float(rotated[1])
 
-            reference_object.refPointList = [   self.create_reference_point("T1", T1_x, T1_y),
-                                                self.create_reference_point("T2", T2_x, T2_y),
-                                                self.create_reference_point("T3", T3_x, T3_y),
-                                                self.create_reference_point("T4", T4_x, T4_y)]
+            reference_object.refPointList = [self.create_reference_point("T1", T1_x, T1_y),
+                                             self.create_reference_point("T2", T2_x, T2_y),
+                                             self.create_reference_point("T3", T3_x, T3_y),
+                                             self.create_reference_point("T4", T4_x, T4_y)]
             
             d = cs.d
             cross_size_x = d * 0.02
@@ -817,14 +817,14 @@ class ProjectionElementControl(object):
             message string
         """
         try:
-            projection_group = proj_elem_params.projection_group_name
-            shape_id         = proj_elem_params.shape_id
-            x                = proj_elem_params.x
-            y                = proj_elem_params.y
-            angle            = proj_elem_params.angle
-            length           = proj_elem_params.length
+            shape_id = proj_elem_params.shape_id
+            group    = proj_elem_params.group_name
+            x        = proj_elem_params.x
+            y        = proj_elem_params.y
+            angle    = proj_elem_params.angle
+            length   = proj_elem_params.length
 
-            polyline_name = projection_group + "/my_polyline_" + shape_id
+            polyline_name = group + "/my_polyline_" + shape_id
             polyline = self.create_polyline(polyline_name)
 
             linestring = [ self.__geometry_tool.create_3d_point(x, y),
@@ -856,12 +856,12 @@ class ProjectionElementControl(object):
             message string
         """
         try:
-            shape_type       = shape_params.shape_type
-            projection_group = shape_params.projection_group_name
-            shape_id         = shape_params.shape_id
+            shape_type  = shape_params.shape_type
+            group       = shape_params.group_name
+            shape_id    = shape_params.shape_id
 
             if shape_type == "polyline":
-                name = projection_group + "/my_" + shape_type + "_" + shape_id
+                name = group + "/my_" + shape_type + "_" + shape_id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
                     polyline.activated = False
@@ -892,12 +892,12 @@ class ProjectionElementControl(object):
             message string
         """
         try:
-            shape_type       = shape_params.shape_type
-            projection_group = shape_params.projection_group_name
-            shape_id         = shape_params.shape_id
+            shape_type  = shape_params.shape_type
+            group       = shape_params.group_name
+            shape_id    = shape_params.shape_id
 
             if shape_type == "polyline":
-                name = projection_group + "/my_" + shape_type + "_" + shape_id
+                name = group + "/my_" + shape_type + "_" + shape_id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
                     polyline.activated = True
@@ -928,11 +928,11 @@ class ProjectionElementControl(object):
             message string
         """
         try:
-            shape_type       = shape_params.shape_type
-            projection_group = shape_params.projection_group_name
-            shape_id         = shape_params.shape_id
+            shape_type  = shape_params.shape_type
+            group       = shape_params.group_name
+            shape_id    = shape_params.shape_id
 
-            name = projection_group + "/my_" + shape_type + "_" + shape_id
+            name = group + "/my_" + shape_type + "_" + shape_id
             shape = self.__thrift_client.GetPolyLine(name)
             if shape:
                 self.__thrift_client.RemoveGeoTreeElem(name)

@@ -358,9 +358,9 @@ class ProjectionNode:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.set_line_params(msg)
         
-        if not msg.projection_group_name.data or not msg.shape_id.data:
+        if not msg.group_name.data or not msg.shape_id.data:
             s = False
-            m = "projection_group_name or shape_id request is empty."
+            m = "group_name or shape_id request is empty."
             return ProjectionElementResponse(Bool(s),String(m))
 
         s,m = self.projector.create_polyline(proj_elem_params)
@@ -385,9 +385,9 @@ class ProjectionNode:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.set_request_params(req)
 
-        if not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
+        if not req.shape_type.data or not req.group_name.data or not req.shape_id.data:
             s = False
-            m = "shape_type or projection_group_name or shape_id request is empty"
+            m = "shape_type or group_name or shape_id request is empty"
             return ProjectionElementResponse(Bool(s),String(m))
         
         s,m = self.projector.hide_shape(proj_elem_params)
@@ -412,9 +412,9 @@ class ProjectionNode:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.set_request_params(req)
 
-        if not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
+        if not req.shape_type.data or not req.group_name.data or not req.shape_id.data:
             s = False
-            m = "shape_type or projection_group_name or shape_id request is empty"
+            m = "shape_type or group_name or shape_id request is empty"
             return ProjectionElementResponse(Bool(s),String(m))
 
         s,m = self.projector.unhide_shape(proj_elem_params)
@@ -439,9 +439,9 @@ class ProjectionNode:
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.set_request_params(req)
 
-        if not req.shape_type.data or not req.projection_group_name.data or not req.shape_id.data:
+        if not req.shape_type.data or not req.group_name.data or not req.shape_id.data:
             s = False
-            m = "shape_type or projection_group_name or shape_id request is empty"
+            m = "shape_type or group_name or shape_id request is empty"
             return ProjectionElementResponse(Bool(s),String(m))
         
         s,m = self.projector.remove_shape(proj_elem_params)

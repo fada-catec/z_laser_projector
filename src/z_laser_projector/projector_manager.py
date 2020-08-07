@@ -321,7 +321,7 @@ class ProjectorManager:
         """
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.shape_type            = "polyline"
-        proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
+        proj_elem_params.group_name = self.coordinate_system + "_origin"
         proj_elem_params.x                     = 0
         proj_elem_params.y                     = 0
         proj_elem_params.length                = cs_params.resolution/2
@@ -386,7 +386,7 @@ class ProjectorManager:
             message string
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
+        proj_elem_params.group_name = self.coordinate_system + "_origin"
         proj_elem_params.shape_type = "polyline"
         
         proj_elem_params.shape_id     = "axis_x"
@@ -425,7 +425,7 @@ class ProjectorManager:
             message string
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.projection_group_name = self.coordinate_system + "_origin"
+        proj_elem_params.group_name = self.coordinate_system + "_origin"
         proj_elem_params.shape_type = "polyline"
         
         proj_elem_params.shape_id     = "axis_x"        
@@ -469,7 +469,7 @@ class ProjectorManager:
         """
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.shape_type            = "polyline"
-        proj_elem_params.projection_group_name = self.coordinate_system + "_frame"
+        proj_elem_params.group_name = self.coordinate_system + "_frame"
 
         T = self.current_user_T_points
         proj_elem_params.shape_id     = "T1_T2"
@@ -524,7 +524,7 @@ class ProjectorManager:
             message string
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.projection_group_name = self.coordinate_system + "_frame"
+        proj_elem_params.group_name = self.coordinate_system + "_frame"
         proj_elem_params.shape_type = "polyline"
         
         proj_elem_params.shape_id     = "T1_T2"
@@ -553,7 +553,7 @@ class ProjectorManager:
             message string
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.projection_group_name = self.coordinate_system + "_frame"
+        proj_elem_params.group_name = self.coordinate_system + "_frame"
         proj_elem_params.shape_type = "polyline"
         
         proj_elem_params.shape_id     = "T1_T2"

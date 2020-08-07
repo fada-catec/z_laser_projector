@@ -2,7 +2,7 @@
 # - polyline
 # - todo...
 std_msgs/String shape_type
-std_msgs/String projection_group_name
+std_msgs/String group_name
 std_msgs/String shape_id
 
 ---
