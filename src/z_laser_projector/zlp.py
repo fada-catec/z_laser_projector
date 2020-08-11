@@ -583,7 +583,7 @@ class CoordinateSystem(object):
             T4_y = T3_y
             T = [T1_x, T1_y, T2_x, T2_y, T3_x, T3_y, T4_x, T4_y]
 
-            rot_angle = 180/math.pi*math.atan2((cs.y1 - cs.y2),(cs.x1 - cs.x2))
+            rot_angle = 180/math.pi*math.atan2((cs.P1_y - cs.P2_y),(cs.P1_x - cs.P2_x))
             # print('Reference system rotation angle: {}'.format(rot_angle))
             
             # rot_matrix = np.array([[ math.cos(rot_angle), -math.sin(rot_angle)], 
@@ -602,10 +602,10 @@ class CoordinateSystem(object):
 
             cross_size = self.__geometry_tool.create_2d_point(cross_size_x,cross_size_y)
             
-            reference_object = self.__define_reference_point(reference_object,cross_size,0,d,cs.x1,cs.y1)
-            reference_object = self.__define_reference_point(reference_object,cross_size,1,d,cs.x2,cs.y2)
-            reference_object = self.__define_reference_point(reference_object,cross_size,2,d,cs.x3,cs.y3)
-            reference_object = self.__define_reference_point(reference_object,cross_size,3,d,cs.x4,cs.y4)
+            reference_object = self.__define_reference_point(reference_object,cross_size,0,d,cs.P1_x,cs.P1_y)
+            reference_object = self.__define_reference_point(reference_object,cross_size,1,d,cs.P2_x,cs.P2_y)
+            reference_object = self.__define_reference_point(reference_object,cross_size,2,d,cs.P3_x,cs.P3_y)
+            reference_object = self.__define_reference_point(reference_object,cross_size,3,d,cs.P4_x,cs.P4_y)
 
             self.__ref_obj_state(False,reference_object)
 

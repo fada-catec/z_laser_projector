@@ -26,14 +26,14 @@ class CoordinateSystemParameters:
         self.resolution = int()
         self.name       = str()
         self.d          = float()
-        self.x1         = float()
-        self.y1         = float()
-        self.x2         = float()
-        self.y2         = float()
-        self.x3         = float()
-        self.y3         = float()
-        self.x4         = float()
-        self.y4         = float()
+        self.P1_x       = float()
+        self.P1_y       = float()
+        self.P2_x       = float()
+        self.P2_y       = float()
+        self.P3_x       = float()
+        self.P3_y       = float()
+        self.P4_x       = float()
+        self.P4_y       = float()
         self.T1_x       = float()
         self.T1_y       = float()
 
@@ -46,14 +46,14 @@ class CoordinateSystemParameters:
         self.resolution = cs.resolution.data
         self.name       = cs.name_cs.data
         self.d          = cs.distance.data
-        self.x1         = cs.p1.x
-        self.y1         = cs.p1.y
-        self.x2         = cs.p2.x
-        self.y2         = cs.p2.y
-        self.x3         = cs.p3.x
-        self.y3         = cs.p3.y
-        self.x4         = cs.p4.x
-        self.y4         = cs.p4.y
+        self.P1_x       = cs.p1.x
+        self.P1_y       = cs.p1.y
+        self.P2_x       = cs.p2.x
+        self.P2_y       = cs.p2.y
+        self.P3_x       = cs.p3.x
+        self.P3_y       = cs.p3.y
+        self.P4_x       = cs.p4.x
+        self.P4_y       = cs.p4.y
         self.T1_x       = cs.T1.x
         self.T1_y       = cs.T1.y
 
