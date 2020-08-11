@@ -4,7 +4,7 @@ connection_port: 9090
 license_file: "1900027652.lic"
 
 coordinate_system_name: "1900027652_FCW"
-coordinate_system_resolution: 100
+coordinate_system_resolution: 300
 coordinate_system_distance: 1500 
 
 # Projector Reference System {P}

@@ -946,3 +946,119 @@ class ProjectionElementControl(object):
             message = e
 
         return success,message
+
+    def cs_axes_create(self,cs_params,proj_elem_params):
+        """Create projection figures of user reference system origin axes, project them and hide after.
+
+        Args:
+            cs_params (list): list of definition parameters of the reference system
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        proj_elem_params.shape_type = "polyline"
+        proj_elem_params.group_name = cs_params.name + "_origin"
+        proj_elem_params.x          = 0
+        proj_elem_params.y          = 0
+        proj_elem_params.length     = cs_params.resolution/2
+        
+        proj_elem_params.shape_id = "axis_x"
+        proj_elem_params.angle    = 0
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)         
+        if not success:
+            return success,message
+        
+        proj_elem_params.shape_id = "axis_y"
+        proj_elem_params.angle    = 90
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        proj_elem_params.shape_id = "axis_x_arrow1"
+        proj_elem_params.x        = cs_params.resolution/2
+        proj_elem_params.y        = 0
+        proj_elem_params.length   = cs_params.resolution/12
+        proj_elem_params.angle    = 180 - 15
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        proj_elem_params.shape_id = "axis_x_arrow2"
+        proj_elem_params.angle    = 180 + 15
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        proj_elem_params.shape_id = "axis_y_arrow1"
+        proj_elem_params.x        = 0
+        proj_elem_params.y        = cs_params.resolution/2
+        proj_elem_params.length   = cs_params.resolution/14
+        proj_elem_params.angle    = 270 - 15
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        proj_elem_params.shape_id = "axis_y_arrow2"
+        proj_elem_params.angle    = 270 + 15
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        success = True
+        message = "Coordinate system origin axes created."
+        return success,message
+
+    def cs_frame_create(self,cs_params,proj_elem_params,T):
+        """Create frame lines projection figures of user reference system, project them and hide them after.
+
+        Args:
+            T (list): list of the User System Reference Points
+            cs_params (list): list of definition parameters of the reference system
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        proj_elem_params.shape_type = "polyline"
+        proj_elem_params.group_name = cs_params.name + "_frame"
+
+        proj_elem_params.shape_id = "T1_T2"
+        proj_elem_params.x        = T[0]
+        proj_elem_params.y        = T[1]
+        proj_elem_params.length   = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
+        proj_elem_params.angle    = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
+        success,message = self.define_polyline(cs_params.name, proj_elem_params) 
+        if not success:
+            return success,message
+
+        proj_elem_params.shape_id = "T2_T3"
+        proj_elem_params.x        = T[2]
+        proj_elem_params.y        = T[3]
+        proj_elem_params.length   = math.sqrt((T[4]-T[2])**2+(T[5]-T[3])**2)
+        proj_elem_params.angle    = 180/math.pi*math.atan2((T[5]-T[3]),(T[4]-T[2]))
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        proj_elem_params.shape_id = "T3_T4"
+        proj_elem_params.x        = T[4]
+        proj_elem_params.y        = T[5]
+        proj_elem_params.length   = math.sqrt((T[6]-T[4])**2+(T[7]-T[5])**2)
+        proj_elem_params.angle    = 180/math.pi*math.atan2((T[7]-T[5]),(T[6]-T[4]))
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        proj_elem_params.shape_id = "T4_T1"
+        proj_elem_params.x        = T[6]
+        proj_elem_params.y        = T[7]
+        proj_elem_params.length   = math.sqrt((T[0]-T[6])**2+(T[1]-T[7])**2)
+        proj_elem_params.angle    = 180/math.pi*math.atan2((T[1]-T[7]),(T[0]-T[6]))
+        success,message = self.define_polyline(cs_params.name, proj_elem_params)
+        if not success:
+            return success,message
+
+        success = True
+        message = "Coordinate system frame created."
+        return success,message

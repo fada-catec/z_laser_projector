@@ -323,7 +323,7 @@ class ProjectorManager:
         success,message = self.projection_element.delete_shape(proj_elem_params)
         if not success:
             raise SystemError(message)
-        
+    
     def cs_axes_create(self,cs_params):
         """Create projection figures of user reference system origin axes, project them and hide after.
 
@@ -335,51 +335,7 @@ class ProjectorManager:
             message string
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.shape_type            = "polyline"
-        proj_elem_params.group_name = self.coordinate_system + "_origin"
-        proj_elem_params.x                     = 0
-        proj_elem_params.y                     = 0
-        proj_elem_params.length                = cs_params.resolution/2
-        
-        proj_elem_params.shape_id = "axis_x"
-        proj_elem_params.angle    = 0
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)         
-        if not success:
-            raise SystemError(message)
-        
-        proj_elem_params.shape_id = "axis_y"
-        proj_elem_params.angle    = 90
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        if not success:
-            raise SystemError(message)
-
-        proj_elem_params.shape_id = "axis_x_arrow1"
-        proj_elem_params.x        = cs_params.resolution/2
-        proj_elem_params.y        = 0
-        proj_elem_params.length   = cs_params.resolution/12
-        proj_elem_params.angle    = 180 - 15
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        if not success:
-            raise SystemError(message)
-
-        proj_elem_params.shape_id = "axis_x_arrow2"
-        proj_elem_params.angle    = 180 + 15
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        if not success:
-            raise SystemError(message)
-
-        proj_elem_params.shape_id = "axis_y_arrow1"
-        proj_elem_params.x        = 0
-        proj_elem_params.y        = cs_params.resolution/2
-        proj_elem_params.length   = cs_params.resolution/14
-        proj_elem_params.angle    = 270 - 15
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        if not success:
-            raise SystemError(message)
-
-        proj_elem_params.shape_id = "axis_y_arrow2"
-        proj_elem_params.angle    = 270 + 15
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
+        success,message = self.projection_element.cs_axes_create(cs_params,proj_elem_params)
         if not success:
             raise SystemError(message)
 
@@ -387,7 +343,28 @@ class ProjectorManager:
             self.cs_axes_hide()
         except SystemError as e:
             raise SystemError(e)
-        
+    
+    def cs_frame_create(self,cs_params):
+        """Create frame lines projection figures of user reference system, project them and hide them after.
+
+        Args:
+            T (list): list of the User System Reference Points
+            cs_params (list): list of definition parameters of the reference system
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        proj_elem_params = ProjectionElementParameters()
+        success,message = self.projection_element.cs_frame_create(cs_params,proj_elem_params,self.current_user_T_points)
+        if not success:
+            raise SystemError(message)
+
+        try:
+           self.cs_frame_hide()
+        except SystemError as e:
+            raise SystemError(e)
+
     def cs_axes_unhide(self):
         """Unhide user reference system origin axes, project them and hide after.
 
@@ -441,64 +418,6 @@ class ProjectorManager:
             self.hide_shape(proj_elem_params)
         except SystemError as e:
             raise SystemError(e)
-        
-    def cs_frame_create(self,cs_params):
-        """Create frame lines projection figures of user reference system, project them and hide them after.
-
-        Args:
-            T (list): list of the User System Reference Points
-            cs_params (list): list of definition parameters of the reference system
-
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
-        """
-        proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.shape_type            = "polyline"
-        proj_elem_params.group_name = self.coordinate_system + "_frame"
-
-        T = self.current_user_T_points
-        proj_elem_params.shape_id = "T1_T2"
-        proj_elem_params.x        = T[0]
-        proj_elem_params.y        = T[1]
-        proj_elem_params.length   = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params) 
-        if not success:
-            raise SystemError(message)
-
-        proj_elem_params.shape_id = "T2_T3"
-        proj_elem_params.x        = T[2]
-        proj_elem_params.y        = T[3]
-        proj_elem_params.length   = math.sqrt((T[4]-T[2])**2+(T[5]-T[3])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[5]-T[3]),(T[4]-T[2]))
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        if not success:
-            raise SystemError(message)
-
-        proj_elem_params.shape_id = "T3_T4"
-        proj_elem_params.x        = T[4]
-        proj_elem_params.y        = T[5]
-        proj_elem_params.length   = math.sqrt((T[6]-T[4])**2+(T[7]-T[5])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[7]-T[5]),(T[6]-T[4]))
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        if not success:
-            raise SystemError(message)
-
-        proj_elem_params.shape_id = "T4_T1"
-        proj_elem_params.x        = T[6]
-        proj_elem_params.y        = T[7]
-        proj_elem_params.length   = math.sqrt((T[0]-T[6])**2+(T[1]-T[7])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[1]-T[7]),(T[0]-T[6]))
-        success,message = self.projection_element.define_polyline(self.coordinate_system, proj_elem_params)
-        if not success:
-            raise SystemError(message)
-
-        try:
-           self.cs_frame_hide()
-        except SystemError as e:
-            raise SystemError(e)
-
         
     def cs_frame_unhide(self):
         """Unhide frame lines of user reference system, project them and hide after.

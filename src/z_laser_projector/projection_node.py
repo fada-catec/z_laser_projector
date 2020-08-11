@@ -427,7 +427,7 @@ class ProjectionNode:
                 rospy.loginfo("User defined coordinate system loaded: {}".format(cs_params.name))
             else:
                 rospy.loginfo("Factory default coordinate system loaded: {}".format(cs_params.name))
-                rospy.logwarn("Defining a new coordinate system is highly recommended.")
+                rospy.logwarn("Defining a new coordinate system by user is highly recommended.")
 
         except Exception as e:
             rospy.logerr(e)
