@@ -235,7 +235,17 @@ class ProjectorManager:
         
         success,message = self.cs_element.show_cs(self.coordinate_system, secs)
         if not success:
-            raise SystemError(message)        
+            raise SystemError(message)
+        try:
+            self.cs_frame_unhide()
+            self.cs_axes_unhide()
+            self.start_projection()
+            time.sleep(secs)
+            self.stop_projection()
+            self.cs_frame_hide()  
+            self.cs_axes_hide()
+        except SystemError as e:
+            raise SystemError(e)       
 
     def remove_coordinate_system(self,coord_sys):
         """Delete current reference system

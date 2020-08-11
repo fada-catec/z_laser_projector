@@ -19,6 +19,7 @@
 """Central node that provides a collection of services that allows to operate and control the ZLP1 laser projector and simplify the task of 
 developing further advanced features."""
 
+import sys
 import rospy
 import rospkg
 import os
@@ -41,7 +42,7 @@ from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
 class ProjectionNode:
     """This class initilizes the services and implements the functionalities of the projection_node."""
     
-    def __init__(self):
+    def __init__(self,load_cs):
         """Initialize the ProjectionNode object."""
         rospy.init_node('projection_node')
 
@@ -49,7 +50,6 @@ class ProjectionNode:
         server_IP       = rospy.get_param('server_IP', "192.168.10.11") 
         connection_port = rospy.get_param('connection_port', 9090) 
         license_file    = rospy.get_param('license_file', "1900027652.lic") 
-        load_cs         = rospy.get_param('load_coordinate_system', True) 
 
         # define license file path
         rospack = rospkg.RosPack()
@@ -60,8 +60,9 @@ class ProjectionNode:
         # Connect, load license and activate projector
         error = self.setup_projector()
         # If set by user, create a coordinate system
-        if not error and load_cs:
-            self.create_initial_coordinate_system()
+        if not error:
+            self.initialize_coordinate_system(load_cs)
+
         # Create services to interact with projector
         self.open_services()
         # Create handler to close connection when exiting node
@@ -179,9 +180,9 @@ class ProjectionNode:
         cs_params.set_request_params(req)
         try:
             self.projector.define_coordinate_system(cs_params)
-            self.projector.show_coordinate_system(5)
             self.projector.cs_frame_create(cs_params)
-            self.projector.cs_axes_create(cs_params)    
+            self.projector.cs_axes_create(cs_params)
+            self.projector.show_coordinate_system(5)
             message = "Coordinate system correctly defined"
             rospy.loginfo("Coordinate system correctly defined")
             return CoordinateSystemResponse(Bool(True),String(message))
@@ -252,15 +253,6 @@ class ProjectionNode:
 
         try:
             self.projector.show_coordinate_system(req.secs.data)
-            self.projector.cs_frame_unhide()
-            self.projector.cs_axes_unhide()
-        
-            self.projector.start_projection()
-            rospy.sleep(req.secs.data)
-            self.projector.stop_projection()
-
-            self.projector.cs_frame_hide()  
-            self.projector.cs_axes_hide()
             return CoordinateSystemNameResponse(Bool(True),String("Coordinate system showed"))
         
         except Exception as e:
@@ -418,18 +410,24 @@ class ProjectionNode:
         try:
             self.projector.connect_and_setup()
             rospy.loginfo("Projector connected.")
+            return False
         
         except Exception as e:
             rospy.logerr(e)
 
-    def create_initial_coordinate_system(self):
+    def initialize_coordinate_system(self,load_cs):
         cs_params = self.read_coordinate_system()
         try:
             self.projector.define_coordinate_system(cs_params)
-            self.projector.show_coordinate_system(5)
             self.projector.cs_frame_create(cs_params)
-            self.projector.cs_axes_create(cs_params)    
-            rospy.loginfo("Created coordinate system: {}".format(cs_params.name))
+            self.projector.cs_axes_create(cs_params)
+            self.projector.show_coordinate_system(5)
+            
+            if load_cs == "true":
+                rospy.loginfo("User defined coordinate system loaded: {}".format(cs_params.name))
+            else:
+                rospy.loginfo("Factory default coordinate system loaded: {}".format(cs_params.name))
+                rospy.logwarn("Defining a new coordinate system is highly recommended.")
 
         except Exception as e:
             rospy.logerr(e)
@@ -448,7 +446,7 @@ class ProjectionNode:
 
 def main():
     """Init ROS node"""
-    ProjectionNode()
+    ProjectionNode(sys.argv[1])
 
 if __name__ == '__main__':
     main()

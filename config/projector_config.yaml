@@ -3,9 +3,7 @@ server_IP: "192.168.10.11"
 connection_port: 9090
 license_file: "1900027652.lic"
 
-load_coordinate_system: True
-
-coordinate_system_name: "default_cs"
+coordinate_system_name: "user_default"
 coordinate_system_resolution: 1000
 coordinate_system_distance: 1500 
 
