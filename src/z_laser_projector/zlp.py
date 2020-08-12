@@ -571,6 +571,15 @@ class CoordinateSystem(object):
             reference_object.name = cs.name
             reference_object.coordinateSystem = cs.name
             reference_object.projectorID = self.projector_id
+
+            # cs.P1_x = cs.P4_x = min(cs.P1_x,cs.P4_x)
+            # cs.P2_x = cs.P3_x = max(cs.P2_x,cs.P3_x)
+            # cs.P1_y = cs.P2_y = min(cs.P1_y,cs.P2_y)
+            # cs.P3_y = cs.P4_y = max(cs.P3_y,cs.P4_y)
+            # print("P1: ({},{})".format(cs.P1_x,cs.P1_y))
+            # print("P2: ({},{})".format(cs.P2_x,cs.P2_y))
+            # print("P3: ({},{})".format(cs.P3_x,cs.P3_y))
+            # print("P4: ({},{})".format(cs.P4_x,cs.P4_y))
             
             resolution = cs.resolution
 
