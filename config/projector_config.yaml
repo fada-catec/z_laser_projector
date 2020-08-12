@@ -9,9 +9,9 @@ coordinate_system_distance: 1500
 
 # Projector Reference System {P}
 P1: {x: -100, y: -100}
-P2: {x: -100, y:  100}
+P2: {x:  100, y: -100}
 P3: {x:  100, y:  100}
-P4: {x:  100, y: -100}
+P4: {x: -100, y:  100}
 
 # User Reference System {T}
 T1: {x: 0, y: 0}

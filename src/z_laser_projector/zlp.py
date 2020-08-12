@@ -573,12 +573,16 @@ class CoordinateSystem(object):
             reference_object.projectorID = self.projector_id
             
             resolution = cs.resolution
+
+            size_horiz = cs.P2_x - cs.P1_x
+            size_vert  = cs.P4_y - cs.P1_y
+
             T1_x = cs.T1_x
             T1_y = cs.T1_y
-            T2_x = T1_x + resolution
+            T2_x = T1_x + resolution*size_horiz/max(size_horiz,size_vert)
             T2_y = T1_y
             T3_x = T2_x
-            T3_y = T1_y + resolution
+            T3_y = T1_y + resolution*size_vert/max(size_horiz,size_vert)
             T4_x = T1_x
             T4_y = T3_y
             T = [T1_x, T1_y, T2_x, T2_y, T3_x, T3_y, T4_x, T4_y]
@@ -601,7 +605,7 @@ class CoordinateSystem(object):
             cross_size_y = d * 0.02
 
             cross_size = self.__geometry_tool.create_2d_point(cross_size_x,cross_size_y)
-            
+
             reference_object = self.__define_reference_point(reference_object,cross_size,0,d,cs.P1_x,cs.P1_y)
             reference_object = self.__define_reference_point(reference_object,cross_size,1,d,cs.P2_x,cs.P2_y)
             reference_object = self.__define_reference_point(reference_object,cross_size,2,d,cs.P3_x,cs.P3_y)
