@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2019, FADA-CATEC
+# Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,12 +20,30 @@ task of developing advanced applications."""
 import sys
 import time
 import math
-from z_laser_projector.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters
+# from z_laser_projector.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl # noqa?
+# from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters # noqa?
+from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from utils import CoordinateSystemParameters, ProjectionElementParameters
 
 class ProjectorManager:
-    """This class uses the methods from the libraries imported."""
+    """This class envolves the methods from the libraries imported.
+    
+    Args:
+        projector_IP (str): IP number of projector device
+        server_IP (str): IP number of service running at projector device
+        connection_port (int): connection port number 
 
+    Attributes:
+        projector_IP (str): IP number of projector device
+        server_IP (str): IP number of service running at projector device
+        connection_port (int): connection port number 
+        license_path (str): folder path where Z-Laser license file is located
+        projector_id (str): identification number of projector device
+        coordinate_system (str): name of coordinate system with which the user is operating currently 
+            ('current operating coordinate system')
+        current_user_T_points (list[float]): list of user reference system points [T1,T2,T3,T4]
+        projector_client (object): ProjectorClient object from utils library
+    """
     def __init__(self, projector_IP = "192.168.10.10", server_IP = "192.168.10.11", connection_port = 9090, lic_path=""):
         """Initialize the ProjectorManager object."""
         self.projector_IP = projector_IP
@@ -40,10 +58,9 @@ class ProjectorManager:
 
     def connect_and_setup(self):
         """Prepare projector to be used: connect, load license and activate.
-
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        
+        Raises:
+            SystemError: Raises an exception
         """
         try:
             self.client_server_connect()       
@@ -57,9 +74,8 @@ class ProjectorManager:
     def client_server_connect(self):
         """Connect to thrift server of ZLP-Service.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            ConnectionError
         """
         success,message = self.projector_client.connect(self.server_IP, self.connection_port)
         if not success:
@@ -68,34 +84,31 @@ class ProjectorManager:
     def client_server_disconnect(self):
         """Disconnect from thrift server of ZLP-Service.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            ConnectionError:
         """
         success,message = self.projector_client.disconnect()
         if not success:
             raise ConnectionError(message)
 
     def load_license(self,license_path):
-        """Transfer license file to service and check correct loading.
+        """Transfer license file to service.
 
         Args:
             license_path (str): path of the license file
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            FileNotFoundError:
         """
         success,message = self.projector_client.transfer_license(license_path)
         if not success:
             raise FileNotFoundError(message)
 
     def activate(self):
-        """Activate projector.
+        """Activate projector once it is connected and license is transfered.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         self.projector_id,success,message = self.projector_client.activate_projector(self.projector_IP)
         if not success:
@@ -108,20 +121,18 @@ class ProjectorManager:
     def deactivate(self):
         """Deactivate projector.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.projector_client.deactivate_projector()
         if not success:
             raise SystemError(message)
 
     def geotree_operator_create(self):
-        """Create geotree operator to handle reference systems and projection figures.
+        """Create geotree operator to handle reference systems and projection elements.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         module_id,success,message = self.projector_client.function_module_create()
         if not success:
@@ -133,11 +144,11 @@ class ProjectorManager:
         self.projection_element = ProjectionElementControl(module_id,thrift_client)
 
     def start_projection(self):
-        """Start projection of figures associated to the current reference system.
+        """Start projection of elements associated to the current reference system.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            Warning:
+            SystemError:
         """
         if not self.coordinate_system:
             raise Warning("No Current Coordinate System set yet.")
@@ -147,11 +158,10 @@ class ProjectorManager:
             raise SystemError(message)
 
     def stop_projection(self):
-        """Stop projection of all figures.
+        """Stop projection of all elements.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.projector_client.stop_project()
         if not success:
@@ -160,9 +170,8 @@ class ProjectorManager:
     def get_coordinate_systems(self):
         """Get list of all defined reference systems.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         cs_list,success,message = self.cs_element.coordinate_system_list()
         if not success:
@@ -176,9 +185,8 @@ class ProjectorManager:
         Args:
             cs_params (list): list of necessary parameters to define a new reference system (coordinates of reference system points)
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         coord_sys,self.current_user_T_points,success,message = self.cs_element.define_cs(cs_params)
         if not success:
@@ -195,9 +203,8 @@ class ProjectorManager:
         Args:
             cs_params (list): list of parameters from the new defined reference system
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.cs_element.register_cs(coord_sys)
         if not success:
@@ -207,11 +214,10 @@ class ProjectorManager:
         """Set the current operating reference system.
 
         Args:
-            coord_sys (str): name of reference system
+            coord_sys (str): name of reference coordinate system
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.cs_element.set_cs(coord_sys)
         if success:
@@ -220,14 +226,14 @@ class ProjectorManager:
             raise SystemError(message)
         
     def show_coordinate_system(self,secs):
-        """Project the reference points and origin axes of the current reference system on the surface.
+        """Project the reference points, origin axes and frame of the current operating reference system, 
+        on the projection surface.
 
         Args:
             secs (int): number of projection seconds on the surface 
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         if not self.coordinate_system:
             message = "Coordinate system does not exist."
@@ -248,14 +254,13 @@ class ProjectorManager:
             raise SystemError(e)       
 
     def remove_coordinate_system(self,coord_sys):
-        """Delete current reference system
+        """Delete current reference system.
 
         Args:
-            coord_sys (str): name of reference system 
+            coord_sys (str): name of reference coordinate system 
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.cs_element.remove_cs(coord_sys)
         if success:
@@ -268,11 +273,10 @@ class ProjectorManager:
         """Create a line as new projection figure, associated to the current reference system.
 
         Args:
-            proj_elem_params (list): list of necessary parameters to define a new line 
+            proj_elem_params (object): object with necessary parameters to identify a polyline 
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         if not self.coordinate_system:
             message = "There is not a current coordinate system. Define or set one first."
@@ -286,11 +290,10 @@ class ProjectorManager:
         """Hide a figure from current reference system.
 
         Args:
-            proj_elem_params (list): list of necessary parameters to identify the figure 
+            proj_elem_params (object): object with necessary parameters to identify a projection element
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.projection_element.deactivate_shape(proj_elem_params)
         if not success:
@@ -300,11 +303,10 @@ class ProjectorManager:
         """Unhide a figure from current reference system.
 
         Args:
-            proj_elem_params (list): list of necessary parameters to identify the figure 
+            proj_elem_params (object): object with necessary parameters to identify a projection element 
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.projection_element.reactivate_shape(proj_elem_params)
         if not success:
@@ -314,25 +316,23 @@ class ProjectorManager:
         """Delete a figure from current reference system.
 
         Args:
-            proj_elem_params (list): list of necessary parameters to identify the figure  
+            proj_elem_params (object): object with necessary parameters to identify a projection element  
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         success,message = self.projection_element.delete_shape(proj_elem_params)
         if not success:
             raise SystemError(message)
     
     def cs_axes_create(self,cs_params):
-        """Create projection figures of user reference system origin axes, project them and hide after.
+        """Create projection elements of user reference system origin axes.
 
         Args:
-            cs_params (list): list of definition parameters of the reference system
+            cs_params (object): object with necessary parameters to identify a coordinate system
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
         success,message = self.projection_element.cs_axes_create(cs_params,proj_elem_params)
@@ -345,15 +345,14 @@ class ProjectorManager:
             raise SystemError(e)
     
     def cs_frame_create(self,cs_params):
-        """Create frame lines projection figures of user reference system, project them and hide them after.
+        """Create projection elements of user reference system frame.
 
         Args:
             T (list): list of the User System Reference Points
             cs_params (list): list of definition parameters of the reference system
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
         success,message = self.projection_element.cs_frame_create(cs_params,proj_elem_params,self.current_user_T_points)
@@ -366,11 +365,10 @@ class ProjectorManager:
             raise SystemError(e)
 
     def cs_axes_unhide(self):
-        """Unhide user reference system origin axes, project them and hide after.
+        """Unhide user reference system origin axes for later projection.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.group_name = self.coordinate_system + "_origin"
@@ -393,11 +391,10 @@ class ProjectorManager:
             raise SystemError(e)
         
     def cs_axes_hide(self):
-        """Hide user reference system origin axes, project them and hide after.
+        """Hide user reference system origin axes.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.group_name = self.coordinate_system + "_origin"
@@ -420,11 +417,10 @@ class ProjectorManager:
             raise SystemError(e)
         
     def cs_frame_unhide(self):
-        """Unhide frame lines of user reference system, project them and hide after.
+        """Unhide frame of user reference system for later projection.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.group_name = self.coordinate_system + "_frame"
@@ -443,11 +439,10 @@ class ProjectorManager:
             raise SystemError(e)
 
     def cs_frame_hide(self):
-        """Hide frame lines of user reference system, project them and hide after.
+        """Hide frame lines of user reference system.
 
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+        Raises:
+            SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.group_name = self.coordinate_system + "_frame"

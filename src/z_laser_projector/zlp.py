@@ -3,7 +3,7 @@
 
 #!/usr/bin/env python3
 
-# Copyright (c) 2019, FADA-CATEC
+# Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import math
 import numpy as np
 import socket
 import copy
-import logging
+# import logging
 import threading 
 
 import thriftpy
@@ -36,16 +36,24 @@ from thriftpy.server import TThreadedServer, TSimpleServer
 from thriftpy.thrift import TProcessor, TClient
 from thriftpy.transport import TBufferedTransportFactory, TServerSocket, TSocket
 
-logging.basicConfig(format="%(asctime)s %(name)s %(levelname)s: %(message)s")
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+# logging.basicConfig(format="%(asctime)s %(name)s %(levelname)s: %(message)s")
+# log = logging.getLogger(__name__)
+# log.setLevel(logging.INFO)
 
 _interface_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "interface.thrift")
 thrift_interface = thriftpy.load(_interface_file, module_name="zlaser_thrift")
 
 class EventChannelInterfaceHandler(object):
-    """This class implement the functions of ClientEventChannel thrift interface."""
+    """This class implement the functions of ClientEventChannel thrift interface.
 
+    Attributes:
+        property_changed_callback (object): callback to handle settings changes on laser projector system
+        geo_tree_changed_callback (object): callback to handle changes on geotree operator
+        service_state_changed_callback (object): callback to handle changes on services state
+        function_module_changed_callback (object): callback to handle changes on function module state
+        rc_command_received_callback (object): callback to handle remote control commands reception
+        on_reflection_state_changed_callback (object): callback to handle changes on reflection state
+    """
     def __init__(self):
         """Initialize the EventChannelInterfaceHandler object."""
         self.property_changed_callback = lambda x, y: None
@@ -56,31 +64,74 @@ class EventChannelInterfaceHandler(object):
         self.on_reflection_state_changed_callback = lambda a, b: None
 
     def PropertyChanged(self, name, value):
+        """Set callback function to handle settings changes on laser projector system.
+    
+        Args:
+            name (str): full path of property that was changed
+            value (int): value of property 
+        """
         self.property_changed_callback(name, value)
 
     def GeoTreeChanged(self, changed_flags, element_names):
+        """Set callback function to handle changes on geotree operator.
+    
+        Args:
+            changed_flags (int): integer value with flags of type GeoTreeChangedFlags
+            element_names (enum): identification of changed element (within the GeoTreeElemId enumeration )
+        """
         self.geo_tree_changed_callback(changed_flags, element_names)
 
     def ServiceStateChanged(self, oldState, newState):
+        """Set callback function to handle changes on services state.
+    
+        Args:
+            oldState (enum): old state (within the ServiceStates enumeration) before change 
+            newState (enum): new state (within the ServiceStates enumeration) after change 
+        """
         self.service_state_changed_callback(oldState, newState)
 
     def FunctionModuleStateChanged(self, functionModID, oldState, newState):
+        """Set callback function to handle changes on function module state.
+    
+        Args:
+            functionModID (str): identificator name of function module
+            oldState (enum): old state (within the FunctionModuleStates enumeration) before change
+            newState (enum): new state (within the FunctionModuleStates enumeration) after change
+        """
         self.function_module_changed_callback(functionModID, oldState, newState)
 
     def RemoteControlFrameReceived(self, rc_id, command, toggle, projector, timestamp):
+        """Set callback function to handle remote control commands reception.
+    
+        Args:
+            rc_id (str): address of RC-device 
+            command (enum): enum with command codes for remotecontrol functions 
+            toggle (bool): toggle function active
+            projector (str): serial number of the projector
+            timestamp (int): timestamp
+        """
         self.rc_command_received_callback(rc_id, command, toggle, projector, timestamp)
 
     def onReflectionStateChanged(self, elementName, state):
+        """Set callback function to handle changes on reflection state.
+    
+        Args:
+            elementName (str): name of the element that changed state 
+            state (bool): true if a reflection was detected; False otherwise
+        """
         self.on_reflection_state_changed_callback(elementName, state)
 
 class ThriftClient(TClient):
-    """This class implement the functions to carry out the connection with the ZLP Service."""
+    """This class implement the functions to carry out the connection with the ZLP Service.
     
+    Args:
+        event_handler (object): object with functions of ClientEventChannel thrift interface
+    """
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
         """Initialize the ThriftClient object.
 
         Args:
-            event_handler (object): ClientEventChannel thrift interface
+            event_handler (object): ClientEventChannel thrift interface object
         """
         self._event_channel = None
         self._event_channel_handler = event_handler
@@ -114,38 +165,82 @@ class ThriftClient(TClient):
             self.ConnectClientEventChannel(connection[1])
 
     def set_property_changed_callback(self, callback):
+        """Set callback function related with laser projector settings changes.
+            
+        Args:
+            callback (object): callback function to set
+
+        Raises:
+            ValueError
+        """
         if self._event_channel_handler:
             self._event_channel_handler.property_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_geotree_changed_callback(self, callback):
+        """Set callback function related with geotree operator changes.
+            
+        Args:
+            callback (object): callback function to set
+
+        Raises:
+            ValueError
+        """
         if self._event_channel_handler:
             self._event_channel_handler.geo_tree_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_function_module_state_changed_callback(self, callback):
+        """Set callback function related with function module state changes.
+            
+        Args:
+            callback (object): callback function to set
+
+        Raises:
+            ValueError
+        """
         if self._event_channel_handler:
             self._event_channel_handler.function_module_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_rc_command_received_callback(self, callback):
+        """Set callback function related with remote control commands reception.
+            
+        Args:
+            callback (object): callback function to set
+
+        Raises:
+            ValueError
+        """
         if self._event_channel_handler:
             self._event_channel_handler.rc_command_received_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
     def set_reflection_state_changed_callback(self, callback):
+        """Set callback function related with reflection state changes.
+            
+        Args:
+            callback (object): callback function to set
+
+        Raises:
+            ValueError
+        """
         if self._event_channel_handler:
             self._event_channel_handler.on_reflection_state_changed_callback = callback
         else:
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
 class ProjectorClient(object):
-    """This class implement the functions to perform elementary operations with the projector."""
+    """This class implement the functions to perform simple operations with the projector.
 
+    Attributes:
+        projector_id (str): serial number of the projector
+        module_id (str): function module identification name
+    """
     def __init__(self):
         """Initialize the ProjectorClient object."""
         self.projector_id = ""
@@ -159,7 +254,7 @@ class ProjectorClient(object):
         """Return the object generated to communicate with the projector.
             
         Returns:
-            object: object with the generated client to communicate with the projector
+            object: object with the generated thrift client to communicate with the projector
         """
         try:
             return self.__thrift_client
@@ -175,8 +270,8 @@ class ProjectorClient(object):
             connection_port (str): port number on which ZLP-Service listens for requests
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             self.__thrift_client.init_client(server_IP, connection_port)
@@ -194,8 +289,8 @@ class ProjectorClient(object):
         """Disconnect from ZLP Service thrift server and close own event server.
         
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try: 
             self.__thrift_client.RemoveGeoTreeElem("") 
@@ -217,19 +312,14 @@ class ProjectorClient(object):
         return success,message
 
     def transfer_license(self, lic_path):
-        """Transfer license file to projector.
-        Transfer data of the local license file to remote file at ZLP-Service.
-        
-        local_path (str): normalized absolutized version of the pathname path 
-        remote_file (str): base name of a normalized absolutized version of the pathname path
-        overwrite (bool): overwrite data over remote file parameter
+        """Transfer data of the local license file to remote file at ZLP-Service.
         
         Args:
             lic_path (str): license file path
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             license_path = os.path.abspath(lic_path)
@@ -257,8 +347,8 @@ class ProjectorClient(object):
         """Check if license is valid.
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             success = self.__thrift_client.CheckLicense()
@@ -279,8 +369,8 @@ class ProjectorClient(object):
             scan_addresses (str): addresses or address to scan
 
         Returns:
-            tuple[list, bool, str]: the first value in the returned tuple is a list of serial numbers of the projectors found, the second a bool success value and 
-            the third value in the tuple is an information message string
+            tuple[list, bool, str]: the first value in the returned tuple is a list of serial numbers of the projectors found, 
+                the second a bool success value and the third value in the tuple is an information message string
         """
         try:
             self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
@@ -306,6 +396,12 @@ class ProjectorClient(object):
         return serial_list,success,message
     
     def property_changed_callback(self, prop, value):
+        """Callback function related with laser projector settings changes.
+        
+        Args:
+            prop (str): full path of property that was changed
+            value (int): value of property 
+        """
         self.cv.acquire()
         self.cv.notify()
         self.cv.release()
@@ -318,7 +414,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the serial number string of the activated projector,
-            the second a bool success value and the third value in the tuple is an information message string
+                the second a bool success value and the third value in the tuple is an information message string
         """
         try:
             projectors,s,m = self.scan_projectors(projector_IP)
@@ -349,8 +445,8 @@ class ProjectorClient(object):
         """Set properties to deactivate a projector.
         
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
@@ -375,7 +471,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the function module identification name string, 
-            the second is a bool success value and the third value in the tuple is an information message string
+                the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
             self.module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
@@ -389,14 +485,14 @@ class ProjectorClient(object):
         return self.module_id,success,message
 
     def start_project(self, coord_sys):
-        """Start projection on the surface of all figures (shapes) that belong to the active coordinate system.
+        """Start projection on the surface of all projection elements that belong to the active coordinate system.
             
         Args:
             coord_sys (str): name of the current coordinate system
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             if not coord_sys:
@@ -426,11 +522,11 @@ class ProjectorClient(object):
         return success,message
 
     def stop_project(self): 
-        """Stop projection of all figures.
+        """Stop projection of all elements.
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
@@ -483,16 +579,20 @@ class GeometryTool(object):
         return thrift_interface.Vector3D(x, y, z)
 
 class CoordinateSystem(object):
-    """This class implement the functions related with coordinate systems management."""
+    """This class implement the functions related with coordinate systems management.
     
+    Args:
+        projector_id (str): serial number of the projector
+        module_id (str): function module identification name
+        thrift_client (object): object with the generated client to communicate with the projector
+
+    Attributes:
+        projector_id (str): serial number of the projector
+        module_id (str): function module identification name
+        reference_object_list (list): list of created reference objects
+    """
     def __init__(self, projector_id, module_id, thrift_client):
-        """Initialize the CoordinateSystem object.
-        
-        Args:
-            projector_id (str): serial number of the projector
-            module_id (str): function module identification name
-            thrift_client (object): object with the generated client to communicate with the projector
-        """
+        """Initialize the CoordinateSystem object."""
         self.__thrift_client = thrift_client 
         self.__geometry_tool = GeometryTool()
 
@@ -588,6 +688,7 @@ class CoordinateSystem(object):
 
             T1_x = cs.T1_x
             T1_y = cs.T1_y
+            print(T1_x,T1_y)
             T2_x = T1_x + resolution*size_horiz/max(size_horiz,size_vert)
             T2_y = T1_y
             T3_x = T2_x
@@ -767,15 +868,18 @@ class CoordinateSystem(object):
         return success,message
 
 class ProjectionElementControl(object):
-    """This class implement the functions related with figures projection."""
+    """This class implement the functions related with projection elements.
     
+    Args:
+        module_id (str): function module identification name
+        thrift_client (object): object with the generated client to communicate with the projector
+
+    Attributes:
+        module_id (str): function module identification name
+        default_projection_element (object): base structure initialization for Projection Elements
+    """
     def __init__(self,module_id, thrift_client):
-        """Initialize the ProjectionElementControl object.
-        
-        Args:
-            module_id (str): function module identification name
-            thrift_client (object): object with the generated client to communicate with the projector
-        """
+        """Initialize the ProjectionElementControl object."""
         self.__thrift_client = thrift_client
         self.__geometry_tool = GeometryTool()
         self.module_id = module_id
@@ -804,10 +908,10 @@ class ProjectionElementControl(object):
         return elem
 
     def create_polyline(self, name):
-        """Generate a new line object.
+        """Generate a new polyline object.
             
         Args:
-            name (str): line name
+            name (str): polyline name
         
         Returns:
             object: polyline struct with fields initialized
@@ -819,15 +923,15 @@ class ProjectionElementControl(object):
         return polyline
 
     def define_polyline(self,coord_sys,proj_elem_params):
-        """Create a new line as projection figure.
+        """Create a new line as projection element.
 
         Args:
-            coord_sys (str): name of coordinate system which the new projection figure will be added
-            proj_elem_params (list): list with the necessary parameters to identify and define a line as a new projection figure
+            coord_sys (str): name of coordinate system which the new projection element will be added
+            proj_elem_params (list): list with the necessary parameters to identify and define a line as a new projection element
                 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             shape_id = proj_elem_params.shape_id
@@ -859,14 +963,14 @@ class ProjectionElementControl(object):
         return success,message
 
     def deactivate_shape(self, shape_params): 
-        """Hide (deactivate) a projection figure from the current reference system.
+        """Hide (deactivate) a projection element from the current reference system.
 
         Args:
-            shape_params (list): list with the necessary parameters to identify the projection figure
+            shape_params (list): list with the necessary parameters to identify the projection element
             
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             shape_type  = shape_params.shape_type
@@ -895,14 +999,14 @@ class ProjectionElementControl(object):
         return success,message
 
     def reactivate_shape(self, shape_params): 
-        """Unhide (activate hidden) a projection figure from the current reference system.
+        """Unhide (activate hidden) a projection element from the current reference system.
 
         Args:
-            shape_params (list): list with the necessary parameters to identify the projection figure
+            shape_params (list): list with the necessary parameters to identify the projection element
             
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             shape_type  = shape_params.shape_type
@@ -931,14 +1035,14 @@ class ProjectionElementControl(object):
         return success,message
 
     def delete_shape(self, shape_params):
-        """Delete a projection figure from the current reference system.
+        """Delete a projection element from the current reference system.
 
         Args:
-            shape_params (list): list with the necessary parameters to identify the projection figure
+            shape_params (list): list with the necessary parameters to identify the projection element
             
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         try:
             shape_type  = shape_params.shape_type
@@ -961,14 +1065,14 @@ class ProjectionElementControl(object):
         return success,message
 
     def cs_axes_create(self,cs_params,proj_elem_params):
-        """Create projection figures of user reference system origin axes, project them and hide after.
+        """Create projection elements of reference coordinate system origin axes.
 
         Args:
             cs_params (list): list of definition parameters of the reference system
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         proj_elem_params.shape_type = "polyline"
         proj_elem_params.group_name = cs_params.name + "_origin"
@@ -1023,15 +1127,15 @@ class ProjectionElementControl(object):
         return success,message
 
     def cs_frame_create(self,cs_params,proj_elem_params,T):
-        """Create frame lines projection figures of user reference system, project them and hide them after.
+        """Create projection elements of reference coordinate system frame.
 
         Args:
             T (list): list of the User System Reference Points
             cs_params (list): list of definition parameters of the reference system
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+                an information message string
         """
         proj_elem_params.shape_type = "polyline"
         proj_elem_params.group_name = cs_params.name + "_frame"

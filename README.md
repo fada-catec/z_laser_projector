@@ -78,7 +78,7 @@ Read documentation `z_laser_projector/doc/html/index.html`
 <a href="http://rosin-project.eu">
   <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png" 
        alt="rosin_logo" height="60" >
-</a></br>
+</a>
 
 Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.  
 More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
