@@ -1,7 +1,7 @@
 # shape_type: keyword of one of the figure types that the laser projector system is able to project:
 # - polyline
-# - curves: circle, oval, arc
-# - text
+# - curves: circle, oval, arc (todo)
+# - text (todo)
 std_msgs/String shape_type
 
 # Group name that the projection element belongs
