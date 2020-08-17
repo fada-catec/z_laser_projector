@@ -688,7 +688,6 @@ class CoordinateSystem(object):
 
             T1_x = cs.T1_x
             T1_y = cs.T1_y
-            print(T1_x,T1_y)
             T2_x = T1_x + resolution*size_horiz/max(size_horiz,size_vert)
             T2_y = T1_y
             T3_x = T2_x

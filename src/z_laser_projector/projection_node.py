@@ -41,16 +41,12 @@ from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
 
 class ProjectionNode:
     """This class initilizes the services and implements the functionalities of the projection_node.
-    
-    Args:
-        load_cs (str): node launcher parameter to load a user predefined coordinate system from template in the 
-            initilization. "true" to load user template, "false" otherwise.
 
     Attributes:
         lic_path (str): folder path where Z-Laser license file is located
         projector (object): ProjectorManager object from projector_manager library
     """
-    def __init__(self,load_cs):
+    def __init__(self):
         """Initialize the ProjectionNode object."""
         rospy.init_node('projection_node')
 
@@ -69,7 +65,7 @@ class ProjectionNode:
         error = self.setup_projector()
         # If set by user, create a coordinate system
         if not error:
-            self.initialize_coordinate_system(load_cs)
+            self.initialize_coordinate_system()
 
         # Create services to interact with projector
         self.open_services()
@@ -433,13 +429,8 @@ class ProjectionNode:
         except Exception as e:
             rospy.logerr(e)
 
-    def initialize_coordinate_system(self,load_cs):
-        """Initialize the factory or user predefined coordinate system at ros projection_node launch.
-
-        Args:
-            load_cs (str): node launcher parameter to load in the initilization an user predefined coordinate system 
-                from template if it is "true", or factory coordinate system if is "false".
-        """
+    def initialize_coordinate_system(self):
+        """Initialize the factory or user predefined coordinate system at ros projection_node launch."""
         cs_params = self.read_coordinate_system()
         try:
             self.projector.define_coordinate_system(cs_params)
@@ -447,11 +438,7 @@ class ProjectionNode:
             self.projector.cs_axes_create(cs_params)
             self.projector.show_coordinate_system(5)
             
-            if load_cs == "true":
-                rospy.loginfo("User defined coordinate system loaded: {}".format(cs_params.name))
-            else:
-                rospy.loginfo("Factory default coordinate system loaded: {}".format(cs_params.name))
-                rospy.logwarn("Defining a new coordinate system by user is highly recommended.")
+            rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))
 
         except Exception as e:
             rospy.logerr(e)
@@ -476,7 +463,7 @@ class ProjectionNode:
 
 def main():
     """Init ROS node"""
-    ProjectionNode(sys.argv[1])
+    ProjectionNode()
 
 if __name__ == '__main__':
     main()

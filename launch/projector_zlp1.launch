@@ -1,20 +1,17 @@
 <launch>
 
     <arg name="namespace" value="projector_zlp1"/>
-    <arg name="load_user_cs" default="false"
-                    doc="whether or not load user coordinate system preferences in projector_config.yaml"/>
+    <arg name="load_user_coordinate_system" default="false"/>
 
     <group ns="$(arg namespace)">
 
-        <group if="$(eval arg('load_user_cs'))">
-            <rosparam file="$(find z_laser_projector)/config/projector_config.yaml"/> 
-            <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" output="screen" args="$(arg load_user_cs)"/>
-        </group>
+        <rosparam if ="$(eval arg('load_user_coordinate_system'))"
+            file="$(find z_laser_projector)/config/projector_config.yaml"/> 
 
-        <group unless="$(eval arg('load_user_cs'))">
-            <rosparam file="$(find z_laser_projector)/config/factory_coordinate_system.yaml"/>
-            <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" output="screen" args="$(arg load_user_cs)"/>
-        </group>
+        <rosparam unless ="$(eval arg('load_user_coordinate_system'))"
+            file="$(find z_laser_projector)/config/factory_coordinate_system.yaml"/>
+
+        <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" output="screen"/>
 
     </group>
 
