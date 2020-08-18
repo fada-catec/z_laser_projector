@@ -121,11 +121,7 @@ class ThriftClient(TClient):
             ZLP-Service and a remote client
     """
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
-        """Initialize the ThriftClient object.
-
-        Args:
-            event_handler (object): ClientEventChannel thrift interface object
-        """
+        """Initialize the ThriftClient object."""
         self._event_channel = None
         self._event_channel_handler = event_handler
 
