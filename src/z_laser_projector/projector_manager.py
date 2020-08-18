@@ -41,18 +41,18 @@ class ProjectorManager:
         projector_id (str): identification number of projector device
         coordinate_system (str): name of coordinate system with which the user is operating currently 
             ('current operating coordinate system')
-        current_user_T_points (list[float]): list of user reference system points [T1,T2,T3,T4]
+        user_T_points (list[float]): list of user reference system points [T1,T2,T3,T4]
         projector_client (object): ProjectorClient object from utils library
     """
     def __init__(self, projector_IP = "192.168.10.10", server_IP = "192.168.10.11", connection_port = 9090, lic_path=""):
         """Initialize the ProjectorManager object."""
-        self.projector_IP = projector_IP
-        self.server_IP = server_IP
-        self.connection_port = connection_port
-        self.license_path = lic_path
-        self.projector_id = ""
-        self.coordinate_system = ""
-        self.current_user_T_points = []
+        self.__projector_IP = projector_IP
+        self.__server_IP = server_IP
+        self.__connection_port = connection_port
+        self.__license_path = lic_path
+        self.__projector_id = ""
+        self.__coordinate_system = ""
+        self.__user_T_points = []
 
         self.projector_client = ProjectorClient() 
 
@@ -64,7 +64,7 @@ class ProjectorManager:
         """
         try:
             self.client_server_connect()       
-            self.load_license(self.license_path)
+            self.load_license(self.__license_path)
             self.activate()
             self.geotree_operator_create()
         
@@ -77,7 +77,7 @@ class ProjectorManager:
         Raises:
             ConnectionError
         """
-        success,message = self.projector_client.connect(self.server_IP, self.connection_port)
+        success,message = self.projector_client.connect(self.__server_IP, self.__connection_port)
         if not success:
             raise ConnectionError(message)
 
@@ -110,7 +110,7 @@ class ProjectorManager:
         Raises:
             SystemError:
         """
-        self.projector_id,success,message = self.projector_client.activate_projector(self.projector_IP)
+        self.__projector_id,success,message = self.projector_client.activate_projector(self.__projector_IP)
         if not success:
             raise SystemError(message)
     
@@ -140,7 +140,7 @@ class ProjectorManager:
 
         thrift_client = self.projector_client.get_thrift_client()
 
-        self.cs_element = CoordinateSystem(self.projector_id, module_id, thrift_client)
+        self.cs_element = CoordinateSystem(self.__projector_id, module_id, thrift_client)
         self.projection_element = ProjectionElementControl(module_id,thrift_client)
 
     def start_projection(self):
@@ -150,10 +150,10 @@ class ProjectorManager:
             Warning:
             SystemError:
         """
-        if not self.coordinate_system:
+        if not self.__coordinate_system:
             raise Warning("No Current Coordinate System set yet.")
 
-        success,message = self.projector_client.start_project(self.coordinate_system)
+        success,message = self.projector_client.start_project(self.__coordinate_system)
         if not success:
             raise SystemError(message)
 
@@ -188,7 +188,7 @@ class ProjectorManager:
         Raises:
             SystemError:
         """
-        coord_sys,self.current_user_T_points,success,message = self.cs_element.define_cs(cs_params)
+        coord_sys,self.__user_T_points,success,message = self.cs_element.define_cs(cs_params)
         if not success:
             raise SystemError(message)
         try:
@@ -221,7 +221,7 @@ class ProjectorManager:
         """
         success,message = self.cs_element.set_cs(coord_sys)
         if success:
-            self.coordinate_system = coord_sys
+            self.__coordinate_system = coord_sys
         if not success:
             raise SystemError(message)
         
@@ -235,11 +235,11 @@ class ProjectorManager:
         Raises:
             SystemError:
         """
-        if not self.coordinate_system:
+        if not self.__coordinate_system:
             message = "Coordinate system does not exist."
             raise SystemError(message)
         
-        success,message = self.cs_element.show_cs(self.coordinate_system, secs)
+        success,message = self.cs_element.show_cs(self.__coordinate_system, secs)
         if not success:
             raise SystemError(message)
         try:
@@ -264,8 +264,8 @@ class ProjectorManager:
         """
         success,message = self.cs_element.remove_cs(coord_sys)
         if success:
-            self.coordinate_system = ""
-            self.current_user_T_points = []
+            self.__coordinate_system = ""
+            self.__user_T_points = []
         else:
             raise SystemError(message)
         
@@ -278,11 +278,11 @@ class ProjectorManager:
         Raises:
             SystemError:
         """
-        if not self.coordinate_system:
+        if not self.__coordinate_system:
             message = "There is not a current coordinate system. Define or set one first."
             raise SystemError(message)
         
-        success,message = self.projection_element.define_polyline(self.coordinate_system,proj_elem_params)
+        success,message = self.projection_element.define_polyline(self.__coordinate_system,proj_elem_params)
         if not success:
             raise SystemError(message)
         
@@ -355,7 +355,7 @@ class ProjectorManager:
             SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
-        success,message = self.projection_element.cs_frame_create(cs_params,proj_elem_params,self.current_user_T_points)
+        success,message = self.projection_element.cs_frame_create(cs_params,proj_elem_params,self.__user_T_points)
         if not success:
             raise SystemError(message)
 
@@ -371,7 +371,7 @@ class ProjectorManager:
             SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.coordinate_system + "_origin"
+        proj_elem_params.group_name = self.__coordinate_system + "_origin"
         proj_elem_params.shape_type = "polyline"
         
         try:
@@ -397,7 +397,7 @@ class ProjectorManager:
             SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.coordinate_system + "_origin"
+        proj_elem_params.group_name = self.__coordinate_system + "_origin"
         proj_elem_params.shape_type = "polyline"
         
         try:
@@ -423,7 +423,7 @@ class ProjectorManager:
             SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.coordinate_system + "_frame"
+        proj_elem_params.group_name = self.__coordinate_system + "_frame"
         proj_elem_params.shape_type = "polyline"
         
         try:
@@ -445,7 +445,7 @@ class ProjectorManager:
             SystemError:
         """
         proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.coordinate_system + "_frame"
+        proj_elem_params.group_name = self.__coordinate_system + "_frame"
         proj_elem_params.shape_type = "polyline"
         
         try:
@@ -459,3 +459,132 @@ class ProjectorManager:
             self.hide_shape(proj_elem_params)
         except SystemError as e:
             raise SystemError(e)
+
+
+    @property        
+    def projetor_IP(self):
+        """Getter for projector_IP
+
+        Returns:
+            str: projector_IP
+        """
+        return self.__projector_IP
+
+    @projetor_IP.setter
+    def projector_IP(self, IP_address):
+        """Setter for projector_IP
+
+        Args:
+            IP_address (str)
+        """
+        self.__projector_IP = IP_address
+    
+    @property
+    def server_IP(self):
+        """Getter for server_IP
+
+        Returns:
+            str: server_IP
+        """
+        return self.__server_IP    
+    
+    @server_IP.setter
+    def server_IP(self, IP_address):
+        """Setter for server_IP
+
+        Args:
+            IP_address (str)
+        """
+        self.__server_IP = IP_address
+    
+    @property
+    def connection_port(self):
+        """Getter for connection_port
+
+        Returns:
+            int: connection_port
+        """
+        return self.__connection_port    
+
+    @connection_port.setter
+    def connection_port(self, port):
+        """Setter for connection_port
+
+        Args:
+            port (int)
+        """         
+        self.__connection_port = port
+    
+    @property
+    def license_path(self):
+        """Getter for license_path
+
+        Returns:
+            str: license_path
+        """
+        return self.__license_path    
+    
+    @license_path.setter
+    def license_path(self, path):
+        """Setter for license_path
+
+        Args:
+            path (str)
+        """
+        self.__license_path = path
+    
+    @property
+    def projector_id(self):
+        """Getter for projector_id
+
+        Returns:
+            str: projector_id
+        """
+        return self.__projector_id    
+
+    @projector_id.setter
+    def projector_id(self, id):
+        """Setter for projector_id
+
+        Args:
+            id (str)
+        """
+        self.__projector_id = id
+
+    @property    
+    def coordinate_system(self):
+        """Getter for coordinate_system
+
+        Returns:
+            str: name of the coordinate system
+        """
+        return self.__coordinate_system    
+
+    @coordinate_system.setter
+    def coordinate_system(self, name):
+        """Setter for coordinate_system
+
+        Args:
+            name (str): name of the coordinate system
+        """
+        self.__coordinate_system = name
+    
+    @property
+    def user_T_points(self):
+        """Getter for user_T_points
+
+        Returns:
+            list[float]: points defining user coordinate system
+        """
+        return self.__user_T_points    
+
+    @user_T_points.setter
+    def user_T_points(self, user_points):
+        """Setter for user_T_points
+
+        Args:
+            user_points (list[float]): points defining user coordinate system
+        """
+        self.__user_T_points = user_points
+
+    
