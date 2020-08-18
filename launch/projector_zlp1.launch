@@ -8,7 +8,7 @@
         <rosparam file="$(find z_laser_projector)/config/communic_setting.yaml"/>
 
         <rosparam if ="$(eval arg('load_user_coordinate_system'))"
-            file="$(find z_laser_projector)/config/projector_config.yaml"/> 
+            file="$(find z_laser_projector)/config/user_coordinate_system.yaml"/> 
 
         <rosparam unless ="$(eval arg('load_user_coordinate_system'))"
             file="$(find z_laser_projector)/config/factory_coordinate_system.yaml"/>

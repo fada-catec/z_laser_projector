@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-#!/usr/bin/env python3
 
 # Copyright (c) 2020, FADA-CATEC
 
@@ -27,7 +24,6 @@ import math
 import numpy as np
 import socket
 import copy
-# import logging
 import threading 
 
 import thriftpy
@@ -35,13 +31,6 @@ from thriftpy.protocol import TBinaryProtocolFactory
 from thriftpy.server import TThreadedServer, TSimpleServer
 from thriftpy.thrift import TProcessor, TClient
 from thriftpy.transport import TBufferedTransportFactory, TServerSocket, TSocket
-
-# logging.basicConfig(format="%(asctime)s %(name)s %(levelname)s: %(message)s")
-# log = logging.getLogger(__name__)
-# log.setLevel(logging.INFO)
-
-_interface_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "interface.thrift")
-thrift_interface = thriftpy.load(_interface_file, module_name="zlaser_thrift")
 
 class EventChannelInterfaceHandler(object):
     """This class implement the functions of ClientEventChannel thrift interface.
@@ -126,6 +115,10 @@ class ThriftClient(TClient):
     
     Args:
         event_handler (object): object with functions of ClientEventChannel thrift interface
+
+    Attributes:
+        thrift_interface (obj): load the interface description file (interface.thrift) for the communication between 
+            ZLP-Service and a remote client
     """
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
         """Initialize the ThriftClient object.
@@ -135,6 +128,9 @@ class ThriftClient(TClient):
         """
         self._event_channel = None
         self._event_channel_handler = event_handler
+
+        _interface_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "interface.thrift")
+        self.thrift_interface = thriftpy.load(_interface_file, module_name="zlaser_thrift")
 
     def init_client(self, ip, port):
         """Establish a connection to thrift server of ZLP Service. Init client opening sockets and init events handler.
@@ -147,12 +143,12 @@ class ThriftClient(TClient):
         transport = TBufferedTransportFactory().get_transport(client_socket)
         protocol = TBinaryProtocolFactory().get_protocol(transport)
         transport.open()
-        super().__init__(thrift_interface.ServiceInterface, protocol)
+        super().__init__(self.thrift_interface.ServiceInterface, protocol)
 
     def init_event_channel(self):
         """Create a thrift server and register it at ZLP Service to receive events."""
         if self._event_channel_handler and not self._event_channel:
-            processor = TProcessor(thrift_interface.ClientEventChannel, self._event_channel_handler)
+            processor = TProcessor(self.thrift_interface.ClientEventChannel, self._event_channel_handler)
             server_socket = TServerSocket(host="0.0.0.0", port=0, socket_family=socket.AF_INET, client_timeout=200000)
             server_socket.client_timeout = 1000*60*10 
             self._event_channel = TSimpleServer(processor, server_socket)
@@ -328,7 +324,7 @@ class ProjectorClient(object):
 
             self.__thrift_client.TransferDataToFile(content, license_file, True)
         
-        except thrift_interface.CantWriteFile as e:
+        except self.__thrift_client.thrift_interface.CantWriteFile as e:
             success = False
             message = e
         
@@ -542,7 +538,14 @@ class ProjectorClient(object):
         return success,message
 
 class GeometryTool(object):
-    """This class implement functions to generate basic mathematical tools."""
+    """This class implement functions to generate basic mathematical tools.
+    
+    Args:
+        thrift_client (object): object with the generated client to communicate with the projector
+    """
+    def __init__(self, thrift_client):
+        """Initialize the GeometryTool object."""
+        self.__thrift_client = thrift_client
 
     def create_matrix4x4(self):
         """Initialize 4x4 matrix.
@@ -550,7 +553,7 @@ class GeometryTool(object):
         Returns:
             object: matrix struct initialized with empty values
         """
-        mat = thrift_interface.Matrix4x4(list())
+        mat = self.__thrift_client.thrift_interface.Matrix4x4(list())
         return mat
 
     def create_2d_point(self, x=0, y=0):
@@ -563,7 +566,7 @@ class GeometryTool(object):
         Returns:
             object: struct with the values of the 2 axes (x,y)
         """
-        return thrift_interface.Vector2D(x, y)
+        return self.__thrift_client.thrift_interface.Vector2D(x, y)
 
     def create_3d_point(self, x=0, y=0, z=0):
         """Initialize 3-dimension array.
@@ -576,7 +579,7 @@ class GeometryTool(object):
         Returns:
             object: struct with the values of the 3 axes (x,y,z)
         """
-        return thrift_interface.Vector3D(x, y, z)
+        return self.__thrift_client.thrift_interface.Vector3D(x, y, z)
 
 class CoordinateSystem(object):
     """This class implement the functions related with coordinate systems management.
@@ -594,7 +597,7 @@ class CoordinateSystem(object):
     def __init__(self, projector_id, module_id, thrift_client):
         """Initialize the CoordinateSystem object."""
         self.__thrift_client = thrift_client 
-        self.__geometry_tool = GeometryTool()
+        self.__geometry_tool = GeometryTool(thrift_client)
 
         self.projector_id = projector_id
         self.module_id = module_id
@@ -625,7 +628,7 @@ class CoordinateSystem(object):
         Returns:
             object: reference object struct fields initialized
         """
-        ref_obj = thrift_interface.Referenceobject()
+        ref_obj = self.__thrift_client.thrift_interface.Referenceobject()
         ref_obj.name = ""
         ref_obj.activated = False
         ref_obj.fieldTransMat = self.__geometry_tool.create_matrix4x4()
@@ -647,7 +650,7 @@ class CoordinateSystem(object):
         Returns:
             object: reference point struct fields initialized
         """
-        ref_point = thrift_interface.Referencepoint()
+        ref_point = self.__thrift_client.thrift_interface.Referencepoint()
         ref_point.name = name
         ref_point.refPoint = self.__geometry_tool.create_3d_point(x, y, z)
         ref_point.activated = active
@@ -696,7 +699,7 @@ class CoordinateSystem(object):
             T4_y = T3_y
             T = [T1_x, T1_y, T2_x, T2_y, T3_x, T3_y, T4_x, T4_y]
 
-            rot_angle = 180/math.pi*math.atan2((cs.P1_y - cs.P2_y),(cs.P1_x - cs.P2_x))
+            # rot_angle = 180/math.pi*math.atan2((cs.P1_y - cs.P2_y),(cs.P1_x - cs.P2_x))
             # print('Reference system rotation angle: {}'.format(rot_angle))
             
             # rot_matrix = np.array([[ math.cos(rot_angle), -math.sin(rot_angle)], 
@@ -880,10 +883,10 @@ class ProjectionElementControl(object):
     def __init__(self,module_id, thrift_client):
         """Initialize the ProjectionElementControl object."""
         self.__thrift_client = thrift_client
-        self.__geometry_tool = GeometryTool()
+        self.__geometry_tool = GeometryTool(thrift_client)
         self.module_id = module_id
 
-        self.default_projection_element = thrift_interface.ProjectionElement()
+        self.default_projection_element = self.__thrift_client.thrift_interface.ProjectionElement()
         self.default_projection_element.pen = 0
         self.default_projection_element.coordinateSystemList = []
         self.default_projection_element.projectorIDList = []
@@ -915,7 +918,7 @@ class ProjectionElementControl(object):
         Returns:
             object: polyline struct with fields initialized
         """
-        polyline = thrift_interface.Polyline()
+        polyline = self.__thrift_client.thrift_interface.Polyline()
         polyline = self.init_projection_element(polyline)
         polyline.name = name
         polyline.polylineList = []
