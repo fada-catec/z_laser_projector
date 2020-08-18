@@ -440,6 +440,8 @@ class ProjectionNode:
             rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))
 
         except Exception as e:
+            if "InvalidRelativePath" in str(e):
+                rospy.logwarn("Possible error: check coordinate system name is not empty")
             rospy.logerr(e)
 
     def shutdown_handler(self):
