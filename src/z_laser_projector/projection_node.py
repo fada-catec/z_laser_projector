@@ -426,6 +426,7 @@ class ProjectionNode:
         
         except Exception as e:
             rospy.logerr(e)
+            return True
 
     def initialize_coordinate_system(self):
         """Initialize the factory or user predefined coordinate system at ros projection_node launch."""
