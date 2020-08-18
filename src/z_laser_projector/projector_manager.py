@@ -375,18 +375,10 @@ class ProjectorManager:
         proj_elem_params.shape_type = "polyline"
         
         try:
-            proj_elem_params.shape_id = "axis_x"
-            self.unhide_shape(proj_elem_params)            
-            proj_elem_params.shape_id = "axis_y"
-            self.unhide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_x_arrow1"
-            self.unhide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_x_arrow2"
-            self.unhide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_y_arrow1"
-            self.unhide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_y_arrow2"
-            self.unhide_shape(proj_elem_params)
+            for axis_id in self.projection_element.axes_ids:
+                proj_elem_params.shape_id = axis_id
+                self.unhide_shape(proj_elem_params)            
+            
         except SystemError as e:
             raise SystemError(e)
         
@@ -401,18 +393,10 @@ class ProjectorManager:
         proj_elem_params.shape_type = "polyline"
         
         try:
-            proj_elem_params.shape_id = "axis_x"
-            self.hide_shape(proj_elem_params)            
-            proj_elem_params.shape_id = "axis_y"
-            self.hide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_x_arrow1"
-            self.hide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_x_arrow2"
-            self.hide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_y_arrow1"
-            self.hide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "axis_y_arrow2"
-            self.hide_shape(proj_elem_params)
+            for axis_id in self.projection_element.axes_ids:
+                proj_elem_params.shape_id = axis_id
+                self.hide_shape(proj_elem_params)            
+
         except SystemError as e:
             raise SystemError(e)
         
@@ -421,20 +405,16 @@ class ProjectorManager:
 
         Raises:
             SystemError:
-        """
+        """        
         proj_elem_params = ProjectionElementParameters()
         proj_elem_params.group_name = self.__coordinate_system + "_frame"
         proj_elem_params.shape_type = "polyline"
-        
+                
         try:
-            proj_elem_params.shape_id = "T1_T2"
-            self.unhide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "T2_T3"
-            self.unhide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "T3_T4"
-            self.unhide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "T4_T1"
-            self.unhide_shape(proj_elem_params)
+            for frame_id in self.projection_element.frame_ids:
+                proj_elem_params.shape_id = frame_id
+                self.unhide_shape(proj_elem_params)
+                
         except SystemError as e:
             raise SystemError(e)
 
@@ -449,14 +429,10 @@ class ProjectorManager:
         proj_elem_params.shape_type = "polyline"
         
         try:
-            proj_elem_params.shape_id = "T1_T2"
-            self.hide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "T2_T3"
-            self.hide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "T3_T4"
-            self.hide_shape(proj_elem_params)
-            proj_elem_params.shape_id = "T4_T1"
-            self.hide_shape(proj_elem_params)
+            for frame_id in self.projection_element.frame_ids:
+                proj_elem_params.shape_id = frame_id
+                self.hide_shape(proj_elem_params)
+
         except SystemError as e:
             raise SystemError(e)
 

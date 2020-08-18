@@ -5,7 +5,7 @@
 
     <group ns="$(arg namespace)">
 
-        <rosparam file="$(find z_laser_projector)/config/communic_setting.yaml"/>
+        <rosparam file="$(find z_laser_projector)/config/communication_settings.yaml"/>
 
         <rosparam if ="$(eval arg('load_user_coordinate_system'))"
             file="$(find z_laser_projector)/config/user_coordinate_system.yaml"/> 
