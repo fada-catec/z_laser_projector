@@ -17,60 +17,33 @@
 """Central node that provides a collection of services that allows to operate and control the ZLP1 laser projector and simplify the task of 
 developing further advanced features."""
 
-import sys
 import rospy
 import rospkg
-import os
-import time
-import numpy as np
 
-# from z_laser_projector.projector_manager import ProjectorManager # noqa?
-# from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters # noqa?
-from projector_manager import ProjectorManager
-from utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_projector.zlp_projector_manager import ZLPProjectorManager
+from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
-from std_msgs.msg import Bool, String
+from std_msgs.msg import Bool, String, Float64
 from std_srvs.srv import Trigger, TriggerResponse
-from z_laser_projector.msg import Line, ReferencePoint
+from z_laser_projector.msg import Line, ReferencePoint, UserCoordinateSystem
 from z_laser_projector.srv import CoordinateSystem, CoordinateSystemResponse
 from z_laser_projector.srv import CoordinateSystemName, CoordinateSystemNameResponse
 from z_laser_projector.srv import CoordinateSystemList, CoordinateSystemListResponse
 from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
 
-class ProjectionNode:
+class ZLPProjectorROS:
     """This class initilizes the services and implements the functionalities of the projection_node.
 
     Attributes:
         lic_path (str): folder path where Z-Laser license file is located
-        projector (object): ProjectorManager object from projector_manager library
+        projector (object): ZLPProjectorManager object from projector_manager library
     """
-    def __init__(self):
-        """Initialize the ProjectionNode object."""
-        rospy.init_node('projection_node')
+    def __init__(self, projector_IP, server_IP, connection_port, license_path):
+        """Initialize the ZlpRos object."""
 
-        projector_IP    = rospy.get_param('projector_IP', "192.168.10.10") 
-        server_IP       = rospy.get_param('server_IP', "192.168.10.11") 
-        connection_port = rospy.get_param('connection_port', 9090) 
-        license_file    = rospy.get_param('license_file', "1900027652.lic") 
+        self.lic_path = license_path
 
-        # define license file path
-        rospack = rospkg.RosPack()
-        pkg_path = rospack.get_path('z_laser_projector')
-        self.lic_path = pkg_path + "/lic/" + license_file
-        # Create ProjectorManager instance
-        self.projector = ProjectorManager(projector_IP, server_IP, connection_port, self.lic_path)
-        # Connect, load license and activate projector
-        error = self.setup_projector()
-        # If set by user, create a coordinate system
-        if not error:
-            self.initialize_coordinate_system()
-
-        # Create services to interact with projector
-        self.open_services()
-        # Create handler to close connection when exiting node
-        rospy.on_shutdown(self.shutdown_handler)
-
-        rospy.spin()
+        self.projector = ZLPProjectorManager(projector_IP, server_IP, connection_port, self.lic_path)
 
     def open_services(self):
         """Open ROS services that allow projector device control."""
@@ -135,7 +108,7 @@ class ProjectionNode:
 
     def projection_start_cb(self,req):
         """Callback of ROS service to start projection of elements associated to the current operating coordinate system 
-        (see :func:`~projection_node.ProjectionNode.set_coord_sys_cb`) on the surface.
+        (see :func:`~projection_node.ZlpRos.set_coord_sys_cb`) on the surface.
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
@@ -184,19 +157,25 @@ class ProjectionNode:
             self.projector.define_coordinate_system(cs_params)
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
+            message = "Coordinate system correctly defined:"
+            rospy.loginfo(message)
+            T = self.get_user_coordinate_system()
+            rospy.loginfo("[T] Reference points:\n{}".format(T))
+
+            rospy.loginfo("Projecting demonstration")
             self.projector.show_coordinate_system()
             rospy.sleep(5)
             self.projector.hide_coordinate_system()
             self.projector.show_frame()
             rospy.sleep(5)
             self.projector.hide_frame()
-            message = "Coordinate system correctly defined"
-            rospy.loginfo("Coordinate system correctly defined")
-            return CoordinateSystemResponse(Bool(True),String(message))
+
+            return CoordinateSystemResponse(T, Bool(True),String(message))
 
         except Exception as e:
             rospy.logerr(e)
-            return CoordinateSystemResponse(Bool(False), String(str(e)))
+            T = UserCoordinateSystem()
+            return CoordinateSystemResponse(T, Bool(False), String(str(e)))
 
     def get_coord_sys_list_cb(self,req):
         """Callback of ROS service to get the list of defined coordinate systems.
@@ -422,6 +401,14 @@ class ProjectionNode:
         cs_params.T1_y        = rospy.get_param('T1/y',    0)
         return cs_params
 
+    def get_user_coordinate_system(self):
+        T = self.projector.user_T_points
+        T1 = ReferencePoint(T[0], T[1])
+        T2 = ReferencePoint(T[2], T[3])
+        T3 = ReferencePoint(T[4], T[5])
+        T4 = ReferencePoint(T[6], T[7])
+        return UserCoordinateSystem(T1,T2,T3,T4)
+
     def setup_projector(self):
         """Setup projector at initialization (connect to ZLP-Service, transfer license file and activate projector).
  
@@ -445,14 +432,17 @@ class ProjectionNode:
             self.projector.define_coordinate_system(cs_params)
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
+            rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))
+            T = self.get_user_coordinate_system()
+            rospy.loginfo("[T] Reference points:\n{}".format(T))
+
+            rospy.loginfo("Projecting demonstration")
             self.projector.show_coordinate_system()
-            rospy.sleep(5)
+            rospy.sleep(3)
             self.projector.hide_coordinate_system()
             self.projector.show_frame()
-            rospy.sleep(5)
-            self.projector.hide_frame()
-            
-            rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))
+            rospy.sleep(3)
+            self.projector.hide_frame()            
 
         except Exception as e:
             if "InvalidRelativePath" in str(e):
@@ -476,10 +466,3 @@ class ProjectionNode:
         except Exception as e:
             rospy.logerr(e)
             return TriggerResponse(False, str(e))
-
-def main():
-    """Init ROS node"""
-    ProjectionNode()
-
-if __name__ == '__main__':
-    main()

@@ -58,16 +58,16 @@ class CoordinateSystemParameters:
         """
         self.name       = cs.name_cs.data
         self.d          = cs.distance.data
-        self.P1_x       = cs.p1.x.data
-        self.P1_y       = cs.p1.y.data
-        self.P2_x       = cs.p2.x.data
-        self.P2_y       = cs.p2.y.data
-        self.P3_x       = cs.p3.x.data
-        self.P3_y       = cs.p3.y.data
-        self.P4_x       = cs.p4.x.data
-        self.P4_y       = cs.p4.y.data
-        self.T1_x       = cs.T1.x.data
-        self.T1_y       = cs.T1.y.data
+        self.P1_x       = cs.p1.x
+        self.P1_y       = cs.p1.y
+        self.P2_x       = cs.p2.x
+        self.P2_y       = cs.p2.y
+        self.P3_x       = cs.p3.x
+        self.P3_y       = cs.p3.y
+        self.P4_x       = cs.p4.x
+        self.P4_y       = cs.p4.y
+        self.T1_x       = cs.T1.x
+        self.T1_y       = cs.T1.y
         self.resolution = cs.resolution.data
 
 class ProjectionElementParameters:

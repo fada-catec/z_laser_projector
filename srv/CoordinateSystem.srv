@@ -20,5 +20,6 @@ std_msgs/Int16 resolution
 
 ---
 
+z_laser_projector/UserCoordinateSystem T
 std_msgs/Bool cs_created
 std_msgs/String message

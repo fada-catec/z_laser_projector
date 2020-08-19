@@ -1,13 +1,13 @@
 coordinate_system_name: "user_coordinate_system"
-coordinate_system_resolution: 1000
-coordinate_system_distance: 1500 
+coordinate_system_resolution: 574
+coordinate_system_distance: 3000 
 
 # Projector Reference System {P}
-P1: {x: -100, y: -100}
-P2: {x:  100, y: -100}
-P3: {x:  100, y:  100}
-P4: {x: -100, y:  100}
+P1: {x:  10, y:  10}
+P2: {x: 584, y:  10}
+P3: {x: 584, y: 410}
+P4: {x:  10, y: 410}
 
 # User Reference System {T}
-T1: {x: 0, y: 0}
+T1: {x: 10, y: 10}
   # T2, T3, T4 will be defined with the resolution

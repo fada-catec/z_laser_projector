@@ -1172,7 +1172,6 @@ class ProjectionElementControl(object):
         success,message = self.define_polyline(cs_params.name, proj_elem_params) 
         if not success:
             return success,message
-
         proj_elem_params.shape_id = self.frame_ids[1]
         proj_elem_params.x        = T[2]
         proj_elem_params.y        = T[3]

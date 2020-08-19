@@ -14,17 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module imports the zlp and utils libraries and manages the functionalities provided from a layer of abstraction, simplifying the 
+"""This module imports the core and utils libraries and manages the functionalities provided from a layer of abstraction, simplifying the 
 task of developing advanced applications."""
 
 import sys
 import math
-# from z_laser_projector.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl # noqa?
-# from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters # noqa?
-from zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_projector.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
-class ProjectorManager:
+class ZLPProjectorManager:
     """This class envolves the methods from the libraries imported.
     
     Args:
@@ -44,7 +42,7 @@ class ProjectorManager:
         projector_client (object): ProjectorClient object from utils library
     """
     def __init__(self, projector_IP = "192.168.10.10", server_IP = "192.168.10.11", connection_port = 9090, lic_path=""):
-        """Initialize the ProjectorManager object."""
+        """Initialize the ZLPProjectorManager object."""
         self.__projector_IP = projector_IP
         self.__server_IP = server_IP
         self.__connection_port = connection_port

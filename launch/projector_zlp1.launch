@@ -13,7 +13,7 @@
         <rosparam unless ="$(eval arg('load_user_coordinate_system'))"
             file="$(find z_laser_projector)/config/factory_coordinate_system.yaml"/>
 
-        <node name="projection_node" pkg="z_laser_projector" type="projection_node.py" output="screen"/>
+        <node name="zlp_node" pkg="z_laser_projector" type="zlp_node.py" output="screen"/>
 
     </group>
 

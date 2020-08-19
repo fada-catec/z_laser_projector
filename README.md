@@ -51,14 +51,14 @@ You can launch the ROS node included in this package, which opens ROS services t
 If you perfer to include some projector functionalities into your custom node, import the librearies instead:
 
      #!/usr/bin/env python3
-     from zlaser_sdk_ros.projector_manager import ProjectorManager
+     from zlaser_sdk_ros.projector_manager import ZLPProjectorManager
      from zlaser_sdk_ros.utils import CoordinateSystemParameters, ProjectionElementParameters
 
 ## Known issues
 
 * RecursionError: maximum recursion depth exceeded while calling a Python object: this means that ethernet connection have not been stablished. Restart projector, wait for green LED's and connect again.
 * Error processing request: FunctionModuleNotExistent(fModUID=''): this means that license could not have registered zFunctModRegister3d or that you are trying to create a coordinate system that already exists.
-* Error processing request: 'ProjectorManager' object has no attribute 'projector_id': this means that projector instance has not been created. Call to `connect or setup service` to create it first.
+* Error processing request: 'ZLPProjectorManager' object has no attribute 'projector_id': this means that projector instance has not been created. Call to `connect or setup service` to create it first.
 * Error processing request: ServiceInterfaceHandler::TriggerProjection() bv::InvalidState(What: Keine Projektoren verbunden!): license problems. Close node and restart again. Perform call in this order: connect, load_license
 
 ## Code API

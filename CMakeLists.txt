@@ -18,8 +18,9 @@ catkin_python_setup()
 
 add_message_files(
    FILES
-   ReferencePoint.msg
    Line.msg
+   ReferencePoint.msg
+   UserCoordinateSystem.msg
 )
 
 add_service_files(
