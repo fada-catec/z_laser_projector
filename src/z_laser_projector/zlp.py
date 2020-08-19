@@ -819,7 +819,7 @@ class CoordinateSystem(object):
 
         return success,message
 
-    def show_cs(self,coord_sys,secs):
+    def show_cs(self,coord_sys):
         """Project a coordinate system on the projection surface.
 
         Args:
@@ -832,11 +832,32 @@ class CoordinateSystem(object):
         """
         try:
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
-            time.sleep(secs)
+            
+            success = True
+            message = ("Show [{}] coordinate system".format(coord_sys))
+        
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def hide_cs(self,coord_sys):
+        """Project a coordinate system on the projection surface.
+
+        Args:
+            coord_sys (str): name of the coordinate system
+            secs (int): number of seconds the projection lasts
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
+            message string
+        """
+        try:
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
             
             success = True
-            message = ("Finished to show [{}] coordinate system".format(coord_sys))
+            message = ("Hide [{}] coordinate system".format(coord_sys))
         
         except Exception as e:
             success = False 

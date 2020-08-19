@@ -18,7 +18,6 @@
 task of developing advanced applications."""
 
 import sys
-import time
 import math
 # from z_laser_projector.zlp import ProjectorClient, CoordinateSystem, ProjectionElementControl # noqa?
 # from z_laser_projector.utils import CoordinateSystemParameters, ProjectionElementParameters # noqa?
@@ -225,7 +224,7 @@ class ProjectorManager:
         if not success:
             raise SystemError(message)
         
-    def show_coordinate_system(self,secs):
+    def show_coordinate_system(self):
         """Project the reference points, origin axes and frame of the current operating reference system, 
         on the projection surface.
 
@@ -239,19 +238,51 @@ class ProjectorManager:
             message = "Coordinate system does not exist."
             raise SystemError(message)
         
-        success,message = self.cs_element.show_cs(self.__coordinate_system, secs)
+        success,message = self.cs_element.show_cs(self.__coordinate_system)
         if not success:
+            raise SystemError(message)
+
+    def hide_coordinate_system(self):
+        """Project the reference points, origin axes and frame of the current operating reference system, 
+        on the projection surface.
+
+        Args:
+            secs (int): number of projection seconds on the surface 
+
+        Raises:
+            SystemError:
+        """
+        if not self.__coordinate_system:
+            message = "Coordinate system does not exist."
+            raise SystemError(message)
+        
+        success,message = self.cs_element.hide_cs(self.__coordinate_system)
+        if not success:
+            raise SystemError(message)
+
+
+    def show_frame(self):
+        if not self.__coordinate_system:
+            message = "Coordinate system does not exist."
             raise SystemError(message)
         try:
             self.cs_frame_unhide()
             self.cs_axes_unhide()
             self.start_projection()
-            time.sleep(secs)
+
+        except SystemError as e:
+            raise SystemError(e) 
+        
+    def hide_frame(self):
+        if not self.__coordinate_system:
+            message = "Coordinate system does not exist."
+            raise SystemError(message)
+        try:
             self.stop_projection()
             self.cs_frame_hide()  
             self.cs_axes_hide()
         except SystemError as e:
-            raise SystemError(e)       
+            raise SystemError(e)  
 
     def remove_coordinate_system(self,coord_sys):
         """Delete current reference system.

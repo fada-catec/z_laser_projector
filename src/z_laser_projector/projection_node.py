@@ -184,7 +184,12 @@ class ProjectionNode:
             self.projector.define_coordinate_system(cs_params)
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
-            self.projector.show_coordinate_system(5)
+            self.projector.show_coordinate_system()
+            rospy.sleep(5)
+            self.projector.hide_coordinate_system()
+            self.projector.show_frame()
+            rospy.sleep(5)
+            self.projector.hide_frame()
             message = "Coordinate system correctly defined"
             rospy.loginfo("Coordinate system correctly defined")
             return CoordinateSystemResponse(Bool(True),String(message))
@@ -254,7 +259,12 @@ class ProjectionNode:
             return CoordinateSystemNameResponse(Bool(False),String("Please, specify seconds"))
 
         try:
-            self.projector.show_coordinate_system(req.secs.data)
+            self.projector.show_coordinate_system()
+            rospy.sleep(req.secs.data)
+            self.projector.hide_coordinate_system()
+            self.projector.show_frame()
+            rospy.sleep(req.secs.data)
+            self.projector.hide_frame()
             return CoordinateSystemNameResponse(Bool(True),String("Coordinate system showed"))
         
         except Exception as e:
@@ -435,7 +445,12 @@ class ProjectionNode:
             self.projector.define_coordinate_system(cs_params)
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
-            self.projector.show_coordinate_system(5)
+            self.projector.show_coordinate_system()
+            rospy.sleep(5)
+            self.projector.hide_coordinate_system()
+            self.projector.show_frame()
+            rospy.sleep(5)
+            self.projector.hide_frame()
             
             rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))
 
