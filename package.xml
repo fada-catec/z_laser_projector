@@ -2,11 +2,21 @@
 <package format="2">
   <name>z_laser_projector</name>
   <version>0.0.0</version>
-  <description>Collect projector functionalities</description>
-
-  <maintainer email="rluque@catec.aero">Rafael Luque</maintainer>
-
-  <license>TODO</license>
+  <description>
+    <p>
+      The z_laser_projector package is a ROS wrapper for ZLP1 Z-LASER Projector, 
+      that makes it fully compatible with all available sensors and devices running 
+      over the ROS-Industrial project. This package provides libraries that allow 
+      the user to operate the device and simplify the task of developing further advanced 
+      features, such as augmented reality applications.
+    </p>
+  </description>
+  <url>http://wiki.ros.org/z_laser_projector</url>
+  <author email="rluque@catec.aero">Rafael Luque </author>
+  <author email="imlara@catec.aero">Ines M. Lara </author>
+  <maintainer email="rluque@catec.aero">Rafael Luque </maintainer>
+  <maintainer email="imlara@catec.aero">Ines M. Lara </maintainer>
+  <license>Apache 2.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
