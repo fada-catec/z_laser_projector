@@ -1,7 +1,5 @@
 ![ZLASER](./images/ZLASER.png)![FADA](./images/FADA.png)![CATEC](./images/CATEC.png)
 
-[//]: <> (<img src="https://z-laser.com/wp-content/uploads/zLaserLogo.png" width="142" height="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="http://www.catec.aero/sites/default/files/FADA.png" width="170" height="50">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="http://www.catec.aero/sites/default/files/Logo_CATEC_1.png" width="138" height="50">)
-
 # z_laser_projector
 
 This package is a ROS wrapper to control the Z-LASER Projector [ZLP1]((https://z-laser.com/en/product/laser-projector/zlp1/)) via ROS using Z-LASER SDK.
@@ -48,7 +46,9 @@ You can launch the ROS node included in this package, which opens ROS services t
 
      roslaunch zlaser_sdk_ros projector_zlp1.launch
 
-If you perfer to include some projector functionalities into your custom node, import the librearies instead:
+It is possible to change rosparameters and get them by the `load_user_coordinate_system` launcher argument.
+
+Or if you perfer to include some projector functionalities into your custom node, import the libraries instead:
 
      #!/usr/bin/env python3
      from z_laser_projector.zlp_projector_manager import ZLPProjectorManager
