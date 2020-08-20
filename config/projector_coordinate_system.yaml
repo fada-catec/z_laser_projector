@@ -1,15 +1,15 @@
-coordinate_system_name: "user_coordinate_system"
+coordinate_system_name: "projector_coordinate_system"
 coordinate_system_resolution: 574
 coordinate_system_distance: 3000 
 
 # Projector Reference System {P}
-P1: {x:  10, y:  10}
-P2: {x: 584, y:  10}
-P3: {x: 584, y: 410}
-P4: {x:  10, y: 410}
+P1: {x:   0, y:   0}
+P2: {x: 594, y:   0}
+P3: {x: 594, y: 420}
+P4: {x:   0, y: 420}
 
 # User Reference System {T}
-T1: {x: 10, y: 10}
+T1: {x: 0, y: 0}
 
 # T2, T3, T4 will be autodefined with the resolution. See the docs
 #      ____________________      
