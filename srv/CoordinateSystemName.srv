@@ -1,9 +1,6 @@
 # Name of the coordinate system
 std_msgs/String cs_name
 
-# Duration in seconds of cordinate system projection
-std_msgs/Int16 secs
-
 ---
 
 std_msgs/Bool success

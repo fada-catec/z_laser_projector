@@ -834,7 +834,7 @@ class CoordinateSystem(object):
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
             
             success = True
-            message = ("Show [{}] coordinate system".format(coord_sys))
+            message = "Show [" + coord_sys + "] coordinate system"
         
         except Exception as e:
             success = False 

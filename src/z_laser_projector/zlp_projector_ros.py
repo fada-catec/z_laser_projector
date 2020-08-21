@@ -28,6 +28,7 @@ from std_srvs.srv import Trigger, TriggerResponse
 from z_laser_projector.msg import Line, ReferencePoint, UserCoordinateSystem
 from z_laser_projector.srv import CoordinateSystem, CoordinateSystemResponse
 from z_laser_projector.srv import CoordinateSystemName, CoordinateSystemNameResponse
+from z_laser_projector.srv import CoordinateSystemShow, CoordinateSystemShowResponse
 from z_laser_projector.srv import CoordinateSystemList, CoordinateSystemListResponse
 from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
 
@@ -58,7 +59,7 @@ class ZLPProjectorROS:
 
         self.set_cs        = rospy.Service('set_coordinate_system', CoordinateSystemName, self.set_coord_sys_cb)
         self.rem_cs        = rospy.Service('remove_coordinate_system', CoordinateSystemName, self.remove_coord_sys_cb)
-        self.show_cs       = rospy.Service('show_current_coordinate_system', CoordinateSystemName, self.show_coord_sys_cb)
+        self.show_cs       = rospy.Service('show_current_coordinate_system', CoordinateSystemShow, self.show_coord_sys_cb)
 
         self.hide_shape    = rospy.Service('hide_shape', ProjectionElement, self.hide_shape_cb)
         self.unhide_shape  = rospy.Service('unhide_shape', ProjectionElement, self.unhide_shape_cb)
@@ -244,7 +245,7 @@ class ZLPProjectorROS:
         """
         rospy.loginfo("Request to project current coordinate system.")
         if req.secs.data == 0:
-            return CoordinateSystemNameResponse(Bool(False),String("Please, specify seconds"))
+            return CoordinateSystemShowResponse(Bool(False),String("Please, specify seconds"))
 
         try:
             self.projector.show_coordinate_system()
@@ -253,11 +254,11 @@ class ZLPProjectorROS:
             self.projector.show_frame()
             rospy.sleep(req.secs.data)
             self.projector.hide_frame()
-            return CoordinateSystemNameResponse(Bool(True),String("Coordinate system showed"))
+            return CoordinateSystemShowResponse(Bool(True),String("Coordinate system showed"))
         
         except Exception as e:
             rospy.logerr(e)
-            return CoordinateSystemNameResponse(Bool(False),String(str(e)))
+            return CoordinateSystemShowResponse(Bool(False),String(str(e)))
 
     def remove_coord_sys_cb(self,req):
         """Callback of ROS service to remove current coordinate system.

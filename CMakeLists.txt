@@ -28,6 +28,7 @@ add_service_files(
    ProjectionElement.srv
    CoordinateSystem.srv
    CoordinateSystemName.srv
+   CoordinateSystemShow.srv
    CoordinateSystemList.srv
    )
 
