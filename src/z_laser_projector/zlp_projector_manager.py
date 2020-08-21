@@ -297,6 +297,22 @@ class ZLPProjectorManager:
             self.__user_T_points = []
         else:
             raise SystemError(message)
+
+    def get_coordinate_system_params(self,coord_sys):
+        """Get parameters values of a defined coordinate system.
+
+        Args:
+            coord_sys (str): name of reference coordinate system 
+
+        Raises:
+            SystemError:
+        """
+        cs_params = CoordinateSystemParameters()
+        cs_params,success,message = self.cs_element.get_cs(coord_sys,cs_params)
+        if not success:
+            raise SystemError(message)
+
+        return cs_params
         
     def create_polyline(self,proj_elem_params):
         """Create a line as new projection figure, associated to the current reference system.

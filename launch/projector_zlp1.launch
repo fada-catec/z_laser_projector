@@ -15,6 +15,12 @@
 
         <node name="zlp_node" pkg="z_laser_projector" type="zlp_node.py" output="screen"/>
 
+        <node pkg="tf" type="static_transform_publisher" name="projector_device" args="0 0 0.95 0 0 -0.70710678  0.70710678 map projector 100" />
+
+        <node name="tf_broadcaster" pkg="z_laser_projector" type="tf_broadcaster.py" output="screen"/>
+
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find z_laser_projector)/rviz/projection_systems_tf.rviz"/>
+
     </group>
 
 </launch>

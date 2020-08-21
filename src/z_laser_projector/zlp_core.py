@@ -604,7 +604,7 @@ class CoordinateSystem(object):
 
         Returns:
             tuple[list, bool, str]: the first value in the returned tuple is a names' list of available coordinate systems, 
-            the second is a bool success value and the third value in the tuple is an information message string
+                the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
             cs_list = self.__thrift_client.GetCoordinatesystemList()
@@ -663,7 +663,7 @@ class CoordinateSystem(object):
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the name string of the coordinate system generated, 
-            the second is a bool success value and the third value in the tuple is an information message string
+                the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
             reference_object = self.create_reference_object()
@@ -885,6 +885,41 @@ class CoordinateSystem(object):
             message = e
 
         return success,message
+
+    def get_cs(self,coord_sys, cs_params):
+        """Get the parameters value of a defined coordinate system.
+            
+        Args:
+            coord_sys (str): name of the coordinate system
+                
+        Returns:
+            tuple[object, bool, str]: the first value in the returned tuple is an object with the coordinate system parameters values,
+                the second is a bool success value and the third value in the tuple is an information message string
+        """
+        try:
+            cs_ref_obj     = self.__thrift_client.GetReferenceobject(coord_sys)
+
+            cs_params.name = cs_ref_obj.coordinateSystem
+            cs_params.d    = cs_ref_obj.refPointList[0].distance
+            cs_params.P1_x = cs_ref_obj.refPointList[0].tracePoint.x
+            cs_params.P1_y = cs_ref_obj.refPointList[0].tracePoint.y
+            cs_params.P2_x = cs_ref_obj.refPointList[1].tracePoint.x
+            cs_params.P2_y = cs_ref_obj.refPointList[1].tracePoint.y
+            cs_params.P3_x = cs_ref_obj.refPointList[2].tracePoint.x
+            cs_params.P3_y = cs_ref_obj.refPointList[2].tracePoint.y
+            cs_params.P4_x = cs_ref_obj.refPointList[3].tracePoint.x
+            cs_params.P4_y = cs_ref_obj.refPointList[3].tracePoint.y
+            cs_params.T1_x = cs_ref_obj.refPointList[0].refPoint.x
+            cs_params.T1_y = cs_ref_obj.refPointList[0].refPoint.y
+            
+            success = True
+            message = "[" + coord_sys + "] coordinate system params returned."
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return cs_params,success,message
 
 class ProjectionElementControl(object):
     """This class implement the functions related with projection elements.

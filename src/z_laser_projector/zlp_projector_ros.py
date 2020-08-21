@@ -155,6 +155,11 @@ class ZLPProjectorROS:
         cs_params.set_request_params(req)
         try:
             self.projector.define_coordinate_system(cs_params)
+
+            rospy.set_param('coordinate_system_distance', req.distance.data)
+            rospy.set_param('P1/x', req.p1.x)
+            rospy.set_param('P1/y', req.p1.y)
+
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
             message = "Coordinate system correctly defined:"
@@ -216,6 +221,10 @@ class ZLPProjectorROS:
 
         try:
             self.projector.set_coordinate_system(req.cs_name.data)
+            coordinate_system_params = self.projector.get_coordinate_system_params(req.cs_name.data)
+            rospy.set_param('coordinate_system_distance', coordinate_system_params.d)
+            rospy.set_param('P1/x', coordinate_system_params.P1_x)
+            rospy.set_param('P1/y', coordinate_system_params.P1_y)
             return CoordinateSystemNameResponse(Bool(True),String("Set coordinate system"))
                     
         except Exception as e:
