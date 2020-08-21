@@ -78,7 +78,7 @@ class ProjectionElementParameters:
         group_name (str): name of the projection group to which the projection element belongs
         shape_id (str): name of the projection element to define
         x (float): x-position of the projection element's 'characteristic point'. 
-            The 'characteristic point' for a polyline refers to the starting point
+        The 'characteristic point' for a polyline refers to the starting point
         y (float): y-position of polyline starting point
         angle (float): polyline slope
         length (float): polyline length
@@ -98,7 +98,7 @@ class ProjectionElementParameters:
         
         Args:
             proj_elem (object): object with the parameters values to set at the class attributes, 
-                stated by the ROS topic pub
+            stated by the ROS topic pub
         """
         self.shape_type = "polyline"
         self.group_name = proj_elem.group_name.data
@@ -113,7 +113,7 @@ class ProjectionElementParameters:
         
         Args:
             proj_elem (object): object with the parameters values to set at the class attributes values, 
-                stated by the ROS service call
+            stated by the ROS service call
         """
         self.shape_type = proj_elem.shape_type.data
         self.group_name = proj_elem.group_name.data

@@ -118,7 +118,7 @@ class ThriftClient(TClient):
 
     Attributes:
         thrift_interface (obj): load the interface description file (interface.thrift) for the communication between 
-            ZLP-Service and a remote client
+        ZLP-Service and a remote client
     """
     def __init__(self, event_handler=EventChannelInterfaceHandler()):
         """Initialize the ThriftClient object."""
@@ -227,7 +227,7 @@ class ThriftClient(TClient):
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
 class ProjectorClient(object):
-    """This class implement the functions to perform simple operations with the projector.
+    """This class implement the functions to connect with the projector and fundamental projection features.
 
     Attributes:
         projector_id (str): serial number of the projector
@@ -263,7 +263,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             self.__thrift_client.init_client(server_IP, connection_port)
@@ -282,7 +282,7 @@ class ProjectorClient(object):
         
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try: 
             self.__thrift_client.RemoveGeoTreeElem("") 
@@ -311,7 +311,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             license_path = os.path.abspath(lic_path)
@@ -340,7 +340,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             success = self.__thrift_client.CheckLicense()
@@ -362,7 +362,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[list, bool, str]: the first value in the returned tuple is a list of serial numbers of the projectors found, 
-                the second a bool success value and the third value in the tuple is an information message string
+            the second a bool success value and the third value in the tuple is an information message string
         """
         try:
             self.__thrift_client.SetProperty("config.projectorManager.cmdGetProjectors.scan", "1")
@@ -406,7 +406,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the serial number string of the activated projector,
-                the second a bool success value and the third value in the tuple is an information message string
+            the second a bool success value and the third value in the tuple is an information message string
         """
         try:
             projectors,s,m = self.scan_projectors(projector_IP)
@@ -438,7 +438,7 @@ class ProjectorClient(object):
         
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
@@ -463,7 +463,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the function module identification name string, 
-                the second is a bool success value and the third value in the tuple is an information message string
+            the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
             self.module_id = self.__thrift_client.FunctionModuleCreate("zFunctModRegister3d", "3DReg")
@@ -484,7 +484,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             if not coord_sys:
@@ -518,7 +518,7 @@ class ProjectorClient(object):
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             projector_property_path = "config.projectorManager.projectors." + self.projector_id
@@ -534,7 +534,7 @@ class ProjectorClient(object):
         return success,message
 
 class GeometryTool(object):
-    """This class implement functions to generate basic mathematical tools.
+    """This class implement functions to generate basic geometry and math tools.
     
     Args:
         thrift_client (object): object with the generated client to communicate with the projector
@@ -604,7 +604,7 @@ class CoordinateSystem(object):
 
         Returns:
             tuple[list, bool, str]: the first value in the returned tuple is a names' list of available coordinate systems, 
-                the second is a bool success value and the third value in the tuple is an information message string
+            the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
             cs_list = self.__thrift_client.GetCoordinatesystemList()
@@ -663,7 +663,7 @@ class CoordinateSystem(object):
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the name string of the coordinate system generated, 
-                the second is a bool success value and the third value in the tuple is an information message string
+            the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
             reference_object = self.create_reference_object()
@@ -771,8 +771,8 @@ class CoordinateSystem(object):
             coord_sys (str): name of the coordinate system
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
         try:
             self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
@@ -799,8 +799,8 @@ class CoordinateSystem(object):
             coord_sys (str): name of the new coordinate system
         
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
         try:
             geo_tree_list = self.__thrift_client.GetGeoTreeIds()
@@ -827,8 +827,8 @@ class CoordinateSystem(object):
             secs (int): number of seconds the projection lasts
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
         try:
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
@@ -850,8 +850,8 @@ class CoordinateSystem(object):
             secs (int): number of seconds the projection lasts
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
         try:
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
@@ -872,8 +872,8 @@ class CoordinateSystem(object):
             coord_sys (str): name of the coordinate system
                 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
         try:
             self.__thrift_client.RemoveGeoTreeElem(coord_sys)
@@ -887,14 +887,14 @@ class CoordinateSystem(object):
         return success,message
 
     def get_cs(self,coord_sys, cs_params):
-        """Get the parameters value of a defined coordinate system.
+        """Get the parameters values of a defined coordinate system.
             
         Args:
             coord_sys (str): name of the coordinate system
                 
         Returns:
             tuple[object, bool, str]: the first value in the returned tuple is an object with the coordinate system parameters values,
-                the second is a bool success value and the third value in the tuple is an information message string
+            the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
             cs_ref_obj     = self.__thrift_client.GetReferenceobject(coord_sys)
@@ -985,7 +985,7 @@ class ProjectionElementControl(object):
                 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             shape_id = proj_elem_params.shape_id
@@ -1024,7 +1024,7 @@ class ProjectionElementControl(object):
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             shape_type  = shape_params.shape_type
@@ -1060,7 +1060,7 @@ class ProjectionElementControl(object):
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             shape_type  = shape_params.shape_type
@@ -1096,7 +1096,7 @@ class ProjectionElementControl(object):
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         try:
             shape_type  = shape_params.shape_type
@@ -1126,7 +1126,7 @@ class ProjectionElementControl(object):
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
 
         self.axes_ids = ["axis_x", "axis_y", "axis_x_arrow1", "axis_x_arrow2", "axis_y_arrow1", "axis_y_arrow2"]
@@ -1192,7 +1192,7 @@ class ProjectionElementControl(object):
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-                an information message string
+            an information message string
         """
         self.frame_ids = ["T1_T2", "T2_T3", "T3_T4", "T4_T1"]
 

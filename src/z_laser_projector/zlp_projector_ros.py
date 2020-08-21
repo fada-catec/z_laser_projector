@@ -20,8 +20,10 @@ developing further advanced features."""
 import rospy
 import rospkg
 
-from z_laser_projector.zlp_projector_manager import ZLPProjectorManager
-from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+# from z_laser_projector.zlp_projector_manager import ZLPProjectorManager
+# from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+from zlp_projector_manager import ZLPProjectorManager
+from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from std_msgs.msg import Bool, String, Float64
 from std_srvs.srv import Trigger, TriggerResponse
@@ -204,9 +206,9 @@ class ZLPProjectorROS:
             return CoordinateSystemListResponse(Bool(False),String(str(e)),cs_list)
 
     def set_coord_sys_cb(self,req):
-        """Callback of ROS service to set the indicated coordinate system as 'current operating coordinate system'.
+        """Callback of ROS service to set the indicated coordinate system as 'current operation coordinate system'.
         It means that services as projection_start or show_current_coordinate_system, ..., automatically use this 
-        'current operating coordinate system' to perform their task.
+        'current operation coordinate system' to perform their task.
         The rest of coordinate systems defined and stored in the projector, stay on background until any is set again.
 
         Args:
@@ -233,7 +235,7 @@ class ZLPProjectorROS:
             return CoordinateSystemNameResponse(Bool(False),String(str(e)))
 
     def show_coord_sys_cb(self,req):
-        """Callback of ROS service to project reference points, origin axes and frame of current operating 
+        """Callback of ROS service to project reference points, origin axes and frame of current operation 
         coordinate system.
 
         Args:
@@ -284,7 +286,7 @@ class ZLPProjectorROS:
     
     def add_line_cb(self,msg):
         """Callback of ROS topic to define a new polyline projection element associated to the current
-        operating coordinate system.
+        operation coordinate system.
 
         Args:
             msg (object): object with the necessary info to define a new polyline
@@ -389,7 +391,7 @@ class ZLPProjectorROS:
             return ProjectionElementResponse(Bool(False),String(str(e)))
 
     def read_coordinate_system(self):
-        """Read necessary info to define a new coordinate system from template (.yaml).
+        """Read necessary info to define a new coordinate system from rosparams.
 
         Returns:
             cs_params (object): object with the necessary info to define a new coordinate system
@@ -412,6 +414,11 @@ class ZLPProjectorROS:
         return cs_params
 
     def get_user_coordinate_system(self):
+        """.
+
+        Returns:
+            
+        """
         T = self.projector.user_T_points
         T1 = ReferencePoint(T[0], T[1])
         T2 = ReferencePoint(T[2], T[3])
@@ -463,8 +470,8 @@ class ZLPProjectorROS:
         """Handler to close connection when node exits.
  
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
         rospy.loginfo("Disconnecting before shutdown...")
         try:
