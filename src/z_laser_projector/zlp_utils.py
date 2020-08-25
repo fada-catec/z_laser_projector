@@ -16,13 +16,13 @@
 
 """Complementary module with useful classes to support the usage of zlp library."""
 
-class ProjectionPoint:
+class ProjectionPoint(object):
     def __init__(self,x,y):
         self.x = x
         self.y = y
 
 
-class CoordinateSystemParameters:
+class CoordinateSystemParameters(object):
     """This class is used as data object with the necessary parameters to define a coordinate system.
 
     Attributes:
@@ -68,7 +68,7 @@ class CoordinateSystemParameters:
         self.T1   = ProjectionPoint(cs.T1.x, cs.T1.y)
         
 
-class ProjectionElementParameters:
+class ProjectionElementParameters(object):
     """This class is used as data object with the necessary information to create a projection element.
     
     Attributes:

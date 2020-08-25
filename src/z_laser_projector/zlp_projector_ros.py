@@ -34,7 +34,7 @@ from z_laser_projector.srv import CoordinateSystemShow, CoordinateSystemShowResp
 from z_laser_projector.srv import CoordinateSystemList, CoordinateSystemListResponse
 from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
 
-class ZLPProjectorROS:
+class ZLPProjectorROS(object):
     """This class initilizes the services and implements the functionalities of the projection_node.
 
     Attributes:

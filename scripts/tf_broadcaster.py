@@ -18,7 +18,7 @@ import rospy
 import tf
 import math
 
-class ProjectionCoordinatesSystemsTF:
+class ProjectionCoordinatesSystemsTF(object):
 
     def __init__(self):
 

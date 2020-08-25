@@ -24,7 +24,7 @@ from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionEl
 # from zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
 # from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
-class ZLPProjectorManager:
+class ZLPProjectorManager(object):
     """This class envolves the methods from the libraries imported.
     
     Args:
