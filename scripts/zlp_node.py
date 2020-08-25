@@ -14,9 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Node that provides a collection of services that allows to operate and control the ZLP1 laser projector and simplify the task of 
-developing further advanced features."""
-
 import rospy
 import rospkg
 

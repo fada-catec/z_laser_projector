@@ -422,10 +422,10 @@ class ZLPProjectorROS:
         return cs_params
 
     def get_user_coordinate_system(self,coordinate_system_name):
-        """.
+        """Get the parameters values of a defined coordinate system.
 
         Returns:
-            
+            list: list with the (x,y) position of points T1,T2,T3 and T4 from user reference system {T}
         """
         cs_params = self.projector.get_coordinate_system_params(coordinate_system_name)
         T1 = ReferencePoint(cs_params.T1.x, cs_params.T1.y)

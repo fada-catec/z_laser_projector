@@ -28,17 +28,15 @@ class CoordinateSystemParameters:
     Attributes:
         name (str): coordinate system name
         d (float): distance between the projection surface and the projector device
-        P1_x (float): x-position of point p1 from projector reference system {P}
-        P1_y (float): y-position of point p1 from projector reference system {P}
-        P2_x (float): x-position of point p2 from projector reference system {P}
-        P2_y (float): y-position of point p2 from projector reference system {P}
-        P3_x (float): x-position of point p3 from projector reference system {P}
-        P3_y (float): y-position of point p3 from projector reference system {P}
-        P4_x (float): x-position of point p4 from projector reference system {P}
-        P4_y (float): y-position of point p4 from projector reference system {P}
-        T1_x (float): x-position of point T1 from user reference system {T}
-        T1_y (float): y-position of point T1 from user reference system {T}
-        resolution (int): resolution of user reference system {T}
+        res (int): resolution of user reference system {T}
+        P1 (object): object with the x,y position of point p1 from projector reference system {P}
+        P2 (object): object with the x,y position of point p2 from projector reference system {P}
+        P3 (object): object with the x,y position of point p3 from projector reference system {P}
+        P4 (object): object with the x,y position of point p4 from projector reference system {P}
+        T1 (object): object with the x,y position of point T1 from user reference system {T}
+        T2 (object): object with the x,y position of point T2 from user reference system {T}
+        T3 (object): object with the x,y position of point T3 from user reference system {T}
+        T4 (object): object with the x,y position of point T4 from user reference system {T}
     """
     def __init__(self):
         """Initialize the CoordinateSystemParameters object."""
