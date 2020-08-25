@@ -19,10 +19,10 @@ task of developing advanced applications."""
 
 import sys
 import math
-# from z_laser_projector.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
-# from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
-from zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_projector.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+# from zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
+# from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 class ZLPProjectorManager:
     """This class envolves the methods from the libraries imported.
@@ -43,7 +43,6 @@ class ZLPProjectorManager:
         self.__license_path = lic_path
         self.__projector_id = ""
         self.__coordinate_system = ""
-        self.__user_T_points = []
 
         self.projector_client = ProjectorClient() 
 
@@ -179,7 +178,7 @@ class ZLPProjectorManager:
         Raises:
             SystemError
         """
-        coord_sys,self.__user_T_points,success,message = self.cs_element.define_cs(cs_params)
+        coord_sys,success,message = self.cs_element.define_cs(cs_params)
         if not success:
             raise SystemError(message)
         try:
@@ -296,7 +295,6 @@ class ZLPProjectorManager:
         success,message = self.cs_element.remove_cs(coord_sys)
         if success:
             self.__coordinate_system = ""
-            self.__user_T_points = []
         else:
             raise SystemError(message)
 
@@ -402,7 +400,9 @@ class ZLPProjectorManager:
             SystemError
         """
         proj_elem_params = ProjectionElementParameters()
-        success,message = self.projection_element.cs_frame_create(cs_params,proj_elem_params,self.__user_T_points)
+        cs = self.get_coordinate_system_params(cs_params.name)
+        T = [cs.T1.x, cs.T1.y, cs.T2.x, cs.T2.y, cs.T3.x, cs.T3.y, cs.T4.x, cs.T4.y]
+        success,message = self.projection_element.cs_frame_create(cs_params,proj_elem_params,T)
         if not success:
             raise SystemError(message)
 
@@ -537,12 +537,3 @@ class ZLPProjectorManager:
     @coordinate_system.setter
     def coordinate_system(self, name):
         self.__coordinate_system = name
-    
-    @property
-    def user_T_points(self):
-        """list[float]: Get or set list of user reference system points [T1,T2,T3,T4]."""
-        return self.__user_T_points    
-
-    @user_T_points.setter
-    def user_T_points(self, user_points):
-        self.__user_T_points = user_points

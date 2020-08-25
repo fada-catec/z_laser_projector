@@ -16,6 +16,12 @@
 
 """Complementary module with useful classes to support the usage of zlp library."""
 
+class ProjectionPoint:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+
+
 class CoordinateSystemParameters:
     """This class is used as data object with the necessary parameters to define a coordinate system.
 
@@ -36,19 +42,17 @@ class CoordinateSystemParameters:
     """
     def __init__(self):
         """Initialize the CoordinateSystemParameters object."""
-        self.name       = str()
-        self.d          = float()
-        self.P1_x       = float()
-        self.P1_y       = float()
-        self.P2_x       = float()
-        self.P2_y       = float()
-        self.P3_x       = float()
-        self.P3_y       = float()
-        self.P4_x       = float()
-        self.P4_y       = float()
-        self.T1_x       = float()
-        self.T1_y       = float()
-        self.resolution = int()
+        self.name = str()
+        self.d    = float()
+        self.res  = int()
+        self.P1   = ProjectionPoint(0,0)
+        self.P2   = ProjectionPoint(0,0)
+        self.P3   = ProjectionPoint(0,0)
+        self.P4   = ProjectionPoint(0,0)
+        self.T1   = ProjectionPoint(0,0)
+        self.T2   = ProjectionPoint(0,0)
+        self.T3   = ProjectionPoint(0,0)
+        self.T4   = ProjectionPoint(0,0)
 
     def set_request_params(self,cs):
         """Set the CoordinateSystemParameters values by ROS service request (CoordinateSystem.srv).
@@ -56,19 +60,15 @@ class CoordinateSystemParameters:
         Args:
             cs (object): object with the parameters to set the class attributes values, stated by the ROS service call
         """
-        self.name       = cs.name_cs.data
-        self.d          = cs.distance.data
-        self.P1_x       = cs.p1.x
-        self.P1_y       = cs.p1.y
-        self.P2_x       = cs.p2.x
-        self.P2_y       = cs.p2.y
-        self.P3_x       = cs.p3.x
-        self.P3_y       = cs.p3.y
-        self.P4_x       = cs.p4.x
-        self.P4_y       = cs.p4.y
-        self.T1_x       = cs.T1.x
-        self.T1_y       = cs.T1.y
-        self.resolution = cs.resolution.data
+        self.name = cs.name_cs.data
+        self.d    = cs.distance.data
+        self.res  = cs.resolution.data
+        self.P1   = ProjectionPoint(cs.p1.x, cs.p1.y)
+        self.P2   = ProjectionPoint(cs.p2.x, cs.p2.y)
+        self.P3   = ProjectionPoint(cs.p3.x, cs.p3.y)
+        self.P4   = ProjectionPoint(cs.p4.x, cs.p4.y)
+        self.T1   = ProjectionPoint(cs.T1.x, cs.T1.y)
+        
 
 class ProjectionElementParameters:
     """This class is used as data object with the necessary information to create a projection element.

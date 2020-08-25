@@ -680,20 +680,19 @@ class CoordinateSystem(object):
             # print("P3: ({},{})".format(cs.P3_x,cs.P3_y))
             # print("P4: ({},{})".format(cs.P4_x,cs.P4_y))
             
-            resolution = cs.resolution
+            resolution = cs.res
 
-            size_horiz = cs.P2_x - cs.P1_x
-            size_vert  = cs.P4_y - cs.P1_y
+            size_horiz = cs.P2.x - cs.P1.x
+            size_vert  = cs.P4.y - cs.P1.y
 
-            T1_x = cs.T1_x
-            T1_y = cs.T1_y
+            T1_x = cs.T1.x
+            T1_y = cs.T1.y
             T2_x = T1_x + resolution*size_horiz/max(size_horiz,size_vert)
             T2_y = T1_y
             T3_x = T2_x
             T3_y = T1_y + resolution*size_vert/max(size_horiz,size_vert)
             T4_x = T1_x
             T4_y = T3_y
-            T = [T1_x, T1_y, T2_x, T2_y, T3_x, T3_y, T4_x, T4_y]
 
             # rot_angle = 180/math.pi*math.atan2((cs.P1_y - cs.P2_y),(cs.P1_x - cs.P2_x))
             # print('Reference system rotation angle: {}'.format(rot_angle))
@@ -714,10 +713,10 @@ class CoordinateSystem(object):
 
             cross_size = self.__geometry_tool.create_2d_point(cross_size_x,cross_size_y)
 
-            reference_object = self.__define_reference_point(reference_object,cross_size,0,d,cs.P1_x,cs.P1_y)
-            reference_object = self.__define_reference_point(reference_object,cross_size,1,d,cs.P2_x,cs.P2_y)
-            reference_object = self.__define_reference_point(reference_object,cross_size,2,d,cs.P3_x,cs.P3_y)
-            reference_object = self.__define_reference_point(reference_object,cross_size,3,d,cs.P4_x,cs.P4_y)
+            reference_object = self.__define_reference_point(reference_object,cross_size,0,d,cs.P1.x,cs.P1.y)
+            reference_object = self.__define_reference_point(reference_object,cross_size,1,d,cs.P2.x,cs.P2.y)
+            reference_object = self.__define_reference_point(reference_object,cross_size,2,d,cs.P3.x,cs.P3.y)
+            reference_object = self.__define_reference_point(reference_object,cross_size,3,d,cs.P4.x,cs.P4.y)
 
             self.__ref_obj_state(False,reference_object)
 
@@ -728,7 +727,7 @@ class CoordinateSystem(object):
             success = False 
             message = e
 
-        return cs.name,T,success,message
+        return cs.name,success,message
 
     def __define_reference_point(self,reference_object,cross_size,n,d,x,y):
         """Fill other fields of the coordinate system structure.
@@ -901,16 +900,22 @@ class CoordinateSystem(object):
 
             cs_params.name = cs_ref_obj.coordinateSystem
             cs_params.d    = cs_ref_obj.refPointList[0].distance
-            cs_params.P1_x = cs_ref_obj.refPointList[0].tracePoint.x
-            cs_params.P1_y = cs_ref_obj.refPointList[0].tracePoint.y
-            cs_params.P2_x = cs_ref_obj.refPointList[1].tracePoint.x
-            cs_params.P2_y = cs_ref_obj.refPointList[1].tracePoint.y
-            cs_params.P3_x = cs_ref_obj.refPointList[2].tracePoint.x
-            cs_params.P3_y = cs_ref_obj.refPointList[2].tracePoint.y
-            cs_params.P4_x = cs_ref_obj.refPointList[3].tracePoint.x
-            cs_params.P4_y = cs_ref_obj.refPointList[3].tracePoint.y
-            cs_params.T1_x = cs_ref_obj.refPointList[0].refPoint.x
-            cs_params.T1_y = cs_ref_obj.refPointList[0].refPoint.y
+            cs_params.P1.x = cs_ref_obj.refPointList[0].tracePoint.x
+            cs_params.P1.y = cs_ref_obj.refPointList[0].tracePoint.y
+            cs_params.P2.x = cs_ref_obj.refPointList[1].tracePoint.x
+            cs_params.P2.y = cs_ref_obj.refPointList[1].tracePoint.y
+            cs_params.P3.x = cs_ref_obj.refPointList[2].tracePoint.x
+            cs_params.P3.y = cs_ref_obj.refPointList[2].tracePoint.y
+            cs_params.P4.x = cs_ref_obj.refPointList[3].tracePoint.x
+            cs_params.P4.y = cs_ref_obj.refPointList[3].tracePoint.y
+            cs_params.T1.x = cs_ref_obj.refPointList[0].refPoint.x
+            cs_params.T1.y = cs_ref_obj.refPointList[0].refPoint.y
+            cs_params.T2.x = cs_ref_obj.refPointList[1].refPoint.x
+            cs_params.T2.y = cs_ref_obj.refPointList[1].refPoint.y
+            cs_params.T3.x = cs_ref_obj.refPointList[2].refPoint.x
+            cs_params.T3.y = cs_ref_obj.refPointList[2].refPoint.y
+            cs_params.T4.x = cs_ref_obj.refPointList[3].refPoint.x
+            cs_params.T4.y = cs_ref_obj.refPointList[3].refPoint.y
             
             success = True
             message = "[" + coord_sys + "] coordinate system params returned."
@@ -1135,7 +1140,7 @@ class ProjectionElementControl(object):
         proj_elem_params.group_name = cs_params.name + "_origin"
         proj_elem_params.x          = 0
         proj_elem_params.y          = 0
-        proj_elem_params.length     = cs_params.resolution/2
+        proj_elem_params.length     = cs_params.res/2
         
         proj_elem_params.shape_id = self.axes_ids[0]
         proj_elem_params.angle    = 0
@@ -1150,9 +1155,9 @@ class ProjectionElementControl(object):
             return success,message
 
         proj_elem_params.shape_id = self.axes_ids[2]
-        proj_elem_params.x        = cs_params.resolution/2
+        proj_elem_params.x        = cs_params.res/2
         proj_elem_params.y        = 0
-        proj_elem_params.length   = cs_params.resolution/12
+        proj_elem_params.length   = cs_params.res/12
         proj_elem_params.angle    = 180 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
@@ -1166,8 +1171,8 @@ class ProjectionElementControl(object):
 
         proj_elem_params.shape_id = self.axes_ids[4]
         proj_elem_params.x        = 0
-        proj_elem_params.y        = cs_params.resolution/2
-        proj_elem_params.length   = cs_params.resolution/14
+        proj_elem_params.y        = cs_params.res/2
+        proj_elem_params.length   = cs_params.res/14
         proj_elem_params.angle    = 270 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:

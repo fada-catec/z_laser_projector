@@ -20,10 +20,10 @@ developing further advanced features."""
 import rospy
 import rospkg
 
-# from z_laser_projector.zlp_projector_manager import ZLPProjectorManager
-# from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
-from zlp_projector_manager import ZLPProjectorManager
-from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_projector.zlp_projector_manager import ZLPProjectorManager
+from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+# from zlp_projector_manager import ZLPProjectorManager
+# from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from std_msgs.msg import Bool, String, Float64
 from std_srvs.srv import Trigger, TriggerResponse
@@ -158,16 +158,19 @@ class ZLPProjectorROS:
         cs_params.set_request_params(req)
         try:
             self.projector.define_coordinate_system(cs_params)
-
-            rospy.set_param('coordinate_system_distance', req.distance.data)
-            rospy.set_param('P1/x', req.p1.x)
-            rospy.set_param('P1/y', req.p1.y)
+            
+            rospy.set_param('coordinate_system_name', cs_params.name)
+            rospy.set_param('coordinate_system_distance', cs_params.d)
+            rospy.set_param('P1/x', cs_params.P1.x)
+            rospy.set_param('P1/y', cs_params.P1.y)
+            rospy.set_param('T1/x', cs_params.T1.x)
+            rospy.set_param('T1/y', cs_params.T1.y)
 
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
             message = "Coordinate system correctly defined:"
             rospy.loginfo(message)
-            T = self.get_user_coordinate_system()
+            T = self.get_user_coordinate_system(cs_params.name)
             rospy.loginfo("[T] Reference points:\n{}".format(T))
 
             rospy.loginfo("Projecting demonstration")
@@ -224,10 +227,15 @@ class ZLPProjectorROS:
 
         try:
             self.projector.set_coordinate_system(req.cs_name.data)
+
             coordinate_system_params = self.projector.get_coordinate_system_params(req.cs_name.data)
+            rospy.set_param('coordinate_system_name', coordinate_system_params.name)
             rospy.set_param('coordinate_system_distance', coordinate_system_params.d)
-            rospy.set_param('P1/x', coordinate_system_params.P1_x)
-            rospy.set_param('P1/y', coordinate_system_params.P1_y)
+            rospy.set_param('P1/x', coordinate_system_params.P1.x)
+            rospy.set_param('P1/y', coordinate_system_params.P1.y)
+            rospy.set_param('T1/x', coordinate_system_params.T1.x)
+            rospy.set_param('T1/y', coordinate_system_params.T1.y)
+            
             return CoordinateSystemNameResponse(Bool(True),String("Set coordinate system"))
                     
         except Exception as e:
@@ -398,32 +406,32 @@ class ZLPProjectorROS:
         """
         rospy.loginfo("Reading coordinate system data")
         cs_params = CoordinateSystemParameters()
-        cs_params.name        = rospy.get_param('coordinate_system_name', "default_cs")
-        cs_params.resolution  = rospy.get_param('coordinate_system_resolution', 1000)
-        cs_params.d           = rospy.get_param('coordinate_system_distance', 1500)
-        cs_params.P1_x        = rospy.get_param('P1/x', -100)
-        cs_params.P1_y        = rospy.get_param('P1/y', -100)
-        cs_params.P2_x        = rospy.get_param('P2/x', -100)
-        cs_params.P2_y        = rospy.get_param('P2/y',  100)
-        cs_params.P3_x        = rospy.get_param('P3/x',  100)
-        cs_params.P3_y        = rospy.get_param('P3/y',  100)
-        cs_params.P4_x        = rospy.get_param('P4/x',  100)
-        cs_params.P4_y        = rospy.get_param('P4/y', -100)
-        cs_params.T1_x        = rospy.get_param('T1/x',    0)
-        cs_params.T1_y        = rospy.get_param('T1/y',    0)
+        cs_params.name = rospy.get_param('coordinate_system_name', "default_cs")
+        cs_params.res  = rospy.get_param('coordinate_system_resolution', 1000)
+        cs_params.d    = rospy.get_param('coordinate_system_distance', 1500)
+        cs_params.P1.x = rospy.get_param('P1/x', -100)
+        cs_params.P1.y = rospy.get_param('P1/y', -100)
+        cs_params.P2.x = rospy.get_param('P2/x', -100)
+        cs_params.P2.y = rospy.get_param('P2/y',  100)
+        cs_params.P3.x = rospy.get_param('P3/x',  100)
+        cs_params.P3.y = rospy.get_param('P3/y',  100)
+        cs_params.P4.x = rospy.get_param('P4/x',  100)
+        cs_params.P4.y = rospy.get_param('P4/y', -100)
+        cs_params.T1.x = rospy.get_param('T1/x',    0)
+        cs_params.T1.y = rospy.get_param('T1/y',    0)
         return cs_params
 
-    def get_user_coordinate_system(self):
+    def get_user_coordinate_system(self,coordinate_system_name):
         """.
 
         Returns:
             
         """
-        T = self.projector.user_T_points
-        T1 = ReferencePoint(T[0], T[1])
-        T2 = ReferencePoint(T[2], T[3])
-        T3 = ReferencePoint(T[4], T[5])
-        T4 = ReferencePoint(T[6], T[7])
+        cs_params = self.projector.get_coordinate_system_params(coordinate_system_name)
+        T1 = ReferencePoint(cs_params.T1.x, cs_params.T1.y)
+        T2 = ReferencePoint(cs_params.T2.x, cs_params.T2.y)
+        T3 = ReferencePoint(cs_params.T3.x, cs_params.T3.y)
+        T4 = ReferencePoint(cs_params.T4.x, cs_params.T4.y)
         return UserCoordinateSystem(T1,T2,T3,T4)
 
     def setup_projector(self):
@@ -450,7 +458,7 @@ class ZLPProjectorROS:
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
             rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))
-            T = self.get_user_coordinate_system()
+            T = self.get_user_coordinate_system(cs_params.name)
             rospy.loginfo("[T] Reference points:\n{}".format(T))
 
             rospy.loginfo("Projecting demonstration")
