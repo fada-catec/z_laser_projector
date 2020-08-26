@@ -1,7 +1,7 @@
 # Duration in seconds of cordinate system projection
-std_msgs/Int16 secs
+int16 secs
 
 ---
 
-std_msgs/Bool success
-std_msgs/String message
+bool success
+string message

@@ -2,16 +2,16 @@
 # - polyline
 # - curves: circle, oval, arc (todo)
 # - text (todo)
-std_msgs/String shape_type
+string shape_type
 
 # Group name that the projection element belongs
 # Several projection elements can be handled as a projection group
-std_msgs/String group_name
+string group_name
 
 # Name of the projection element
-std_msgs/String shape_id
+string shape_id
 
 ---
 
-std_msgs/Bool success
-std_msgs/String message
+bool success
+string message

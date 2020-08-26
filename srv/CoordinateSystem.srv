@@ -1,25 +1,26 @@
 # Name of the coordinate system
-std_msgs/String name_cs
+string name
 
 # Distance between the projector device and the projection surface
-std_msgs/Float64 distance
+float64 distance
 
 # Real-world coordinates of reference points from the projector's reference system {P}
-z_laser_projector/ReferencePoint p1
-z_laser_projector/ReferencePoint p2
-z_laser_projector/ReferencePoint p3
-z_laser_projector/ReferencePoint p4
+geometry_msgs/Point P1
+geometry_msgs/Point P2
+geometry_msgs/Point P3
+geometry_msgs/Point P4
 
 # Coordinates of the reference point T1 from the user's reference system {T}
-z_laser_projector/ReferencePoint T1
+geometry_msgs/Point T1
 
 # Resolution of the coordinate system
 # The resolution is considered for the largest dimension of the coordinate system
 # and it is calculated proportionally for the rest
-std_msgs/Int16 resolution
+float64 resolution
 
 ---
 
-z_laser_projector/UserCoordinateSystem T
-std_msgs/Bool cs_created
-std_msgs/String message
+# z_laser_projector/UserCoordinateSystem T
+geometry_msgs/Point[] T
+bool cs_created
+string message

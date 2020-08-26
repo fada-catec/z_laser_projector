@@ -19,6 +19,7 @@ task of developing advanced applications."""
 
 import sys
 import math
+
 from z_laser_projector.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
 from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 # from zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
@@ -134,14 +135,14 @@ class ZLPProjectorManager(object):
         self.projection_element = ProjectionElementControl(module_id,thrift_client)
 
     def start_projection(self):
-        """Start projection of elements associated to the current reference system.
+        """Start projection of elements associated to the active reference system.
 
         Raises:
             Warning
             SystemError
         """
         if not self.__coordinate_system:
-            raise Warning("No Current Coordinate System set yet.")
+            raise Warning("No Active Coordinate System set yet.")
 
         success,message = self.projector_client.start_project(self.__coordinate_system)
         if not success:
@@ -201,7 +202,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
         
     def set_coordinate_system(self,coord_sys):
-        """Set the current operation reference system.
+        """Set the active reference system.
 
         Args:
             coord_sys (str): name of reference coordinate system
@@ -216,7 +217,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
         
     def show_coordinate_system(self):
-        """Project the reference points  of the current operation reference system on the projection surface.
+        """Project the reference points of the active reference system on the projection surface.
 
         Args:
             secs (int): number of projection seconds on the surface 
@@ -233,7 +234,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
 
     def hide_coordinate_system(self):
-        """Project the reference points, origin axes and frame of the current operation reference system, 
+        """Project the reference points, origin axes and frame of the active reference system, 
         on the projection surface.
 
         Args:
@@ -251,7 +252,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
 
     def show_frame(self):
-        """Project the origin axes and frame of the current operation reference system on the projection surface.
+        """Project the origin axes and frame of the active reference system on the projection surface.
 
         Raises:
             SystemError
@@ -268,7 +269,7 @@ class ZLPProjectorManager(object):
             raise SystemError(e) 
         
     def hide_frame(self):
-        """Hide the origin axes and frame of the current operation reference system.
+        """Hide the origin axes and frame of the active reference system.
 
         Raises:
             SystemError
@@ -284,7 +285,7 @@ class ZLPProjectorManager(object):
             raise SystemError(e)  
 
     def remove_coordinate_system(self,coord_sys):
-        """Delete current reference system.
+        """Delete active reference system.
 
         Args:
             coord_sys (str): name of reference coordinate system 
@@ -315,7 +316,7 @@ class ZLPProjectorManager(object):
         return cs_params
         
     def create_polyline(self,proj_elem_params):
-        """Create a polyline as new projection element, associated to the current operation reference system.
+        """Create a polyline as new projection element, associated to the active reference system.
 
         Args:
             proj_elem_params (object): object with necessary parameters to identify a polyline 
@@ -324,7 +325,7 @@ class ZLPProjectorManager(object):
             SystemError
         """
         if not self.__coordinate_system:
-            message = "There is not a current coordinate system. Define or set one first."
+            message = "There is not an active coordinate system. Define or set one first."
             raise SystemError(message)
         
         success,message = self.projection_element.define_polyline(self.__coordinate_system,proj_elem_params)
@@ -332,7 +333,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
         
     def hide_shape(self, proj_elem_params):
-        """Hide a projection element from current operation reference system.
+        """Hide a projection element from active reference system.
 
         Args:
             proj_elem_params (object): object with necessary parameters to identify a projection element
@@ -345,7 +346,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
         
     def unhide_shape(self,proj_elem_params):
-        """Unhide a projection element from current operation reference system.
+        """Unhide a projection element from active reference system.
 
         Args:
             proj_elem_params (object): object with necessary parameters to identify a projection element 
@@ -358,7 +359,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
         
     def remove_shape(self,proj_elem_params):
-        """Delete a projection element from current operation reference system.
+        """Delete a projection element from active reference system.
 
         Args:
             proj_elem_params (object): object with necessary parameters to identify a projection element  
@@ -530,8 +531,7 @@ class ZLPProjectorManager(object):
 
     @property    
     def coordinate_system(self):
-        """str: Get or set the name of coordinate system with which the user is operating currently 
-        ('current operation coordinate system')."""
+        """str: Get or set the name of coordinate system with which the user is operating currently = 'active coordinate system'."""
         return self.__coordinate_system    
 
     @coordinate_system.setter

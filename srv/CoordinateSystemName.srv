@@ -1,7 +1,7 @@
 # Name of the coordinate system
-std_msgs/String cs_name
+string name
 
 ---
 
-std_msgs/Bool success
-std_msgs/String message
+bool success
+string message

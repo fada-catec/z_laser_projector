@@ -480,7 +480,7 @@ class ProjectorClient(object):
         """Start projection on the surface of all projection elements that belong to the active coordinate system.
             
         Args:
-            coord_sys (str): name of the current coordinate system
+            coord_sys (str): name of the active coordinate system
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
@@ -600,7 +600,7 @@ class CoordinateSystem(object):
         self.reference_object_list = []
 
     def coordinate_system_list(self):
-        """Get list of current available coordinate systems from projector.
+        """Get list of active available coordinate systems from projector.
 
         Returns:
             tuple[list, bool, str]: the first value in the returned tuple is a names' list of available coordinate systems, 
@@ -671,7 +671,7 @@ class CoordinateSystem(object):
             reference_object.coordinateSystem = cs.name
             reference_object.projectorID = self.projector_id
             
-            resolution = cs.res
+            resolution = cs.resolution
 
             size_horiz = cs.P2.x - cs.P1.x
             size_vert  = cs.P4.y - cs.P1.y
@@ -686,8 +686,6 @@ class CoordinateSystem(object):
             T4_y = T3_y
 
             # rot_angle = 180/math.pi*math.atan2((cs.P1_y - cs.P2_y),(cs.P1_x - cs.P2_x))
-            # print('Reference system rotation angle: {}'.format(rot_angle))
-            
             # rot_matrix = np.array([[ math.cos(rot_angle), -math.sin(rot_angle)], 
             #                        [ math.sin(rot_angle),  math.cos(rot_angle)]])
             # rot_inverse = np.linalg.inv(rot_matrix)
@@ -698,7 +696,7 @@ class CoordinateSystem(object):
                                              self.create_reference_point("T3", T3_x, T3_y),
                                              self.create_reference_point("T4", T4_x, T4_y)]
             
-            d = cs.d
+            d = cs.distance
             cross_size_x = d * 0.02
             cross_size_y = d * 0.02
 
@@ -724,7 +722,7 @@ class CoordinateSystem(object):
         """Fill other fields of the coordinate system structure.
 
         Args:
-            reference_object (object): current coordinate system struct
+            reference_object (object): object of the active coordinate system
             cross_size (object): struct with the dimensions of the crosses
             n (int): vector index
             d (float): distance between the projection surface and the projector
@@ -801,7 +799,7 @@ class CoordinateSystem(object):
             [self.__ref_obj_state(True, cs)  for cs in coordinate_systems if cs.name == coord_sys]
 
             success = True
-            message = coord_sys + " set as current coordinate system"
+            message = coord_sys + " set as active coordinate system"
 
         except Exception as e:
             success = False 
@@ -887,26 +885,26 @@ class CoordinateSystem(object):
             the second is a bool success value and the third value in the tuple is an information message string
         """
         try:
-            cs_ref_obj     = self.__thrift_client.GetReferenceobject(coord_sys)
+            cs_ref_obj         = self.__thrift_client.GetReferenceobject(coord_sys)
 
-            cs_params.name = cs_ref_obj.coordinateSystem
-            cs_params.d    = cs_ref_obj.refPointList[0].distance
-            cs_params.P1.x = cs_ref_obj.refPointList[0].tracePoint.x
-            cs_params.P1.y = cs_ref_obj.refPointList[0].tracePoint.y
-            cs_params.P2.x = cs_ref_obj.refPointList[1].tracePoint.x
-            cs_params.P2.y = cs_ref_obj.refPointList[1].tracePoint.y
-            cs_params.P3.x = cs_ref_obj.refPointList[2].tracePoint.x
-            cs_params.P3.y = cs_ref_obj.refPointList[2].tracePoint.y
-            cs_params.P4.x = cs_ref_obj.refPointList[3].tracePoint.x
-            cs_params.P4.y = cs_ref_obj.refPointList[3].tracePoint.y
-            cs_params.T1.x = cs_ref_obj.refPointList[0].refPoint.x
-            cs_params.T1.y = cs_ref_obj.refPointList[0].refPoint.y
-            cs_params.T2.x = cs_ref_obj.refPointList[1].refPoint.x
-            cs_params.T2.y = cs_ref_obj.refPointList[1].refPoint.y
-            cs_params.T3.x = cs_ref_obj.refPointList[2].refPoint.x
-            cs_params.T3.y = cs_ref_obj.refPointList[2].refPoint.y
-            cs_params.T4.x = cs_ref_obj.refPointList[3].refPoint.x
-            cs_params.T4.y = cs_ref_obj.refPointList[3].refPoint.y
+            cs_params.name     = cs_ref_obj.coordinateSystem
+            cs_params.distance = cs_ref_obj.refPointList[0].distance
+            cs_params.P1.x     = cs_ref_obj.refPointList[0].tracePoint.x
+            cs_params.P1.y     = cs_ref_obj.refPointList[0].tracePoint.y
+            cs_params.P2.x     = cs_ref_obj.refPointList[1].tracePoint.x
+            cs_params.P2.y     = cs_ref_obj.refPointList[1].tracePoint.y
+            cs_params.P3.x     = cs_ref_obj.refPointList[2].tracePoint.x
+            cs_params.P3.y     = cs_ref_obj.refPointList[2].tracePoint.y
+            cs_params.P4.x     = cs_ref_obj.refPointList[3].tracePoint.x
+            cs_params.P4.y     = cs_ref_obj.refPointList[3].tracePoint.y
+            cs_params.T1.x     = cs_ref_obj.refPointList[0].refPoint.x
+            cs_params.T1.y     = cs_ref_obj.refPointList[0].refPoint.y
+            cs_params.T2.x     = cs_ref_obj.refPointList[1].refPoint.x
+            cs_params.T2.y     = cs_ref_obj.refPointList[1].refPoint.y
+            cs_params.T3.x     = cs_ref_obj.refPointList[2].refPoint.x
+            cs_params.T3.y     = cs_ref_obj.refPointList[2].refPoint.y
+            cs_params.T4.x     = cs_ref_obj.refPointList[3].refPoint.x
+            cs_params.T4.y     = cs_ref_obj.refPointList[3].refPoint.y
             
             success = True
             message = "[" + coord_sys + "] coordinate system params returned."
@@ -1013,7 +1011,7 @@ class ProjectionElementControl(object):
         return success,message
 
     def deactivate_shape(self, shape_params): 
-        """Hide (deactivate) a projection element from the current reference system.
+        """Hide (deactivate) a projection element from the active reference system.
 
         Args:
             shape_params (list): list with the necessary parameters to identify the projection element
@@ -1049,7 +1047,7 @@ class ProjectionElementControl(object):
         return success,message
 
     def reactivate_shape(self, shape_params): 
-        """Unhide (activate hidden) a projection element from the current reference system.
+        """Unhide (activate hidden) a projection element from the active reference system.
 
         Args:
             shape_params (list): list with the necessary parameters to identify the projection element
@@ -1085,7 +1083,7 @@ class ProjectionElementControl(object):
         return success,message
 
     def delete_shape(self, shape_params):
-        """Delete a projection element from the current reference system.
+        """Delete a projection element from the active reference system.
 
         Args:
             shape_params (list): list with the necessary parameters to identify the projection element
@@ -1131,7 +1129,7 @@ class ProjectionElementControl(object):
         proj_elem_params.group_name = cs_params.name + "_origin"
         proj_elem_params.x          = 0
         proj_elem_params.y          = 0
-        proj_elem_params.length     = cs_params.res/2
+        proj_elem_params.length     = cs_params.resolution/2
         
         proj_elem_params.shape_id = self.axes_ids[0]
         proj_elem_params.angle    = 0
@@ -1146,9 +1144,9 @@ class ProjectionElementControl(object):
             return success,message
 
         proj_elem_params.shape_id = self.axes_ids[2]
-        proj_elem_params.x        = cs_params.res/2
+        proj_elem_params.x        = cs_params.resolution/2
         proj_elem_params.y        = 0
-        proj_elem_params.length   = cs_params.res/12
+        proj_elem_params.length   = cs_params.resolution/12
         proj_elem_params.angle    = 180 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
@@ -1162,8 +1160,8 @@ class ProjectionElementControl(object):
 
         proj_elem_params.shape_id = self.axes_ids[4]
         proj_elem_params.x        = 0
-        proj_elem_params.y        = cs_params.res/2
-        proj_elem_params.length   = cs_params.res/14
+        proj_elem_params.y        = cs_params.resolution/2
+        proj_elem_params.length   = cs_params.resolution/14
         proj_elem_params.angle    = 270 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:

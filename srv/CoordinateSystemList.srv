@@ -1,6 +1,6 @@
 
 ---
 
-std_msgs/Bool success
-std_msgs/String message
-std_msgs/String[] cs_list
+bool success
+string message
+string[] cs_list

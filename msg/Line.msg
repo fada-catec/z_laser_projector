@@ -1,6 +1,6 @@
-std_msgs/String group_name
-std_msgs/String shape_id
-std_msgs/Float64 x
-std_msgs/Float64 y
-std_msgs/Float64 angle
-std_msgs/Float64 length
+string group_name
+string shape_id
+float64 x
+float64 y
+float64 angle
+float64 length

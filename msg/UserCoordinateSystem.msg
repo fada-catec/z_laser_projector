@@ -1,4 +1,0 @@
-z_laser_projector/ReferencePoint T1
-z_laser_projector/ReferencePoint T2
-z_laser_projector/ReferencePoint T3
-z_laser_projector/ReferencePoint T4
