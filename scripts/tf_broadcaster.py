@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Copyright (c) 2020, FADA-CATEC
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         projection_cs_tf.get_cs_params()
 
         br_P.sendTransform((0, 0, projection_cs_tf.d),
-                     tf.transformations.quaternion_from_euler(math.pi/2, 0, 0),
+                     tf.transformations.quaternion_from_euler(math.pi, 0, 0),
                      rospy.Time.now(),
                      "[P]",
                      "zlp1_link")
