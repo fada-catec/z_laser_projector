@@ -182,8 +182,7 @@ class ZLPProjectorROS(object):
 
         except Exception as e:
             rospy.logerr(e)
-            T = Point()
-            return CoordinateSystemResponse(T, False, str(e))
+            return CoordinateSystemResponse([], False, str(e))
 
     def get_coord_sys_list_cb(self,req):
         """Callback of ROS service to get the list of defined coordinate systems.
