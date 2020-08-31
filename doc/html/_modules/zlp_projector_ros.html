@@ -1,0 +1,683 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>zlp_projector_ros &mdash; z_laser_projector 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="../_static/Icon_016x016.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/ROSIN.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code_api.html">CODE API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">z_laser_projector</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>zlp_projector_ros</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for zlp_projector_ros</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+
+<span class="c1"># Copyright (c) 2020, FADA-CATEC</span>
+
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;Central node that provides a collection of services that allows to operate and control the ZLP1 laser projector and simplify the task of </span>
+<span class="sd">developing further advanced features.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">rospkg</span>
+
+<span class="c1"># from z_laser_projector.zlp_projector_manager import ZLPProjectorManager</span>
+<span class="c1"># from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters</span>
+<span class="kn">from</span> <span class="nn">zlp_projector_manager</span> <span class="kn">import</span> <span class="n">ZLPProjectorManager</span>
+<span class="kn">from</span> <span class="nn">zlp_utils</span> <span class="kn">import</span> <span class="n">CoordinateSystemParameters</span><span class="p">,</span> <span class="n">ProjectionElementParameters</span>
+
+<span class="kn">from</span> <span class="nn">geometry_msgs.msg</span> <span class="kn">import</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">std_srvs.srv</span> <span class="kn">import</span> <span class="n">Trigger</span><span class="p">,</span> <span class="n">TriggerResponse</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.msg</span> <span class="kn">import</span> <span class="n">Line</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.srv</span> <span class="kn">import</span> <span class="n">CoordinateSystem</span><span class="p">,</span> <span class="n">CoordinateSystemResponse</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.srv</span> <span class="kn">import</span> <span class="n">CoordinateSystemName</span><span class="p">,</span> <span class="n">CoordinateSystemNameResponse</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.srv</span> <span class="kn">import</span> <span class="n">CoordinateSystemShow</span><span class="p">,</span> <span class="n">CoordinateSystemShowResponse</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.srv</span> <span class="kn">import</span> <span class="n">CoordinateSystemList</span><span class="p">,</span> <span class="n">CoordinateSystemListResponse</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.srv</span> <span class="kn">import</span> <span class="n">ProjectionElement</span><span class="p">,</span> <span class="n">ProjectionElementResponse</span>
+
+<div class="viewcode-block" id="ZLPProjectorROS"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS">[docs]</a><span class="k">class</span> <span class="nc">ZLPProjectorROS</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class initilizes the services and implements the functionalities of the projection_node.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        lic_path (str): folder path where Z-Laser license file is located</span>
+<span class="sd">        projector (object): ZLPProjectorManager object from projector_manager library</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ZLPProjectorROS.__init__"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">projector_IP</span><span class="p">,</span> <span class="n">server_IP</span><span class="p">,</span> <span class="n">connection_port</span><span class="p">,</span> <span class="n">license_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the ZlpRos object.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lic_path</span> <span class="o">=</span> <span class="n">license_path</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">projector</span> <span class="o">=</span> <span class="n">ZLPProjectorManager</span><span class="p">(</span><span class="n">projector_IP</span><span class="p">,</span> <span class="n">server_IP</span><span class="p">,</span> <span class="n">connection_port</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lic_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.open_services"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.open_services">[docs]</a>    <span class="k">def</span> <span class="nf">open_services</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Open ROS services that allow projector device control.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connect</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;connect&#39;</span><span class="p">,</span> <span class="n">Trigger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection_cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disconnect</span>    <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;disconnect&#39;</span><span class="p">,</span> <span class="n">Trigger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">disconnection_cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_proj</span>    <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;projection_start&#39;</span><span class="p">,</span> <span class="n">Trigger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_start_cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_proj</span>     <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;projection_stop&#39;</span><span class="p">,</span> <span class="n">Trigger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_stop_cb</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">manual_cs</span>     <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;define_coordinate_system&#39;</span><span class="p">,</span> <span class="n">CoordinateSystem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">manual_define_coord_sys_cb</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_cs_list</span>   <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;coordinate_system_list&#39;</span><span class="p">,</span> <span class="n">CoordinateSystemList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coord_sys_list_cb</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_cs</span>        <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;set_coordinate_system&#39;</span><span class="p">,</span> <span class="n">CoordinateSystemName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_coord_sys_cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rem_cs</span>        <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;remove_coordinate_system&#39;</span><span class="p">,</span> <span class="n">CoordinateSystemName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_coord_sys_cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_cs</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;show_active_coordinate_system&#39;</span><span class="p">,</span> <span class="n">CoordinateSystemShow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_coord_sys_cb</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hide_shape</span>    <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;hide_shape&#39;</span><span class="p">,</span> <span class="n">ProjectionElement</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide_shape_cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unhide_shape</span>  <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;unhide_shape&#39;</span><span class="p">,</span> <span class="n">ProjectionElement</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unhide_shape_cb</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_shape</span>  <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Service</span><span class="p">(</span><span class="s1">&#39;remove_shape&#39;</span><span class="p">,</span> <span class="n">ProjectionElement</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_shape_cb</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span>      <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Subscriber</span><span class="p">(</span><span class="s2">&quot;add_line&quot;</span><span class="p">,</span> <span class="n">Line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_line_cb</span><span class="p">)</span>
+
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Use ROS Services: </span><span class="se">\n\t\t\t</span><span class="s2">rosservice list&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.connection_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.connection_cb">[docs]</a>    <span class="k">def</span> <span class="nf">connection_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to connect to ZLP-Service, transfer license and activate projector.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an </span>
+<span class="sd">            information message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to connect projector.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">client_server_connect</span><span class="p">()</span>       
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">load_license</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lic_path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">geotree_operator_create</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Projector connected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Projector connected.&quot;</span><span class="p">)</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.disconnection_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.disconnection_cb">[docs]</a>    <span class="k">def</span> <span class="nf">disconnection_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to deactivate projector and disconnect from ZLP-Service.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to disconnect projector.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">deactivate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">client_server_disconnect</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Projector disconnected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Projector disconnected.&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.projection_start_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.projection_start_cb">[docs]</a>    <span class="k">def</span> <span class="nf">projection_start_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to start projection of elements associated to the active coordinate system </span>
+<span class="sd">        (see :func:`~projection_node.ZlpRos.set_coord_sys_cb`) on the surface.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to start projection&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">start_projection</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Projection started.&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="ZLPProjectorROS.projection_stop_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.projection_stop_cb">[docs]</a>    <span class="k">def</span> <span class="nf">projection_stop_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to stop projection of all elements.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to stop projection&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">stop_projection</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Projection stopped.&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.manual_define_coord_sys_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.manual_define_coord_sys_cb">[docs]</a>    <span class="k">def</span> <span class="nf">manual_define_coord_sys_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to define a new reference system, stating the points coordinates manually by the user.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (object): object with the necessary info to define a new coordinate system</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to create a new coordinate system manually. Please wait for the system to indicate the end.&quot;</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">define_coordinate_system</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+            
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;coordinate_system_name&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;coordinate_system_distance&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;P1/x&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">P1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;P1/y&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">P1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;T1/x&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;T1/y&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">cs_frame_create</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">cs_axes_create</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Coordinate system correctly defined:&quot;</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_user_coordinate_system</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Projecting demonstration&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">show_coordinate_system</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">hide_coordinate_system</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">show_frame</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">hide_frame</span><span class="p">()</span>
+
+            <span class="k">return</span> <span class="n">CoordinateSystemResponse</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemResponse</span><span class="p">([],</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.get_coord_sys_list_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.get_coord_sys_list_cb">[docs]</a>    <span class="k">def</span> <span class="nf">get_coord_sys_list_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to get the list of defined coordinate systems.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to get the coordinate system list at projector&quot;</span><span class="p">)</span>
+        
+        <span class="n">cs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cs_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">get_coordinate_systems</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemListResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Coordinate system list:&quot;</span><span class="p">,</span><span class="n">cs_list</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemListResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span><span class="n">cs_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.set_coord_sys_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.set_coord_sys_cb">[docs]</a>    <span class="k">def</span> <span class="nf">set_coord_sys_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to set the indicated coordinate system as &#39;active coordinate system&#39;.</span>
+<span class="sd">        It means that services as projection_start or show_active_coordinate_system, ..., automatically use this </span>
+<span class="sd">        active coordinate system to perform their task.</span>
+<span class="sd">        The rest of coordinate systems defined and stored in the projector, stay on background until any is set as active again.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (object): object with the necessary info to identify a coordinate system</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to set coordinate system.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemNameResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;Please, specify name&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">set_coordinate_system</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">coordinate_system_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">get_coordinate_system_params</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;coordinate_system_name&#39;</span><span class="p">,</span> <span class="n">coordinate_system_params</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;coordinate_system_distance&#39;</span><span class="p">,</span> <span class="n">coordinate_system_params</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;P1/x&#39;</span><span class="p">,</span> <span class="n">coordinate_system_params</span><span class="o">.</span><span class="n">P1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;P1/y&#39;</span><span class="p">,</span> <span class="n">coordinate_system_params</span><span class="o">.</span><span class="n">P1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;T1/x&#39;</span><span class="p">,</span> <span class="n">coordinate_system_params</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span><span class="s1">&#39;T1/y&#39;</span><span class="p">,</span> <span class="n">coordinate_system_params</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            
+            <span class="k">return</span> <span class="n">CoordinateSystemNameResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Set coordinate system&quot;</span><span class="p">)</span>
+                    
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemNameResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.show_coord_sys_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.show_coord_sys_cb">[docs]</a>    <span class="k">def</span> <span class="nf">show_coord_sys_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to project reference points, origin axes and frame of active </span>
+<span class="sd">        coordinate system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (object): object with the necessary info to identify a coordinate system</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Request to project active coordinate system.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">secs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemShowResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;Please, specify seconds&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Projecting demonstration&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">show_coordinate_system</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">secs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">hide_coordinate_system</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">show_frame</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">secs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">hide_frame</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemShowResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Coordinate system showed&quot;</span><span class="p">)</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemShowResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.remove_coord_sys_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.remove_coord_sys_cb">[docs]</a>    <span class="k">def</span> <span class="nf">remove_coord_sys_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to remove active coordinate system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (object): object with the necessary info to identify a coordinate system</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to remove coordinate system&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemNameResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;Please, specify name&quot;</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">remove_coordinate_system</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemNameResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Removed coordinate system&quot;</span><span class="p">)</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">CoordinateSystemNameResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="ZLPProjectorROS.add_line_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.add_line_cb">[docs]</a>    <span class="k">def</span> <span class="nf">add_line_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS topic to define a new polyline projection element associated to the active coordinate system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            msg (object): object with the necessary info to define a new polyline</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an </span>
+<span class="sd">            information message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to add a line to the active coordinate system.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">msg</span><span class="o">.</span><span class="n">group_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">msg</span><span class="o">.</span><span class="n">shape_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;group_name or shape_id request is empty.&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">create_polyline</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Line added correctly.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Line added correctly.&quot;</span><span class="p">)</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.hide_shape_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.hide_shape_cb">[docs]</a>    <span class="k">def</span> <span class="nf">hide_shape_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to hide specific figure from active coordinate system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (object): object with the necessary info to identify a projection element</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to hide shape.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">shape_type</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">group_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">shape_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;shape_type or group_name or shape_id request is empty&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>        
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">hide_shape</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Hide shape&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.unhide_shape_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.unhide_shape_cb">[docs]</a>    <span class="k">def</span> <span class="nf">unhide_shape_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to unhide specific figure from active coordinate system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (object): object with the necessary info to identify a projection element</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to unhide shape.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">shape_type</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">group_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">shape_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;shape_type or group_name or shape_id request is empty&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>        
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">unhide_shape</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Hide shape&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.remove_shape_cb"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.remove_shape_cb">[docs]</a>    <span class="k">def</span> <span class="nf">remove_shape_cb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Callback of ROS service to remove specific figure from active coordinate system.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            req (object): object with the necessary info to identify a projection element</span>
+<span class="sd">            </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information </span>
+<span class="sd">            message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Received request to remove shape.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">shape_type</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">group_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">req</span><span class="o">.</span><span class="n">shape_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="s2">&quot;shape_type or group_name or shape_id request is empty&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>        
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">remove_shape</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;Hide shape&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProjectionElementResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.read_coordinate_system"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.read_coordinate_system">[docs]</a>    <span class="k">def</span> <span class="nf">read_coordinate_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read necessary info to define a new coordinate system from rosparams.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            cs_params (object): object with the necessary info to define a new coordinate system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Reading coordinate system data&quot;</span><span class="p">)</span>
+        <span class="n">cs_params</span>            <span class="o">=</span> <span class="n">CoordinateSystemParameters</span><span class="p">()</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">name</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;coordinate_system_name&#39;</span><span class="p">,</span> <span class="s2">&quot;default_cs&quot;</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;coordinate_system_resolution&#39;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">distance</span>   <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;coordinate_system_distance&#39;</span><span class="p">,</span> <span class="mi">1500</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P1</span><span class="o">.</span><span class="n">x</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P1/x&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P1</span><span class="o">.</span><span class="n">y</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P1/y&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P2</span><span class="o">.</span><span class="n">x</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P2/x&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P2</span><span class="o">.</span><span class="n">y</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P2/y&#39;</span><span class="p">,</span>  <span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P3</span><span class="o">.</span><span class="n">x</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P3/x&#39;</span><span class="p">,</span>  <span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P3</span><span class="o">.</span><span class="n">y</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P3/y&#39;</span><span class="p">,</span>  <span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P4</span><span class="o">.</span><span class="n">x</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P4/x&#39;</span><span class="p">,</span>  <span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">P4</span><span class="o">.</span><span class="n">y</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;P4/y&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">x</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;T1/x&#39;</span><span class="p">,</span>    <span class="mi">0</span><span class="p">)</span>
+        <span class="n">cs_params</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">y</span>       <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s1">&#39;T1/y&#39;</span><span class="p">,</span>    <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cs_params</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.get_user_coordinate_system"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.get_user_coordinate_system">[docs]</a>    <span class="k">def</span> <span class="nf">get_user_coordinate_system</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">coordinate_system_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the parameters values of a defined coordinate system.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: list with the (x,y) position of points T1,T2,T3 and T4 from user reference system {T}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cs_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">get_coordinate_system_params</span><span class="p">(</span><span class="n">coordinate_system_name</span><span class="p">)</span>
+        <span class="n">T1</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">cs_params</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">T1</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+        <span class="n">T2</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">cs_params</span><span class="o">.</span><span class="n">T2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">T2</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+        <span class="n">T3</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">cs_params</span><span class="o">.</span><span class="n">T3</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">T3</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+        <span class="n">T4</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">cs_params</span><span class="o">.</span><span class="n">T4</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">T4</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">cs_params</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;[T] Reference points: </span><span class="se">\n</span><span class="s2">T1: </span><span class="se">\n</span><span class="si">{}</span><span class="s2">, </span><span class="se">\n</span><span class="s2">T2: </span><span class="se">\n</span><span class="si">{}</span><span class="s2">, </span><span class="se">\n</span><span class="s2">T3: </span><span class="se">\n</span><span class="si">{}</span><span class="s2">, </span><span class="se">\n</span><span class="s2">T4: </span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">,</span><span class="n">T3</span><span class="p">,</span><span class="n">T4</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="n">T1</span><span class="p">,</span><span class="n">T2</span><span class="p">,</span><span class="n">T3</span><span class="p">,</span><span class="n">T4</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.setup_projector"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.setup_projector">[docs]</a>    <span class="k">def</span> <span class="nf">setup_projector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setup projector at initialization (connect to ZLP-Service, transfer license file and activate projector).</span>
+<span class="sd"> </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: success value. True if success, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Setting projector up&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">connect_and_setup</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Projector connected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.initialize_coordinate_system"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.initialize_coordinate_system">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_coordinate_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the factory or user predefined coordinate system at ros projection_node launch.&quot;&quot;&quot;</span>
+        <span class="n">cs_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_coordinate_system</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">define_coordinate_system</span><span class="p">(</span><span class="n">cs_params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">cs_frame_create</span><span class="p">(</span><span class="n">cs_params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">cs_axes_create</span><span class="p">(</span><span class="n">cs_params</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Coordinate System [</span><span class="si">{}</span><span class="s2">] loaded&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cs_params</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_user_coordinate_system</span><span class="p">(</span><span class="n">cs_params</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Projecting demonstration&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">show_coordinate_system</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">hide_coordinate_system</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">show_frame</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">hide_frame</span><span class="p">()</span>            
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;InvalidRelativePath&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="n">rospy</span><span class="o">.</span><span class="n">logwarn</span><span class="p">(</span><span class="s2">&quot;Possible error: check coordinate system name is not empty&quot;</span><span class="p">)</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ZLPProjectorROS.shutdown_handler"><a class="viewcode-back" href="../zlp_projector_ros.html#zlp_projector_ros.ZLPProjectorROS.shutdown_handler">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handler to close connection when node exits.</span>
+<span class="sd"> </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is </span>
+<span class="sd">            an information message string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Disconnecting before shutdown...&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">deactivate</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projector</span><span class="o">.</span><span class="n">client_server_disconnect</span><span class="p">()</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s2">&quot;Projector disconnected.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Projector disconnected.&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TriggerResponse</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Rafael Luque
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

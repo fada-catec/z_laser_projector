@@ -1,0 +1,775 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>zlp_projector_manager module &mdash; z_laser_projector 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="_static/Icon_016x016.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="zlp_projector_ros module" href="zlp_projector_ros.html" />
+    <link rel="prev" title="zlp_utils module" href="zlp_utils.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/ROSIN.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="code_api.html">CODE API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="code_api.html#messages">Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_api.html#services">Services</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="code_api.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="zlp_core.html">zlp_core module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_utils.html">zlp_utils module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">zlp_projector_manager module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_projector_ros.html">zlp_projector_ros module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">z_laser_projector</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="code_api.html">CODE API</a> &raquo;</li>
+        
+      <li>zlp_projector_manager module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-zlp_projector_manager">
+<span id="zlp-projector-manager-module"></span><h1>zlp_projector_manager module<a class="headerlink" href="#module-zlp_projector_manager" title="Permalink to this headline">¶</a></h1>
+<p>This module imports the core and utils libraries and manages the functionalities provided from a layer of abstraction, simplifying the
+task of developing advanced applications.</p>
+<dl class="class">
+<dt id="zlp_projector_manager.ZLPProjectorManager">
+<em class="property">class </em><code class="descclassname">zlp_projector_manager.</code><code class="descname">ZLPProjectorManager</code><span class="sig-paren">(</span><em>projector_IP='192.168.10.10'</em>, <em>server_IP='192.168.10.11'</em>, <em>connection_port=9090</em>, <em>lic_path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class envolves the methods from the libraries imported.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>projector_IP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – IP number of projector device</li>
+<li><strong>server_IP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – IP number of service running at projector device</li>
+<li><strong>connection_port</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – connection port number</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="zlp_projector_manager.ZLPProjectorManager.projector_client">
+<code class="descname">projector_client</code><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.projector_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>ProjectorClient object from utils library</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>projector_IP='192.168.10.10'</em>, <em>server_IP='192.168.10.11'</em>, <em>connection_port=9090</em>, <em>lic_path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the ZLPProjectorManager object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.connect_and_setup">
+<code class="descname">connect_and_setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.connect_and_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.connect_and_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare projector to be used: connect, load license and activate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.client_server_connect">
+<code class="descname">client_server_connect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.client_server_connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.client_server_connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to thrift server of ZLP-Service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ConnectionError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConnectionError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.client_server_disconnect">
+<code class="descname">client_server_disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.client_server_disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.client_server_disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect from thrift server of ZLP-Service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ConnectionError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ConnectionError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.load_license">
+<code class="descname">load_license</code><span class="sig-paren">(</span><em>license_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.load_license"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.load_license" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer license file to service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>license_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – path of the license file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FileNotFoundError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.activate">
+<code class="descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate projector once it is connected and license is transfered.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.deactivate">
+<code class="descname">deactivate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deactivate projector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.geotree_operator_create">
+<code class="descname">geotree_operator_create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.geotree_operator_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.geotree_operator_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create geotree operator to handle reference systems and projection elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.start_projection">
+<code class="descname">start_projection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.start_projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.start_projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start projection of elements associated to the active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Warning</span></code></a></li>
+<li><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.stop_projection">
+<code class="descname">stop_projection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.stop_projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.stop_projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop projection of all elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.get_coordinate_systems">
+<code class="descname">get_coordinate_systems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.get_coordinate_systems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.get_coordinate_systems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of all defined reference systems.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.define_coordinate_system">
+<code class="descname">define_coordinate_system</code><span class="sig-paren">(</span><em>cs_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.define_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.define_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a new coordinate reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cs_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of necessary parameters to define a new reference system (coordinates of reference system points)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.register_coordinate_system">
+<code class="descname">register_coordinate_system</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.register_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.register_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register new coordinate reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cs_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of parameters from the new defined reference system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.set_coordinate_system">
+<code class="descname">set_coordinate_system</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.set_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.set_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of reference coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.show_coordinate_system">
+<code class="descname">show_coordinate_system</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.show_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.show_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project the reference points of the active reference system on the projection surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of projection seconds on the surface</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.hide_coordinate_system">
+<code class="descname">hide_coordinate_system</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.hide_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.hide_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project the reference points, origin axes and frame of the active reference system,
+on the projection surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>secs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of projection seconds on the surface</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.show_frame">
+<code class="descname">show_frame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.show_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.show_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project the origin axes and frame of the active reference system on the projection surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.hide_frame">
+<code class="descname">hide_frame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.hide_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.hide_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide the origin axes and frame of the active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.remove_coordinate_system">
+<code class="descname">remove_coordinate_system</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.remove_coordinate_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.remove_coordinate_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of reference coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.get_coordinate_system_params">
+<code class="descname">get_coordinate_system_params</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.get_coordinate_system_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.get_coordinate_system_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get parameters values of a defined coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of reference coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.create_polyline">
+<code class="descname">create_polyline</code><span class="sig-paren">(</span><em>proj_elem_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.create_polyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.create_polyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a polyline as new projection element, associated to the active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>proj_elem_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with necessary parameters to identify a polyline</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.hide_shape">
+<code class="descname">hide_shape</code><span class="sig-paren">(</span><em>proj_elem_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.hide_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.hide_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide a projection element from active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>proj_elem_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with necessary parameters to identify a projection element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.unhide_shape">
+<code class="descname">unhide_shape</code><span class="sig-paren">(</span><em>proj_elem_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.unhide_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.unhide_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unhide a projection element from active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>proj_elem_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with necessary parameters to identify a projection element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.remove_shape">
+<code class="descname">remove_shape</code><span class="sig-paren">(</span><em>proj_elem_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.remove_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.remove_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a projection element from active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>proj_elem_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with necessary parameters to identify a projection element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.cs_axes_create">
+<code class="descname">cs_axes_create</code><span class="sig-paren">(</span><em>cs_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.cs_axes_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.cs_axes_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create projection elements of user reference system origin axes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cs_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with necessary parameters to identify a coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.cs_frame_create">
+<code class="descname">cs_frame_create</code><span class="sig-paren">(</span><em>cs_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.cs_frame_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.cs_frame_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create projection elements of user reference system frame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of the User System Reference Points</li>
+<li><strong>cs_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of definition parameters of the reference system</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.cs_axes_unhide">
+<code class="descname">cs_axes_unhide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.cs_axes_unhide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.cs_axes_unhide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unhide user reference system origin axes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.cs_axes_hide">
+<code class="descname">cs_axes_hide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.cs_axes_hide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.cs_axes_hide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide user reference system origin axes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.cs_frame_unhide">
+<code class="descname">cs_frame_unhide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.cs_frame_unhide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.cs_frame_unhide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unhide frame of user reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_projector_manager.ZLPProjectorManager.cs_frame_hide">
+<code class="descname">cs_frame_hide</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_projector_manager.html#ZLPProjectorManager.cs_frame_hide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.cs_frame_hide" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide frame lines of user reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#SystemError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SystemError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_projector_manager.ZLPProjectorManager.projector_IP">
+<code class="descname">projector_IP</code><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.projector_IP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get or set projector IP address.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_projector_manager.ZLPProjectorManager.server_IP">
+<code class="descname">server_IP</code><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.server_IP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get or set IP address of server running at projector device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_projector_manager.ZLPProjectorManager.connection_port">
+<code class="descname">connection_port</code><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.connection_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get or set connection port number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_projector_manager.ZLPProjectorManager.license_path">
+<code class="descname">license_path</code><a class="headerlink" href="#zlp_projector_manager.ZLPProjectorManager.license_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get or set license file path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="zlp_projector_ros.html" class="btn btn-neutral float-right" title="zlp_projector_ros module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="zlp_utils.html" class="btn btn-neutral float-left" title="zlp_utils module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Rafael Luque
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

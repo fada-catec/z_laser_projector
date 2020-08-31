@@ -1,0 +1,410 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>CODE API &mdash; z_laser_projector 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="_static/Icon_016x016.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="zlp_core module" href="zlp_core.html" />
+    <link rel="prev" title="Getting started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/ROSIN.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CODE API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#messages">Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services">Services</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modules">Modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="zlp_core.html">zlp_core module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_utils.html">zlp_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_projector_manager.html">zlp_projector_manager module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_projector_ros.html">zlp_projector_ros module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">z_laser_projector</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>CODE API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="ros-pkg-z_laser_projector"></span><div class="section" id="code-api">
+<h1>CODE API<a class="headerlink" href="#code-api" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#messages" id="id1">Messages</a></li>
+<li><a class="reference internal" href="#services" id="id2">Services</a></li>
+<li><a class="reference internal" href="#modules" id="id3">Modules</a></li>
+</ul>
+</div>
+<div class="section" id="messages">
+<h2><a class="toc-backref" href="#id1">Messages</a><a class="headerlink" href="#messages" title="Permalink to this headline">¶</a></h2>
+<dl class="message">
+<dt id="z_laser_projector.msg.Line">
+<em class="property">message </em><code class="descclassname">z_laser_projector/</code><code class="descname">Line</code><a class="headerlink" href="#z_laser_projector.msg.Line" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>group_name</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – name of the projection elements group to which the line belongs</li>
+<li><strong>shape_id</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – name of the line element to define</li>
+<li><strong>x</strong> (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) – x position of the line’s starting point</li>
+<li><strong>y</strong> (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) – y position of the line’s starting point</li>
+<li><strong>angle</strong> (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) – line slope</li>
+<li><strong>length</strong> (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) – line length</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<embed>
+    <li><a href="msg/Line.html">Line.msg</a></li>
+</embed></dd></dl>
+
+</div>
+<div class="section" id="services">
+<h2><a class="toc-backref" href="#id2">Services</a><a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
+<dl class="service">
+<dt id="z_laser_projector.srv.CoordinateSystem">
+<em class="property">service </em><code class="descclassname">z_laser_projector/</code><code class="descname">CoordinateSystem</code><a class="headerlink" href="#z_laser_projector.srv.CoordinateSystem" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Request parameters:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – coordinate system name</li>
+<li><strong>distance</strong> (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) – distance between the projector and the projection surface</li>
+<li><strong>P1</strong> (<a class="reference external" href="http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Point.html"><code class="xref ros ros-msg docutils literal notranslate"><span class="pre">geometry_msgs/Point</span></code></a>) – x,y position of P1 point from projector reference system {P}</li>
+<li><strong>P2</strong> (<a class="reference external" href="http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Point.html"><code class="xref ros ros-msg docutils literal notranslate"><span class="pre">geometry_msgs/Point</span></code></a>) – x,y position of P2 point from projector reference system {P}</li>
+<li><strong>P3</strong> (<a class="reference external" href="http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Point.html"><code class="xref ros ros-msg docutils literal notranslate"><span class="pre">geometry_msgs/Point</span></code></a>) – x,y position of P3 point from projector reference system {P}</li>
+<li><strong>P4</strong> (<a class="reference external" href="http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Point.html"><code class="xref ros ros-msg docutils literal notranslate"><span class="pre">geometry_msgs/Point</span></code></a>) – x,y position of P4 point from projector reference system {P}</li>
+<li><strong>T1</strong> (<a class="reference external" href="http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Point.html"><code class="xref ros ros-msg docutils literal notranslate"><span class="pre">geometry_msgs/Point</span></code></a>) – x,y position of T1 point from user reference system {T}</li>
+<li><strong>resolution</strong> (<code class="docutils literal notranslate"><span class="pre">float64</span></code>) – resolution of user coordinate system {T}</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Response parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>T</strong> (<a class="reference external" href="http://docs.ros.org/melodic/api/geometry_msgs/html/msg/Point.html"><code class="xref ros ros-msg docutils literal notranslate"><span class="pre">geometry_msgs/Point[]</span></code></a>) – return list of user reference points [T1,T2,T3,T4]</li>
+<li><strong>cs_created</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – return value response. True for success, False otherwise</li>
+<li><strong>message</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – message response for error or success identification</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<embed>
+    <li><a href="srv/CoordinateSystem.html">CoordinateSystem.srv</a></li>
+</embed></dd></dl>
+
+<dl class="service">
+<dt id="z_laser_projector.srv.CoordinateSystemList">
+<em class="property">service </em><code class="descclassname">z_laser_projector/</code><code class="descname">CoordinateSystemList</code><a class="headerlink" href="#z_laser_projector.srv.CoordinateSystemList" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Response parameters:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>success</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – return value response. True for success, False otherwise</li>
+<li><strong>message</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – message response for error or success identification</li>
+<li><strong>cs_list</strong> (<code class="docutils literal notranslate"><span class="pre">string[]</span></code>) – list of defined coordinate systems</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<embed>
+    <li><a href="srv/CoordinateSystemList.html">CoordinateSystemList.srv</a></li>
+</embed></dd></dl>
+
+<dl class="service">
+<dt id="z_laser_projector.srv.CoordinateSystemName">
+<em class="property">service </em><code class="descclassname">z_laser_projector/</code><code class="descname">CoordinateSystemName</code><a class="headerlink" href="#z_laser_projector.srv.CoordinateSystemName" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Request parameters:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first"><strong>name</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – coordinate system name</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Response parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>success</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – return value response. True for success, False otherwise</li>
+<li><strong>message</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – message response for error or success identification</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<embed>
+    <li><a href="srv/CoordinateSystemName.html">CoordinateSystemName.srv</a></li>
+</embed></dd></dl>
+
+<dl class="service">
+<dt id="z_laser_projector.srv.CoordinateSystemShow">
+<em class="property">service </em><code class="descclassname">z_laser_projector/</code><code class="descname">CoordinateSystemShow</code><a class="headerlink" href="#z_laser_projector.srv.CoordinateSystemShow" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Request parameters:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first"><strong>secs</strong> (<code class="docutils literal notranslate"><span class="pre">int16</span></code>) – number of projection seconds</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Response parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>success</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – return value response. True for success, False otherwise</li>
+<li><strong>message</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – message response for error or success identification</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<embed>
+    <li><a href="srv/CoordinateSystemShow.html">CoordinateSystemShow.srv</a></li>
+</embed></dd></dl>
+
+<dl class="service">
+<dt id="z_laser_projector.srv.ProjectionElement">
+<em class="property">service </em><code class="descclassname">z_laser_projector/</code><code class="descname">ProjectionElement</code><a class="headerlink" href="#z_laser_projector.srv.ProjectionElement" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Request parameters:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>shape_type</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – type of projection element</li>
+<li><strong>group_name</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – name of the projection elements group to which the projection element belongs</li>
+<li><strong>shape_id</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – projection element name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Response parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>success</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – return value response. True for success, False otherwise</li>
+<li><strong>message</strong> (<code class="docutils literal notranslate"><span class="pre">string</span></code>) – message response for error or success identification</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<embed>
+    <li><a href="srv/ProjectionElement.html">ProjectionElement.srv</a></li>
+</embed></dd></dl>
+
+</div>
+<div class="section" id="modules">
+<h2><a class="toc-backref" href="#id3">Modules</a><a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="zlp_core.html">zlp_core module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zlp_utils.html">zlp_utils module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zlp_projector_manager.html">zlp_projector_manager module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="zlp_projector_ros.html">zlp_projector_ros module</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="zlp_core.html" class="btn btn-neutral float-right" title="zlp_core module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Rafael Luque
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

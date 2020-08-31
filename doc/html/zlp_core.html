@@ -1,0 +1,1469 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>zlp_core module &mdash; z_laser_projector 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="_static/Icon_016x016.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="zlp_utils module" href="zlp_utils.html" />
+    <link rel="prev" title="CODE API" href="code_api.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/ROSIN.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="code_api.html">CODE API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="code_api.html#messages">Messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="code_api.html#services">Services</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="code_api.html#modules">Modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">zlp_core module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_utils.html">zlp_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_projector_manager.html">zlp_projector_manager module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="zlp_projector_ros.html">zlp_projector_ros module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">z_laser_projector</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="code_api.html">CODE API</a> &raquo;</li>
+        
+      <li>zlp_core module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-zlp_core">
+<span id="zlp-core-module"></span><h1>zlp_core module<a class="headerlink" href="#module-zlp_core" title="Permalink to this headline">¶</a></h1>
+<p>Helper module for python thrift interface to ZLP Service.
+This module contains utility classes and methods which ease the usage of the thrift interface to ZLP Service.</p>
+<dl class="class">
+<dt id="zlp_core.EventChannelInterfaceHandler">
+<em class="property">class </em><code class="descclassname">zlp_core.</code><code class="descname">EventChannelInterfaceHandler</code><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class implement the functions of ClientEventChannel thrift interface.</p>
+<dl class="attribute">
+<dt id="zlp_core.EventChannelInterfaceHandler.property_changed_callback">
+<code class="descname">property_changed_callback</code><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.property_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback to handle settings changes on laser projector system</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.EventChannelInterfaceHandler.geo_tree_changed_callback">
+<code class="descname">geo_tree_changed_callback</code><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.geo_tree_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback to handle changes on geotree operator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.EventChannelInterfaceHandler.service_state_changed_callback">
+<code class="descname">service_state_changed_callback</code><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.service_state_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback to handle changes on services state</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.EventChannelInterfaceHandler.function_module_changed_callback">
+<code class="descname">function_module_changed_callback</code><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.function_module_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback to handle changes on function module state</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.EventChannelInterfaceHandler.rc_command_received_callback">
+<code class="descname">rc_command_received_callback</code><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.rc_command_received_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback to handle remote control commands reception</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.EventChannelInterfaceHandler.on_reflection_state_changed_callback">
+<code class="descname">on_reflection_state_changed_callback</code><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.on_reflection_state_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>callback to handle changes on reflection state</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.EventChannelInterfaceHandler.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the EventChannelInterfaceHandler object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.EventChannelInterfaceHandler.PropertyChanged">
+<code class="descname">PropertyChanged</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler.PropertyChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.PropertyChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to handle settings changes on laser projector system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – full path of property that was changed</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – value of property</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.EventChannelInterfaceHandler.GeoTreeChanged">
+<code class="descname">GeoTreeChanged</code><span class="sig-paren">(</span><em>changed_flags</em>, <em>element_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler.GeoTreeChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.GeoTreeChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to handle changes on geotree operator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>changed_flags</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – integer value with flags of type GeoTreeChangedFlags</li>
+<li><strong>element_names</strong> (<em>enum</em>) – identification of changed element (within the GeoTreeElemId enumeration )</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.EventChannelInterfaceHandler.ServiceStateChanged">
+<code class="descname">ServiceStateChanged</code><span class="sig-paren">(</span><em>oldState</em>, <em>newState</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler.ServiceStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.ServiceStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to handle changes on services state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>oldState</strong> (<em>enum</em>) – old state (within the ServiceStates enumeration) before change</li>
+<li><strong>newState</strong> (<em>enum</em>) – new state (within the ServiceStates enumeration) after change</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.EventChannelInterfaceHandler.FunctionModuleStateChanged">
+<code class="descname">FunctionModuleStateChanged</code><span class="sig-paren">(</span><em>functionModID</em>, <em>oldState</em>, <em>newState</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler.FunctionModuleStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.FunctionModuleStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to handle changes on function module state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>functionModID</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – identificator name of function module</li>
+<li><strong>oldState</strong> (<em>enum</em>) – old state (within the FunctionModuleStates enumeration) before change</li>
+<li><strong>newState</strong> (<em>enum</em>) – new state (within the FunctionModuleStates enumeration) after change</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.EventChannelInterfaceHandler.RemoteControlFrameReceived">
+<code class="descname">RemoteControlFrameReceived</code><span class="sig-paren">(</span><em>rc_id</em>, <em>command</em>, <em>toggle</em>, <em>projector</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler.RemoteControlFrameReceived"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.RemoteControlFrameReceived" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to handle remote control commands reception.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rc_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – address of RC-device</li>
+<li><strong>command</strong> (<em>enum</em>) – enum with command codes for remotecontrol functions</li>
+<li><strong>toggle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – toggle function active</li>
+<li><strong>projector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – serial number of the projector</li>
+<li><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – timestamp</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.EventChannelInterfaceHandler.onReflectionStateChanged">
+<code class="descname">onReflectionStateChanged</code><span class="sig-paren">(</span><em>elementName</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#EventChannelInterfaceHandler.onReflectionStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.EventChannelInterfaceHandler.onReflectionStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to handle changes on reflection state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>elementName</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the element that changed state</li>
+<li><strong>state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – true if a reflection was detected; False otherwise</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="zlp_core.ThriftClient">
+<em class="property">class </em><code class="descclassname">zlp_core.</code><code class="descname">ThriftClient</code><span class="sig-paren">(</span><em>event_handler=&lt;zlp_core.EventChannelInterfaceHandler object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">thriftpy.thrift.TClient</span></code></p>
+<p>This class implement the functions to carry out the connection with the ZLP Service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event_handler</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with functions of ClientEventChannel thrift interface</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="zlp_core.ThriftClient.thrift_interface">
+<code class="descname">thrift_interface</code><a class="headerlink" href="#zlp_core.ThriftClient.thrift_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>load the interface description file (interface.thrift) for the communication between</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">obj</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">ZLP-Service and a remote client</code></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>event_handler=&lt;zlp_core.EventChannelInterfaceHandler object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the ThriftClient object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.init_client">
+<code class="descname">init_client</code><span class="sig-paren">(</span><em>ip</em>, <em>port</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.init_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.init_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish a connection to thrift server of ZLP Service. Init client opening sockets and init events handler.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ip</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – ipv6 network address of ZLP-Service</li>
+<li><strong>port</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – port number on which ZLP-Service listens for requests</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.init_event_channel">
+<code class="descname">init_event_channel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.init_event_channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.init_event_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a thrift server and register it at ZLP Service to receive events.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.set_property_changed_callback">
+<code class="descname">set_property_changed_callback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.set_property_changed_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.set_property_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function related with laser projector settings changes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – callback function to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.set_geotree_changed_callback">
+<code class="descname">set_geotree_changed_callback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.set_geotree_changed_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.set_geotree_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function related with geotree operator changes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – callback function to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.set_function_module_state_changed_callback">
+<code class="descname">set_function_module_state_changed_callback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.set_function_module_state_changed_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.set_function_module_state_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function related with function module state changes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – callback function to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.set_rc_command_received_callback">
+<code class="descname">set_rc_command_received_callback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.set_rc_command_received_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.set_rc_command_received_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function related with remote control commands reception.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – callback function to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ThriftClient.set_reflection_state_changed_callback">
+<code class="descname">set_reflection_state_changed_callback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ThriftClient.set_reflection_state_changed_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ThriftClient.set_reflection_state_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function related with reflection state changes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – callback function to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.8)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="zlp_core.ProjectorClient">
+<em class="property">class </em><code class="descclassname">zlp_core.</code><code class="descname">ProjectorClient</code><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class implement the functions to connect with the projector and fundamental projection features.</p>
+<dl class="attribute">
+<dt id="zlp_core.ProjectorClient.projector_id">
+<code class="descname">projector_id</code><a class="headerlink" href="#zlp_core.ProjectorClient.projector_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>serial number of the projector</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.ProjectorClient.module_id">
+<code class="descname">module_id</code><a class="headerlink" href="#zlp_core.ProjectorClient.module_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>function module identification name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the ProjectorClient object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.get_thrift_client">
+<code class="descname">get_thrift_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.get_thrift_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.get_thrift_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the object generated to communicate with the projector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">object with the generated thrift client to communicate with the projector</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>server_IP</em>, <em>connection_port</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and connect the client to thrift server (located at projector) of ZLP-Service and establish an event channel if needed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>server_IP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – ipv6 network address of ZLP-Service</li>
+<li><strong>connection_port</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – port number on which ZLP-Service listens for requests</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect from ZLP Service thrift server and close own event server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.transfer_license">
+<code class="descname">transfer_license</code><span class="sig-paren">(</span><em>lic_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.transfer_license"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.transfer_license" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfer data of the local license file to remote file at ZLP-Service.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>lic_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – license file path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.check_license">
+<code class="descname">check_license</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.check_license"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.check_license" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if license is valid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.scan_projectors">
+<code class="descname">scan_projectors</code><span class="sig-paren">(</span><em>scan_addresses=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.scan_projectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.scan_projectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scan the network for projectors. Get a list of active projectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>scan_addresses</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – addresses or address to scan</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a list of serial numbers of the projectors found,
+the second a bool success value and the third value in the tuple is an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.property_changed_callback">
+<code class="descname">property_changed_callback</code><span class="sig-paren">(</span><em>prop</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.property_changed_callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.property_changed_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Callback function related with laser projector settings changes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – full path of property that was changed</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – value of property</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.activate_projector">
+<code class="descname">activate_projector</code><span class="sig-paren">(</span><em>projector_IP</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.activate_projector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.activate_projector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set properties to activate a projector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>projector_IP</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – address of the projector to scan</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is the serial number string of the activated projector,
+the second a bool success value and the third value in the tuple is an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.deactivate_projector">
+<code class="descname">deactivate_projector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.deactivate_projector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.deactivate_projector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set properties to deactivate a projector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.function_module_create">
+<code class="descname">function_module_create</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.function_module_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.function_module_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create function module to operate with GeoTreeElements (coordinate systems and shapes).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is the function module identification name string,
+the second is a bool success value and the third value in the tuple is an information message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.start_project">
+<code class="descname">start_project</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.start_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.start_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start projection on the surface of all projection elements that belong to the active coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the active coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectorClient.stop_project">
+<code class="descname">stop_project</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectorClient.stop_project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectorClient.stop_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop projection of all elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="zlp_core.GeometryTool">
+<em class="property">class </em><code class="descclassname">zlp_core.</code><code class="descname">GeometryTool</code><span class="sig-paren">(</span><em>thrift_client</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#GeometryTool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.GeometryTool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class implement functions to generate basic geometry and math tools.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>thrift_client</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with the generated client to communicate with the projector</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="zlp_core.GeometryTool.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>thrift_client</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#GeometryTool.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.GeometryTool.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the GeometryTool object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.GeometryTool.create_matrix4x4">
+<code class="descname">create_matrix4x4</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#GeometryTool.create_matrix4x4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.GeometryTool.create_matrix4x4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize 4x4 matrix.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">matrix struct initialized with empty values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.GeometryTool.create_2d_point">
+<code class="descname">create_2d_point</code><span class="sig-paren">(</span><em>x=0</em>, <em>y=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#GeometryTool.create_2d_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.GeometryTool.create_2d_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize 2-dimension array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – x position value</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – y position value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">struct with the values of the 2 axes (x,y)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.GeometryTool.create_3d_point">
+<code class="descname">create_3d_point</code><span class="sig-paren">(</span><em>x=0</em>, <em>y=0</em>, <em>z=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#GeometryTool.create_3d_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.GeometryTool.create_3d_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize 3-dimension array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – x position value</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – y position value</li>
+<li><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – z position value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">struct with the values of the 3 axes (x,y,z)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="zlp_core.CoordinateSystem">
+<em class="property">class </em><code class="descclassname">zlp_core.</code><code class="descname">CoordinateSystem</code><span class="sig-paren">(</span><em>projector_id</em>, <em>module_id</em>, <em>thrift_client</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class implement the functions related with coordinate systems management.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>projector_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – serial number of the projector</li>
+<li><strong>module_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – function module identification name</li>
+<li><strong>thrift_client</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with the generated client to communicate with the projector</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="zlp_core.CoordinateSystem.projector_id">
+<code class="descname">projector_id</code><a class="headerlink" href="#zlp_core.CoordinateSystem.projector_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>serial number of the projector</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.CoordinateSystem.module_id">
+<code class="descname">module_id</code><a class="headerlink" href="#zlp_core.CoordinateSystem.module_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>function module identification name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.CoordinateSystem.reference_object_list">
+<code class="descname">reference_object_list</code><a class="headerlink" href="#zlp_core.CoordinateSystem.reference_object_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of created reference objects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>projector_id</em>, <em>module_id</em>, <em>thrift_client</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the CoordinateSystem object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.coordinate_system_list">
+<code class="descname">coordinate_system_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.coordinate_system_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.coordinate_system_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of active available coordinate systems from projector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a names’ list of available coordinate systems,
+the second is a bool success value and the third value in the tuple is an information message string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.create_reference_object">
+<code class="descname">create_reference_object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.create_reference_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.create_reference_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate new reference object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">reference object struct fields initialized</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.create_reference_point">
+<code class="descname">create_reference_point</code><span class="sig-paren">(</span><em>name</em>, <em>x</em>, <em>y</em>, <em>z=0</em>, <em>active=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.create_reference_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.create_reference_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate new reference point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – reference point name</li>
+<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – x position value</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – y position value</li>
+<li><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – z position value</li>
+<li><strong>active</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – activate reference point parameter</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">reference point struct fields initialized</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.define_cs">
+<code class="descname">define_cs</code><span class="sig-paren">(</span><em>cs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.define_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.define_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate new coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – struct with the necessary parameters to create the coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is the name string of the coordinate system generated,
+the second is a bool success value and the third value in the tuple is an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.register_cs">
+<code class="descname">register_cs</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.register_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.register_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register the new coordinate system at the projector once it has been generated and activated.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.set_cs">
+<code class="descname">set_cs</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.set_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.set_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the new coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.show_cs">
+<code class="descname">show_cs</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.show_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.show_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a coordinate system on the projection surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the coordinate system</li>
+<li><strong>secs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of seconds the projection lasts</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.hide_cs">
+<code class="descname">hide_cs</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.hide_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.hide_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a coordinate system on the projection surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the coordinate system</li>
+<li><strong>secs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – number of seconds the projection lasts</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.remove_cs">
+<code class="descname">remove_cs</code><span class="sig-paren">(</span><em>coord_sys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.remove_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.remove_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem.get_cs">
+<code class="descname">get_cs</code><span class="sig-paren">(</span><em>coord_sys</em>, <em>cs_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#CoordinateSystem.get_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.CoordinateSystem.get_cs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the parameters values of a defined coordinate system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the coordinate system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is an object with the coordinate system parameters values,
+the second is a bool success value and the third value in the tuple is an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem._CoordinateSystem__define_reference_point">
+<code class="descname">_CoordinateSystem__define_reference_point</code><span class="sig-paren">(</span><em>reference_object</em>, <em>cross_size</em>, <em>n</em>, <em>d</em>, <em>x</em>, <em>y</em><span class="sig-paren">)</span><a class="headerlink" href="#zlp_core.CoordinateSystem._CoordinateSystem__define_reference_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill other fields of the coordinate system structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reference_object</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object of the active coordinate system</li>
+<li><strong>cross_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – struct with the dimensions of the crosses</li>
+<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – vector index</li>
+<li><strong>d</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – distance between the projection surface and the projector</li>
+<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – value of the x-axis coordinate</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – value of the y-axis coordinate</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">coordinate system parameters structure updated</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.CoordinateSystem._CoordinateSystem__ref_obj_state">
+<code class="descname">_CoordinateSystem__ref_obj_state</code><span class="sig-paren">(</span><em>state</em>, <em>ref_obj</em><span class="sig-paren">)</span><a class="headerlink" href="#zlp_core.CoordinateSystem._CoordinateSystem__ref_obj_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate or deactivate a reference object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>state</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – activation/deactivation parameter</li>
+<li><strong>reference_object</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – reference object to be activated/deactivated</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="zlp_core.ProjectionElementControl">
+<em class="property">class </em><code class="descclassname">zlp_core.</code><code class="descname">ProjectionElementControl</code><span class="sig-paren">(</span><em>module_id</em>, <em>thrift_client</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class implement the functions related with projection elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>module_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – function module identification name</li>
+<li><strong>thrift_client</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – object with the generated client to communicate with the projector</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="zlp_core.ProjectionElementControl.module_id">
+<code class="descname">module_id</code><a class="headerlink" href="#zlp_core.ProjectionElementControl.module_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>function module identification name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="zlp_core.ProjectionElementControl.default_projection_element">
+<code class="descname">default_projection_element</code><a class="headerlink" href="#zlp_core.ProjectionElementControl.default_projection_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>base structure initialization for Projection Elements</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>module_id</em>, <em>thrift_client</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the ProjectionElementControl object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.init_projection_element">
+<code class="descname">init_projection_element</code><span class="sig-paren">(</span><em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.init_projection_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.init_projection_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize new projection element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>elem</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><em>object</em></a>) – projection element struct to initialize</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">projection element struct with fields initialized</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.create_polyline">
+<code class="descname">create_polyline</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.create_polyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.create_polyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a new polyline object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – polyline name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">polyline struct with fields initialized</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)">object</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.define_polyline">
+<code class="descname">define_polyline</code><span class="sig-paren">(</span><em>coord_sys</em>, <em>proj_elem_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.define_polyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.define_polyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new line as projection element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>coord_sys</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of coordinate system which the new projection element will be added</li>
+<li><strong>proj_elem_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list with the necessary parameters to identify and define a line as a new projection element</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.deactivate_shape">
+<code class="descname">deactivate_shape</code><span class="sig-paren">(</span><em>shape_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.deactivate_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.deactivate_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide (deactivate) a projection element from the active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shape_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list with the necessary parameters to identify the projection element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.reactivate_shape">
+<code class="descname">reactivate_shape</code><span class="sig-paren">(</span><em>shape_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.reactivate_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.reactivate_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unhide (activate hidden) a projection element from the active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shape_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list with the necessary parameters to identify the projection element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.delete_shape">
+<code class="descname">delete_shape</code><span class="sig-paren">(</span><em>shape_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.delete_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.delete_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a projection element from the active reference system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shape_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list with the necessary parameters to identify the projection element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.cs_axes_create">
+<code class="descname">cs_axes_create</code><span class="sig-paren">(</span><em>cs_params</em>, <em>proj_elem_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.cs_axes_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.cs_axes_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create projection elements of reference coordinate system origin axes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cs_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of definition parameters of the reference system</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="zlp_core.ProjectionElementControl.cs_frame_create">
+<code class="descname">cs_frame_create</code><span class="sig-paren">(</span><em>cs_params</em>, <em>proj_elem_params</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/zlp_core.html#ProjectionElementControl.cs_frame_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#zlp_core.ProjectionElementControl.cs_frame_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create projection elements of reference coordinate system frame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of the User System Reference Points</li>
+<li><strong>cs_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)"><em>list</em></a>) – list of definition parameters of the reference system</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the first value in the returned tuple is a bool success value and the second value in the tuple is
+an information message string</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="zlp_utils.html" class="btn btn-neutral float-right" title="zlp_utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="code_api.html" class="btn btn-neutral float-left" title="CODE API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Rafael Luque
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

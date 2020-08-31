@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html4" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting started &mdash; z_laser_projector 0.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+    <link rel="shortcut icon" href="_static/Icon_016x016.png"/>
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CODE API" href="code_api.html" />
+    <link rel="prev" title="Z_LASER_PROJECTOR - Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/ROSIN.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#set-up">Set up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tests">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#help">Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code_api.html">CODE API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">z_laser_projector</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Getting started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>The z_laser_projector package is a ROS wrapper for <a class="reference external" href="(https://z-laser.com/en/product/laser-projector/zlp1/)">ZLP1</a>
+Z-LASER Projector, that makes it fully compatible with all available sensors and devices running over the ROS-Industrial project.
+This package provides libraries that allow the user to operate the device and simplify the task of developing further advanced
+features, such as augmented reality applications.</p>
+<p>The ZLP1 is an eye-safe laser projector (laser class 2M). It is used to project desired objects and figures as an optical
+guidance system for human operator tasks in industrial production processes like pick-and-place, logistics, and workstations,
+endeavouring to enlarge and optimize the production and workflow.</p>
+<a class="reference internal image-reference" href="_images/ZLP1.png"><img alt="_images/ZLP1.png" class="align-center" src="_images/ZLP1.png" style="width: 284.1px; height: 257.7px;" /></a>
+<p>The collection of rosservices supplied by the package wraps the functionalities of the device helping with the development
+of advanced applications in factories facilities, and motivating the ROS-Industrial community growth.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="mailto:rluque&#37;&#52;&#48;catec&#46;aero">Rafael Luque</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Author:</th><td class="field-body"><a class="reference external" href="mailto:imlara&#37;&#52;&#48;catec&#46;aero">Inés M<span>&#46;</span> Lara</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Maintainers:</th><td class="field-body">Rafael Luque, Inés M. Lara</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Repository:</th><td class="field-body"><a class="reference external" href="https://github.com/fada-catec/z_laser_projector.git">https://github.com/fada-catec/z_laser_projector.git</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">ROS Wiki:</th><td class="field-body"><a class="reference external" href="http://wiki.ros.org/z_laser_projector">http://wiki.ros.org/z_laser_projector</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Version:</th><td class="field-body">1.0</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">License:</th><td class="field-body"><a class="reference external" href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="set-up">
+<h2>Set up<a class="headerlink" href="#set-up" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Create a workspace and clone this repo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">~/</span><span class="n">catkin_ws</span><span class="o">/</span><span class="n">src</span> <span class="o">&amp;&amp;</span> <span class="n">cd</span> <span class="o">~/</span><span class="n">catkin_ws</span><span class="o">/</span><span class="n">src</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">fada</span><span class="o">-</span><span class="n">catec</span><span class="o">/</span><span class="n">z_laser_projector</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="o">~/</span><span class="n">catkin_ws</span> <span class="o">&amp;&amp;</span> <span class="n">catkin_make</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Don’t forget to source workspace:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">~/</span><span class="n">catkin_ws</span><span class="o">/</span><span class="n">devel</span><span class="o">/</span><span class="n">setup</span><span class="o">.</span><span class="n">bash</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Set the correct network to reach projector.</p>
+<p>Connect projector to PC and set a network on IP <code class="docutils literal notranslate"><span class="pre">192.168.10.9</span></code> and submask <code class="docutils literal notranslate"><span class="pre">255.255.255.0</span></code></p>
+<p>To consider:</p>
+<ul class="simple">
+<li>The internal zService is running inside the projector under <code class="docutils literal notranslate"><span class="pre">192.168.11.11</span></code> on port <code class="docutils literal notranslate"><span class="pre">9090</span></code>.</li>
+<li>Projector is always reachable under <code class="docutils literal notranslate"><span class="pre">192.168.10.10</span></code>.</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">The code have been tested for <a class="reference external" href="http://wiki.ros.org/melodic/Installation/Ubuntu">ROS Melodic</a> on <strong>Ubuntu 18.04</strong>.</p>
+</li>
+<li><p class="first">This software runs on <strong>python 3</strong>. Install dependencies by using <code class="docutils literal notranslate"><span class="pre">pip3</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span>
+<span class="n">pip3</span> <span class="n">install</span> <span class="n">thriftpy</span>
+<span class="n">pip3</span> <span class="n">install</span> <span class="n">numpy</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>You can launch the ROS node included in this package, which opens ROS services to operate de projector.</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">roslaunch</span> <span class="n">z_laser_projector</span> <span class="n">projector_zlp1</span><span class="o">.</span><span class="n">launch</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>It is possible to change rosparameters and get them by the <code class="docutils literal notranslate"><span class="pre">load_user_coordinate_system</span></code> argument in launch file.</p>
+<p>Or if you perfer to include some projector functionalities into your custom node, import the libraries instead:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.zlp_projector_manager</span> <span class="kn">import</span> <span class="n">ZLPProjectorManager</span>
+<span class="kn">from</span> <span class="nn">z_laser_projector.zlp_utils</span> <span class="kn">import</span> <span class="n">CoordinateSystemParameters</span><span class="p">,</span> <span class="n">ProjectionElementParameters</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h2>
+<p>Run automatic integration tests:</p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rostest</span> <span class="n">z_laser_projector</span> <span class="n">connection_test</span><span class="o">.</span><span class="n">test</span>
+<span class="n">rostest</span> <span class="n">z_laser_projector</span> <span class="n">define_coordinate_system_test</span><span class="o">.</span><span class="n">test</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="help">
+<h2>Help<a class="headerlink" href="#help" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Ines M. Lara - <a class="reference external" href="mailto:imlara&#37;&#52;&#48;catec&#46;aero">imlara<span>&#64;</span>catec<span>&#46;</span>aero</a></li>
+<li>Rafael Luque - <a class="reference external" href="mailto:rluque&#37;&#52;&#48;catec&#46;aero">rluque<span>&#64;</span>catec<span>&#46;</span>aero</a></li>
+<li>Other community or team contact</li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="code_api.html" class="btn btn-neutral float-right" title="CODE API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Z_LASER_PROJECTOR - Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Rafael Luque
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
