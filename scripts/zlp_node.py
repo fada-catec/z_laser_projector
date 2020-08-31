@@ -25,7 +25,7 @@ if __name__ == '__main__':
     projector_IP    = rospy.get_param('projector_IP', "192.168.10.10") 
     server_IP       = rospy.get_param('server_IP', "192.168.10.11") 
     connection_port = rospy.get_param('connection_port', 9090) 
-    license_file    = rospy.get_param('license_file', "1900027652.lic") 
+    license_file    = rospy.get_param('license_file', "my_license_file.lic") 
 
     # define license file path
     rospack = rospkg.RosPack()
