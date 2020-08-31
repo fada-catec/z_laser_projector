@@ -2,6 +2,9 @@
 
 # z_laser_projector
 
+[![Build Status](https://travis-ci.com/fada-catec/z_laser_projector.svg?token=euTp3jtyEts1qcm7iWeV&branch=melodic)](https://travis-ci.com/fada-catec/z_laser_projector)
+[![License](https://img.shields.io/badge/License-Apache%202-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 This package is a ROS wrapper to control the Z-LASER Projector [ZLP1]((https://z-laser.com/en/product/laser-projector/zlp1/)) via ROS using Z-LASER SDK.
 
 The code have been tested for **ROS Melodic** on **Ubuntu 18.04**.
@@ -59,6 +62,13 @@ Or if you perfer to include some projector functionalities into your custom node
 [Topics, Services](http://wiki.ros.org/z_laser_projector#Code_API)
 
 Read documentation `z_laser_projector/doc/html/index.html`
+
+## Tests
+
+Run automatic integration tests:
+
+     rostest z_laser_projector connection_test.test
+     rostest z_laser_projector define_coordinate_system_test.test
 
 ## Acknowledgement
 
