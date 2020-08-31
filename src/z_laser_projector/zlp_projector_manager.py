@@ -519,21 +519,3 @@ class ZLPProjectorManager(object):
     @license_path.setter
     def license_path(self, path):
         self.__license_path = path
-    
-    @property
-    def projector_id(self):
-        """str: Get or set projector indentification number."""
-        return self.__projector_id    
-
-    @projector_id.setter
-    def projector_id(self, id):
-        self.__projector_id = id
-
-    @property    
-    def coordinate_system(self):
-        """str: Get or set the name of coordinate system with which the user is operating currently = 'active coordinate system'."""
-        return self.__coordinate_system    
-
-    @coordinate_system.setter
-    def coordinate_system(self, name):
-        self.__coordinate_system = name

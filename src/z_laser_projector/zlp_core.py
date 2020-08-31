@@ -713,6 +713,7 @@ class CoordinateSystem(object):
             message = "Cordinate system defined correctly"
 
         except Exception as e:
+            self.__thrift_client.RemoveGeoTreeElem(cs.name)
             success = False 
             message = e
 
