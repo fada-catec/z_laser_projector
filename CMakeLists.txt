@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   geometry_msgs
+  rostest
 )
 
 catkin_python_setup()
@@ -47,3 +48,4 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_rostest(test/connection_test.test)
