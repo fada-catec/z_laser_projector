@@ -47,5 +47,3 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
-
-add_rostest(test/connection_test.test)
