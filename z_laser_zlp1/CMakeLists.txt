@@ -20,6 +20,8 @@ catkin_python_setup()
 add_message_files(
    FILES
    Line.msg
+   Curve.msg
+   Text.msg
 )
 
 add_service_files(
