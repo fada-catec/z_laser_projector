@@ -19,7 +19,7 @@ import sys
 catkin_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 catkin_package = catkin_pkg.package.parse_package(os.path.join(catkin_dir, catkin_pkg.package.PACKAGE_MANIFEST_FILENAME))
 
-sys.path.insert(0, os.path.abspath('../src/z_laser_projector'))
+sys.path.insert(0, os.path.abspath('../src/z_laser_zlp1'))
 
 # -- General configuration ---------------------------------------------------
 
@@ -61,7 +61,7 @@ master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 
-project = u'z_laser_projector'
+project = u'z_laser_zlp1'
 copyright = u'2020, Rafael Luque'
 author = u'Rafael Luque'
 
@@ -220,7 +220,7 @@ html_show_sourcelink = False
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'z_laser_projector_doc'
+htmlhelp_basename = 'z_laser_zlp1_doc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -236,7 +236,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'z_laser_projector_doc.tex', u'z_laser_projector Documentation',
+    (master_doc, 'z_laser_zlp1_doc.tex', u'z_laser_zlp1 Documentation',
      u'Rafael Luque', 'manual'),
 ]
 
@@ -266,7 +266,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'z_laser_projector_doc', u'z_laser_projector Documentation',
+    (master_doc, 'z_laser_zlp1_doc', u'z_laser_zlp1 Documentation',
      [author], 1)
 ]
 
@@ -279,8 +279,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'z_laser_projector', u'z_laser_projector Documentation',
-     author, 'z_laser_projector', 'One line description of project.',
+    (master_doc, 'z_laser_zlp1', u'z_laser_zlp1 Documentation',
+     author, 'z_laser_zlp1', 'One line description of project.',
      'Miscellaneous'),
 ]
 

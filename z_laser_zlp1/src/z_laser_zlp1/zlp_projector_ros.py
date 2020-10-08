@@ -20,17 +20,17 @@ developing further advanced features."""
 import rospy
 import rospkg
 
-from z_laser_projector.zlp_projector_manager import ZLPProjectorManager
-from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_zlp1.zlp_projector_manager import ZLPProjectorManager
+from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from geometry_msgs.msg import Point
 from std_srvs.srv import Trigger, TriggerResponse
-from z_laser_projector.msg import Line
-from z_laser_projector.srv import CoordinateSystem, CoordinateSystemResponse
-from z_laser_projector.srv import CoordinateSystemName, CoordinateSystemNameResponse
-from z_laser_projector.srv import CoordinateSystemShow, CoordinateSystemShowResponse
-from z_laser_projector.srv import CoordinateSystemList, CoordinateSystemListResponse
-from z_laser_projector.srv import ProjectionElement, ProjectionElementResponse
+from z_laser_zlp1.msg import Line
+from z_laser_zlp1.srv import CoordinateSystem, CoordinateSystemResponse
+from z_laser_zlp1.srv import CoordinateSystemName, CoordinateSystemNameResponse
+from z_laser_zlp1.srv import CoordinateSystemShow, CoordinateSystemShowResponse
+from z_laser_zlp1.srv import CoordinateSystemList, CoordinateSystemListResponse
+from z_laser_zlp1.srv import ProjectionElement, ProjectionElementResponse
 
 class ZLPProjectorROS(object):
     """This class initilizes the services and implements the functionalities of the projection_node.

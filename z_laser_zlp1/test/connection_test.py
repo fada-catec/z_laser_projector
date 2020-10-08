@@ -73,4 +73,4 @@ class TestServiceCall(unittest.TestCase):
             
 if __name__ == '__main__':
     import rostest
-    rostest.rosrun("z_laser_projector", 'connection_test', TestServiceCall)
+    rostest.rosrun("z_laser_zlp1", 'connection_test', TestServiceCall)

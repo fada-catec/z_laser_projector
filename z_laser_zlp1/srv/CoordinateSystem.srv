@@ -20,7 +20,7 @@ float64 resolution
 
 ---
 
-# z_laser_projector/UserCoordinateSystem T
+# z_laser_zlp1/UserCoordinateSystem T
 geometry_msgs/Point[] T
 bool cs_created
 string message

@@ -20,8 +20,8 @@ task of developing advanced applications."""
 import sys
 import math
 
-from z_laser_projector.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
-from z_laser_projector.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+from z_laser_zlp1.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 class ZLPProjectorManager(object):
     """This class envolves the methods from the libraries imported.

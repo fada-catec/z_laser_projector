@@ -2,9 +2,10 @@
 
 import unittest
 import rospy
+import psutil
 from std_srvs.srv import Trigger
 from geometry_msgs.msg import Point
-from z_laser_projector.srv import CoordinateSystem, CoordinateSystemRequest, CoordinateSystemResponse
+from z_laser_zlp1.srv import CoordinateSystem, CoordinateSystemRequest, CoordinateSystemResponse
 
 def remote_ip_present(ip):
     remote_ips = [] # list of IPs for current active connections
@@ -82,4 +83,4 @@ class TestServiceCall(unittest.TestCase):
 
 if __name__ == '__main__':
     import rostest
-    rostest.rosrun("z_laser_projector", 'define_coordinate_system_test', TestServiceCall)
+    rostest.rosrun("z_laser_zlp1", 'define_coordinate_system_test', TestServiceCall)

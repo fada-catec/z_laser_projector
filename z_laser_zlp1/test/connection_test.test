@@ -1,0 +1,17 @@
+<launch>
+
+    <arg name="namespace" value="projector_zlp1"/>
+
+    <group ns="$(arg namespace)">
+
+        <rosparam file="$(find z_laser_zlp1)/config/communication_settings.yaml"/>
+
+        <rosparam file="$(find z_laser_zlp1)/config/projector_coordinate_system.yaml"/>
+
+        <node name="zlp_node" pkg="z_laser_zlp1" type="zlp_node.py" output="screen"/>
+
+        <test test-name="connection_test" pkg="z_laser_zlp1" type="connection_test.py" />
+        
+    </group>
+
+</launch>

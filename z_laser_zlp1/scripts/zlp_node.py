@@ -17,7 +17,7 @@
 import rospy
 import rospkg
 
-from z_laser_projector.zlp_projector_ros import ZLPProjectorROS
+from z_laser_zlp1.zlp_projector_ros import ZLPProjectorROS
 
 if __name__ == '__main__':
     rospy.init_node('zlp_node')
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     # define license file path
     rospack = rospkg.RosPack()
-    pkg_path = rospack.get_path('z_laser_projector')
+    pkg_path = rospack.get_path('z_laser_zlp1')
     license_path = pkg_path + "/lic/" + license_file
 
     # create node instance
