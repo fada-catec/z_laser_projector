@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>z_laser_msgs</name>
+  <version>0.0.0</version>
+  <description>
+    <p>
+      T
+    </p>
+  </description>
+  <url>http://wiki.ros.org/z_laser_projector</url>
+  <author email="rluque@catec.aero">Rafael Luque </author>
+  <author email="imlara@catec.aero">Ines M. Lara </author>
+  <maintainer email="rluque@catec.aero">Rafael Luque </maintainer>
+  <maintainer email="imlara@catec.aero">Ines M. Lara </maintainer>
+  <license>Apache 2.0</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+
+  <build_export_depend>message_runtime</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend> 
+  
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+
+</package>

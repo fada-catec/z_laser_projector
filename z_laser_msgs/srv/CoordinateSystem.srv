@@ -1,0 +1,25 @@
+# Name of the coordinate system
+string name
+
+# Distance between the projector device and the projection surface
+float64 distance
+
+# Real-world coordinates of reference points from the projector's reference system {P}
+geometry_msgs/Point P1
+geometry_msgs/Point P2
+geometry_msgs/Point P3
+geometry_msgs/Point P4
+
+# Coordinates of the reference point T1 from the user's reference system {T}
+geometry_msgs/Point T1
+
+# Resolution of the coordinate system
+# The resolution is considered for the largest dimension of the coordinate system
+# and it is calculated proportionally for the rest
+float64 resolution
+
+---
+
+geometry_msgs/Point[] T
+bool cs_created
+string message

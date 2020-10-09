@@ -1,0 +1,7 @@
+# Name of the coordinate system
+string name
+
+---
+
+bool success
+string message
