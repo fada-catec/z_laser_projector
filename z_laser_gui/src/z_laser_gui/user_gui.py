@@ -407,7 +407,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 if __name__ == "__main__":
 
-    rospy.init_node('gui_node')
+    rospy.init_node('zlp_gui_node')
 
     app = QtWidgets.QApplication(sys.argv)
     window = MyWindow()

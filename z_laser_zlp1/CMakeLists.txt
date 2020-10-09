@@ -5,10 +5,8 @@ project(z_laser_zlp1)
 add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
   roscpp
   rospy
-  std_msgs
   rostest
   z_laser_msgs
 )
