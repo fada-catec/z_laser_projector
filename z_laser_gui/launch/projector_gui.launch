@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="namespace" value="zlaser"/>
+    <arg name="load_user_coordinate_system" default="false"/>
+
+    <group ns="$(arg namespace)">
+
+        <rosparam file="$(find z_laser_zlp1)/config/communication_settings.yaml"/>
+
+        <rosparam if ="$(eval arg('load_user_coordinate_system'))"
+            file="$(find z_laser_zlp1)/config/user_coordinate_system.yaml"/> 
+
+        <rosparam unless ="$(eval arg('load_user_coordinate_system'))"
+            file="$(find z_laser_zlp1)/config/projector_coordinate_system.yaml"/>
+
+        <node name="zlp_node" pkg="z_laser_zlp1" type="zlp_node.py" output="screen"/>
+
+        <node name="gui_node" pkg="z_laser_gui" type="user_gui.py" output="screen"/>
+
+    </group>
+
+</launch>
