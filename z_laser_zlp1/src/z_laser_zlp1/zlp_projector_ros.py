@@ -54,6 +54,7 @@ class ZLPProjectorROS(object):
         self.stop_proj     = rospy.Service('projection_stop', Trigger, self.projection_stop_cb)
 
         self.manual_cs     = rospy.Service('define_coordinate_system', CoordinateSystem, self.manual_define_coord_sys_cb)
+        self.auto_cs       = rospy.Service('search_targets', CoordinateSystem, self.auto_search_target_cb)
 
         self.get_cs_list   = rospy.Service('coordinate_system_list', CoordinateSystemList, self.get_coord_sys_list_cb)
 
@@ -155,7 +156,7 @@ class ZLPProjectorROS(object):
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end.")
         
         try:
-            self.projector.define_coordinate_system(req)
+            self.projector.define_coordinate_system(req,False)
             
             rospy.set_param('coordinate_system_name', req.name)
             rospy.set_param('coordinate_system_distance', req.distance)
@@ -167,6 +168,49 @@ class ZLPProjectorROS(object):
             self.projector.cs_frame_create(req)
             self.projector.cs_axes_create(req)
             message = "Coordinate system correctly defined:"
+            rospy.loginfo(message)
+            T = self.get_user_coordinate_system(req.name)
+            
+            rospy.loginfo("Projecting demonstration")
+            self.projector.show_coordinate_system()
+            rospy.sleep(5)
+            self.projector.hide_coordinate_system()
+            self.projector.show_frame()
+            rospy.sleep(5)
+            self.projector.hide_frame()
+
+            return CoordinateSystemResponse(T, True, message)
+
+        except Exception as e:
+            rospy.logerr(e)
+            return CoordinateSystemResponse([], False, str(e))
+
+    def auto_search_target_cb(self,req):
+        """Callback of ROS service to define a new reference system by scanning the targets automatically with the projector.
+
+        Args:
+            req (list): necessary parameters to start the automatic targets search (name, aproximate coordinates of 
+            reference system points, scanning area size, ...)
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an 
+            information message string
+        """
+        rospy.loginfo("Received request to scan a new reference system.")
+
+        try:
+            self.projector.define_coordinate_system(req,True)
+
+            # rospy.set_param('coordinate_system_name', req.name)
+            # rospy.set_param('coordinate_system_distance', req.distance)
+            # rospy.set_param('P1/x', req.P1.x)
+            # rospy.set_param('P1/y', req.P1.y)
+            # rospy.set_param('T1/x', req.T1.x)
+            # rospy.set_param('T1/y', req.T1.y)
+
+            self.projector.cs_frame_create(req)
+            self.projector.cs_axes_create(req)
+            message = "Coordinate system correctly scanned:"
             rospy.loginfo(message)
             T = self.get_user_coordinate_system(req.name)
             
@@ -486,7 +530,7 @@ class ZLPProjectorROS(object):
         """Initialize the factory or user predefined coordinate system at ros projection_node launch."""
         cs_params = self.read_coordinate_system()
         try:
-            self.projector.define_coordinate_system(cs_params)
+            self.projector.define_coordinate_system(cs_params,False)
             self.projector.cs_frame_create(cs_params)
             self.projector.cs_axes_create(cs_params)
             rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))

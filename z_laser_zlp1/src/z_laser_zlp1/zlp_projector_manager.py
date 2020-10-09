@@ -169,7 +169,7 @@ class ZLPProjectorManager(object):
 
         return cs_list
 
-    def define_coordinate_system(self,cs_params):
+    def define_coordinate_system(self,cs_params,do_target_search):
         """Define a new coordinate reference system.
 
         Args:
@@ -178,7 +178,7 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        coord_sys,success,message = self.cs_element.define_cs(cs_params)
+        coord_sys,success,message = self.cs_element.define_cs(cs_params,do_target_search)
         if not success:
             raise SystemError(message)
         try:

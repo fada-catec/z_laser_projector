@@ -599,6 +599,8 @@ class CoordinateSystem(object):
         self.module_id = module_id
         self.reference_object_list = []
 
+        self.cv = threading.Condition()
+
     def coordinate_system_list(self):
         """Get list of active available coordinate systems from projector.
 
@@ -655,7 +657,7 @@ class CoordinateSystem(object):
         ref_point.distance = 0
         return ref_point
 
-    def define_cs(self,cs):
+    def define_cs(self,cs,do_target_search):
         """Generate new coordinate system.
 
         Args:
@@ -708,9 +710,17 @@ class CoordinateSystem(object):
             reference_object = self.__define_reference_point(reference_object,cross_size,3,d,cs.P4.x,cs.P4.y)
 
             self.__ref_obj_state(False,reference_object)
+            self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
 
-            success = True
-            message = "Cordinate system defined correctly"
+            if do_target_search:
+                # self.__thrift_client.SetReferenceobject(reference_object)
+                # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", reference_object.name)
+                success,message = self.scan_targets(reference_object.name)
+                if success:
+                    message = "Cordinate system defined and scanned correctly."
+            else:
+                success = True
+                message = "Cordinate system defined correctly"
 
         except Exception as e:
             self.__thrift_client.RemoveGeoTreeElem(cs.name)
@@ -718,6 +728,76 @@ class CoordinateSystem(object):
             message = e
 
         return cs.name,success,message
+
+    def function_module_changed_callback(self,module_id,old_state, new_state):
+        """Callback for function module state change, events handler. It is used for stopping running code while the projector is 
+        scanning targets.
+
+        Args:
+            module_id (str): function module identification name
+            old_state (str): old state of the function module
+            new_state (str): new state of the function module
+        """
+        # print("function module changed callback {}".format(module_id))
+        if new_state != self.__thrift_client.thrift_interface.FunctionModuleStates.RUNNING:
+            # print("change!")
+            self.cv.acquire()
+            self.cv.notify()
+            self.cv.release()
+
+    def scan_targets(self,ref_obj_name):
+        """Projector automatic scanning of the targets placed on the projection surface.
+
+        Args:
+            ref_obj_name (str): object with the necessary parameters to create the coordinate system 
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an 
+            information message string
+        """
+        try:
+            # print(self.module_id)
+            # print(type(self.module_id))
+            self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "0")
+            # print(self.projector_id)
+            point_search_prop_path = "config.projectorManager.projectors." + self.projector_id + ".search"
+            self.__thrift_client.SetProperty(point_search_prop_path + ".threshold", "1")
+            self.__thrift_client.set_function_module_state_changed_callback(self.function_module_changed_callback)
+
+            self.cv.acquire()
+            self.__thrift_client.FunctionModuleRun(self.module_id)
+            self.cv.wait()
+            self.cv.release()
+
+            state = self.__thrift_client.FunctionModuleGetProperty(self.module_id, "state")
+            if state != "1": 
+                success = False
+                message = "Function module is not in idle state, hence an error has occured."
+            else:
+                reference_object = self.__thrift_client.GetReferenceobject(ref_obj_name)
+                # print(self.__thrift_client.FunctionModuleGetProperty(self.module_id, "result.tracePoints.0.x"))
+                found_all = True
+                for i in range(0, len(reference_object.refPointList)):
+                    resultPath = "result.tracePoints." + str(i)
+                    if self.__thrift_client.FunctionModuleGetProperty(self.module_id, resultPath + ".found") != "true":
+                        found_all = False
+                        break
+            
+                # print("function module set property ref obj data")
+                # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj_name)##############
+
+                if not found_all:
+                    success = False
+                    message = "Not all targets have been found."
+                else:
+                    success = True
+                    message = "Targets scanned successfully."
+
+        except Exception as e:
+            success = False 
+            message = e
+        
+        return success,message
 
     def __define_reference_point(self,reference_object,cross_size,n,d,x,y):
         """Fill other fields of the coordinate system structure.
@@ -749,9 +829,9 @@ class CoordinateSystem(object):
         """
         ref_obj.activated = state
         self.__thrift_client.SetReferenceobject(ref_obj)
-        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj.name)
-        self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
-        self.__thrift_client.FunctionModuleRun(self.module_id)
+        # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", ref_obj.name)
+        # self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
+        # self.__thrift_client.FunctionModuleRun(self.module_id)
 
     def register_cs(self,coord_sys):
         """Register the new coordinate system at the projector once it has been generated and activated.
@@ -764,10 +844,11 @@ class CoordinateSystem(object):
             an information message string
         """
         try:
+            self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", coord_sys)
             self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
             self.__thrift_client.FunctionModuleRun(self.module_id)
-            state = self.__thrift_client.FunctionModuleGetProperty(self.module_id, "state")
 
+            state = self.__thrift_client.FunctionModuleGetProperty(self.module_id, "state")
             if state != "1":
                 success = False
                 message = "Function module is not in idle state, hence an error has occured."
@@ -796,8 +877,14 @@ class CoordinateSystem(object):
             matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType == 4096]
             coordinate_systems = [self.__thrift_client.GetReferenceobject(name) for name in matches]
             
-            [self.__ref_obj_state(False, cs) for cs in coordinate_systems]
-            [self.__ref_obj_state(True, cs)  for cs in coordinate_systems if cs.name == coord_sys]
+            # [self.__ref_obj_state(False, cs) for cs in coordinate_systems]
+            # [self.__ref_obj_state(True, cs) for cs in coordinate_systems if cs.name == coord_sys]
+            for cs in coordinate_systems:
+                if cs.name == coord_sys:
+                    self.__ref_obj_state(True, cs)
+                    self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", cs.name)
+                else:
+                    self.__ref_obj_state(False, cs)
 
             success = True
             message = coord_sys + " set as active coordinate system"
