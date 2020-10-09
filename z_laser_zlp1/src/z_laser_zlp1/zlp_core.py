@@ -269,10 +269,14 @@ class ProjectorClient(object):
             an information message string
         """
         try:
-            self.__thrift_client.init_client(server_IP, connection_port)
-            self.__thrift_client.init_event_channel()
-            success = True 
-            message = "Client connected"
+            if not self.__thrift_client._event_channel:
+                self.__thrift_client.init_client(server_IP, connection_port)
+                self.__thrift_client.init_event_channel()
+                success = True 
+                message = "Client connected"
+            else:
+                success = False 
+                message = "Projector already connected"
 
         except Exception as e:
             success = False 
@@ -296,7 +300,8 @@ class ProjectorClient(object):
 
             if self.__thrift_client._event_channel:
                 self.__thrift_client._event_channel.close()
-        
+                self.__thrift_client._event_channel = None
+
             success = True 
             message = "Projector disconnected"
 
@@ -351,6 +356,7 @@ class ProjectorClient(object):
                 message = "License is valid"
             else:
                 message = "License is not valid"
+        
         except Exception as e:
             success = False
             message = e
