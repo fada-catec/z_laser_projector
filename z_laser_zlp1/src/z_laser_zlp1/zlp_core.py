@@ -25,12 +25,15 @@ import numpy as np
 import socket
 import copy
 import threading 
+from pynput import keyboard
 
 import thriftpy
 from thriftpy.protocol import TBinaryProtocolFactory
 from thriftpy.server import TThreadedServer, TSimpleServer
 from thriftpy.thrift import TProcessor, TClient
 from thriftpy.transport import TBufferedTransportFactory, TServerSocket, TSocket
+
+from z_laser_zlp1.zlp_utils import KeyboardParameters
 
 class EventChannelInterfaceHandler(object):
     """This class implement the functions of ClientEventChannel thrift interface.
@@ -531,6 +534,25 @@ class ProjectorClient(object):
             success = False
             message = e
         
+        return success,message
+
+    def update_project(self,coord_sys): 
+        """Update changes on figures projected (restart projection).
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            self.stop_project()
+            self.start_project(coord_sys)
+            success = True
+            message = "Projection updated."
+        
+        except Exception as e:
+            success = False
+            message = e
+
         return success,message
 
 class GeometryTool(object):
@@ -1313,6 +1335,7 @@ class ProjectionElementControl(object):
                 else:
                     success = False
                     message = "Polyline " + name + " does not exist."
+            # if figure_type == "circle": ####################################
             else:
                 success = False
                 message = "Figure name does not exist."
@@ -1383,6 +1406,98 @@ class ProjectionElementControl(object):
             else:
                 success = False
                 message = "Figure name does not exist."
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def translate_figure(self,proj_elem_params,dx=0,dy=0,dz=0):
+        """Translate a figure from one position to anotherthe current reference system.
+
+        Args:
+            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            dx (float): offset in x direction
+            dy (float): offset in y direction
+            dz (float): offset in z direction
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
+        try:
+            figure_type      = proj_elem_params.figure_type
+            projection_group = proj_elem_params.projection_group
+            id               = proj_elem_params.figure_name
+
+            name = projection_group + "/my_" + figure_type + "_" + id
+
+            self.__thrift_client.Translate(name,dx,dy)
+            self.__thrift_client.ApplyTransformation(name)
+
+            success = True
+            message = "Figure translated"
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def scale_figure(self,proj_elem_params,scale_factor):
+        """Scale size of a projection figure.
+
+        Args:
+            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            scale_factor (float): scalation factor of the figure
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            figure_type      = proj_elem_params.figure_type
+            projection_group = proj_elem_params.projection_group
+            id               = proj_elem_params.figure_name
+
+            name = projection_group + "/my_" + figure_type + "_" + id
+
+            self.__thrift_client.Scale(name,scale_factor)
+            self.__thrift_client.ApplyTransformation(name)
+
+            success = True
+            message = "Figure scalated."
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def rotate_figure(self,proj_elem_params,x_angle,y_angle,z_angle):
+        """Rotate a figure an angle.
+
+        Args:
+            proj_elem_params (list): list with the necessary parameters to identify the projection figure
+            rotation_angle (float): rotation angle of the figure
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            figure_type      = proj_elem_params.figure_type
+            projection_group = proj_elem_params.projection_group
+            id               = proj_elem_params.figure_name
+
+            name = projection_group + "/my_" + figure_type + "_" + id
+
+            self.__thrift_client.Rotate(name,x_angle,y_angle,z_angle)
+            self.__thrift_client.ApplyTransformation(name)
+
+            success = True
+            message = "Figure rotated."
+
         except Exception as e:
             success = False 
             message = e
@@ -1506,4 +1621,96 @@ class ProjectionElementControl(object):
 
         success = True
         message = "Coordinate system frame created."
+        return success,message
+
+class KeyboardControl(object):
+    """This class is used to monitor the keyboard presses."""
+
+    def __init__(self,projector_client,projection_element):
+        """Initialize the KeyboardControl object.
+
+        Args:
+            projector_client (object):
+            projection_element (object):
+        """
+        self.keyboard_params = KeyboardParameters()
+
+        self.projector_client = projector_client
+        self.projection_element = projection_element
+
+        self.current = set()
+
+    def on_press(self,key,coord_sys, proj_elem_params):
+        """.
+        
+        Args:
+            key (): 
+        """
+        if any([key in COMBO for COMBO in self.keyboard_params.COMBINATIONS]):
+            self.current.add(key)
+
+            if self.current == self.keyboard_params.KEY_UP:
+                print ("KEY_UP")
+                self.projection_element.translate_figure(proj_elem_params,0,50,0)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.KEY_DOWN:
+                print ("KEY_DOWN")
+                self.projection_element.translate_figure(proj_elem_params,0,-50,0)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.KEY_LEFT:
+                print ("KEY_LEFT")
+                self.projection_element.translate_figure(proj_elem_params,-50,0,0)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.KEY_RIGHT:
+                print ("KEY_RIGHT")
+                self.projection_element.translate_figure(proj_elem_params,50,0,0)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.KEY_PLUS:
+                print ("KEY_PLUS")
+                self.projection_element.scale_figure(proj_elem_params,2)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.KEY_MINUS:
+                print ("KEY_MINUS")
+                self.projection_element.scale_figure(proj_elem_params,0.5)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.COMB_1:
+                print ("COMB_1")
+                self.projection_element.rotate_figure(proj_elem_params,0,0,45)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.COMB_2:
+                print ("COMB_2")
+                self.projection_element.rotate_figure(proj_elem_params,0,0,-45)
+                self.projector_client.update_project(coord_sys)
+            elif self.current == self.keyboard_params.ESC:
+                print ("ESC")
+                self.projector_client.stop_project()
+
+    def on_release(self,key):
+        """.
+        
+        Args:
+            key (): 
+        """
+        if any([key in COMBO for COMBO in self.keyboard_params.COMBINATIONS]):
+            
+            if self.current == self.keyboard_params.ESC:
+                self.current.remove(key)
+                return False
+
+            self.current.remove(key)
+            
+    def init_keyboard_listener(self,cs,figure_params):
+        """."""
+        try:
+            with keyboard.Listener(on_press=lambda event: self.on_press(event, coord_sys=cs, proj_elem_params=figure_params),
+                        on_release=self.on_release) as listener:
+                listener.join()
+
+            success = True
+            message = "Keyboard monitoring finished correctly."
+
+        except Exception as e:
+            success = False
+            message = e
+
         return success,message

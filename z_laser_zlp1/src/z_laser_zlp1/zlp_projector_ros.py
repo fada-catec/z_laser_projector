@@ -65,6 +65,7 @@ class ZLPProjectorROS(object):
         self.hide_figure   = rospy.Service('hide_figure', ProjectionElement, self.hide_figure_cb)
         self.unhide_figure = rospy.Service('unhide_figure', ProjectionElement, self.unhide_figure_cb)
         self.remove_figure = rospy.Service('remove_figure', ProjectionElement, self.remove_figure_cb)
+        self.monit_figure  = rospy.Service('monitor_figure', ProjectionElement, self.keyboard_monitor_figure_cb)
         
         self.add_line      = rospy.Subscriber("add_line", Line, self.add_line_cb)
         self.add_curve     = rospy.Subscriber("add_curve", Curve, self.add_curve_cb)
@@ -468,6 +469,31 @@ class ZLPProjectorROS(object):
             self.projector.remove_proj_elem(req)
             return ProjectionElementResponse(True,"Figure removed")
 
+        except Exception as e:
+            rospy.logerr(e)
+            return ProjectionElementResponse(False,str(e))
+
+    def keyboard_monitor_figure_cb(self,req):
+        """Callback of ROS service to apply on real time different transformation operations (translation, rotation, scalation) to a 
+        specific figure by the use of keyboard.
+
+        Args:
+            req (object): figure indentifiers
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an 
+            information message string
+        """
+        rospy.loginfo("Received request to monitor figure. PRESS PRESS 'ESC' TO FINISH MONITORING.")
+
+        if not req.figure_type or not req.projection_group or not req.figure_name:
+            return ProjectionElementResponse(False,"figure_type or group_name or figure_name request is empty")
+        
+        try:
+            self.projector.monitor_proj_elem(req)
+            rospy.loginfo("Monitoring ENDED.")
+            return ProjectionElementResponse(True,"Figure monitored")
+        
         except Exception as e:
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))

@@ -20,7 +20,7 @@ task of developing advanced applications."""
 import sys
 import math
 
-from z_laser_zlp1.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl
+from z_laser_zlp1.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl, KeyboardControl
 from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 class ZLPProjectorManager(object):
@@ -131,6 +131,7 @@ class ZLPProjectorManager(object):
 
         self.cs_element = CoordinateSystem(self.__projector_id, module_id, thrift_client)
         self.projection_element = ProjectionElementControl(module_id,thrift_client)
+        self.keyboard_control = KeyboardControl(self.projector_client,self.projection_element)
 
     def start_projection(self):
         """Start projection of elements associated to the active reference system.
@@ -412,6 +413,23 @@ class ZLPProjectorManager(object):
         success,message = self.projection_element.delete_figure(proj_elem_params)
         if not success:
             raise SystemError(message)
+    
+    def monitor_proj_elem(self,proj_elem_params):
+        """Monitor transformation operations (translation, rotation, scalation) to a specific figure on real time projection 
+        by the use of keyboard.
+
+        Args:
+            proj_elem_params (list): list of necessary parameters to identify the figure  
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        success,message = self.projector_client.start_project(self.__coordinate_system)
+        if success:
+            success,message = self.keyboard_control.init_keyboard_listener(self.__coordinate_system,proj_elem_params)
+            if not success:
+                raise SystemError(message)
     
     def cs_axes_create(self,cs_params):
         """Create projection elements of user reference system origin axes.
