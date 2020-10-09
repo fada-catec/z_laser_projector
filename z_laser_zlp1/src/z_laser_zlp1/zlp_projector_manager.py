@@ -67,7 +67,9 @@ class ZLPProjectorManager(object):
             ConnectionError
         """
         success,message = self.projector_client.connect(self.__server_IP, self.__connection_port)
-        if not success:
+        if success:
+            self.__coordinate_system = ""
+        else:
             raise ConnectionError(message)
 
     def client_server_disconnect(self):
@@ -145,7 +147,6 @@ class ZLPProjectorManager(object):
 
         success,message = self.projector_client.start_project(self.__coordinate_system)
         if not success:
-            print("error aqui")
             raise SystemError(message)
 
     def stop_projection(self):
@@ -163,12 +164,16 @@ class ZLPProjectorManager(object):
 
         Raises:
             SystemError
+
+        Return:
+            cs_list(list): list of defined coordinate systems
+            (string): name of the active coordinate system if it exists
         """
         cs_list,success,message = self.cs_element.coordinate_system_list()
         if not success:
             raise SystemError(message)
 
-        return cs_list
+        return cs_list,self.__coordinate_system
 
     def define_coordinate_system(self,cs_params,do_target_search):
         """Define a new coordinate reference system.
@@ -226,7 +231,7 @@ class ZLPProjectorManager(object):
             SystemError
         """
         if not self.__coordinate_system:
-            message = "Coordinate system does not exist."
+            message = "No active coordinate system set yet."
             raise SystemError(message)
         
         success,message = self.cs_element.show_cs(self.__coordinate_system)

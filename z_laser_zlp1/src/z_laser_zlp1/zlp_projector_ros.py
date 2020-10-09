@@ -87,6 +87,7 @@ class ZLPProjectorROS(object):
             self.projector.activate()
             self.projector.geotree_operator_create()
             rospy.loginfo("Projector connected.")
+            rospy.set_param('projector_connected', True)
             return TriggerResponse(True, "Projector connected.")
         
         except Exception as e:
@@ -105,6 +106,7 @@ class ZLPProjectorROS(object):
             self.projector.deactivate()
             self.projector.client_server_disconnect()
             rospy.loginfo("Projector disconnected.")
+            rospy.set_param('projector_connected', False)
             return TriggerResponse(True, "Projector disconnected.")
 
         except Exception as e:
@@ -240,12 +242,12 @@ class ZLPProjectorROS(object):
         
         cs_list = []
         try:
-            cs_list = self.projector.get_coordinate_systems()
-            return CoordinateSystemListResponse(True,"Coordinate system list:",cs_list)
+            cs_list,active_cs = self.projector.get_coordinate_systems()
+            return CoordinateSystemListResponse(True,"Coordinate system list:",cs_list,active_cs)
 
         except Exception as e:
             rospy.logerr(e)
-            return CoordinateSystemListResponse(False,str(e),cs_list)
+            return CoordinateSystemListResponse(False,str(e),cs_list,active_cs)
 
     def set_coord_sys_cb(self,req):
         """Callback of ROS service to set the indicated coordinate system as 'active coordinate system'.
@@ -326,7 +328,7 @@ class ZLPProjectorROS(object):
         
         try:
             self.projector.remove_coordinate_system(req.name)
-            return CoordinateSystemNameResponse(True,"Removed coordinate system")
+            return CoordinateSystemNameResponse(True,"Coordinate system removed")
         
         except Exception as e:
             rospy.logerr(e)
@@ -546,6 +548,7 @@ class ZLPProjectorROS(object):
         try:
             self.projector.connect_and_setup()
             rospy.loginfo("Projector connected.")
+            rospy.set_param('projector_connected', True)
             return False
         
         except Exception as e:
