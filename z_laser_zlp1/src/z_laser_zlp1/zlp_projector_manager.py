@@ -67,9 +67,7 @@ class ZLPProjectorManager(object):
             ConnectionError
         """
         success,message = self.projector_client.connect(self.__server_IP, self.__connection_port)
-        if success:
-            self.__coordinate_system = ""
-        else:
+        if not success:
             raise ConnectionError(message)
 
     def client_server_disconnect(self):
@@ -79,7 +77,9 @@ class ZLPProjectorManager(object):
             ConnectionError
         """
         success,message = self.projector_client.disconnect()
-        if not success:
+        if success:
+            self.__coordinate_system = ""
+        else:
             raise ConnectionError(message)
 
     def load_license(self,license_path):
