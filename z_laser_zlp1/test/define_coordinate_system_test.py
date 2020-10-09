@@ -38,7 +38,7 @@ class TestServiceCall(unittest.TestCase):
 
         try:
             resp = s(req)
-            if resp.cs_created:
+            if resp.success:
                 self.fail("call failed: we expect the server to throw an exception")
         except Exception as e:
                 rospy.loginfo("success. service exception: %s" %e)   
@@ -52,7 +52,7 @@ class TestServiceCall(unittest.TestCase):
 
         try:
             resp = s(req)
-            if resp.cs_created:
+            if resp.success:
                 self.fail("call failed: we expect the server to throw an exception")
         except Exception as e:
                 rospy.loginfo("success. service exception: %s" %e)   
@@ -75,7 +75,7 @@ class TestServiceCall(unittest.TestCase):
 
         try:
             resp = s(req)
-            if not resp.cs_created:
+            if not resp.success:
                 self.fail("service should have responded successfully")
         except Exception as e:
                 self.fail("service should have responded successfully")
