@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="zlp1_xacro">
+    
+    <!-- ZLP1 laser projector design -->
+    <link name="zlp1_link">
+        <visual>
+            <origin xyz="0.245 0.04 0" rpy="${pi} ${pi/2} 0"/>
+            <geometry>
+                <mesh filename="file://$(find z_laser_simulator)/meshes/zlp1.dae"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0.245 0.04 0" rpy="${pi} ${pi/2} 0"/>
+            <geometry>
+                <mesh filename="file://$(find z_laser_simulator)/meshes/zlp1.stl"/>     
+            </geometry>
+        </collision>
+    </link>
+</robot>
