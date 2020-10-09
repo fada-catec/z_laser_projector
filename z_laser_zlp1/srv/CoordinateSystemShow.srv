@@ -1,7 +1,0 @@
-# Duration in seconds of cordinate system projection
-int16 secs
-
----
-
-bool success
-string message

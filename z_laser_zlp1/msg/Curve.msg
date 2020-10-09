@@ -1,9 +1,0 @@
-string projection_group
-string figure_name
-string curve_type
-float64 x
-float64 y
-float64 angle
-float64 end_angle
-float64 length
-float64 height

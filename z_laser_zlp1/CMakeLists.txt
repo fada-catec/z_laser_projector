@@ -9,34 +9,35 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  sensor_msgs
-  geometry_msgs
+#   sensor_msgs
+#   geometry_msgs
   rostest
+  z_laser_msgs
 )
 
 catkin_python_setup()
 
 
-add_message_files(
-   FILES
-   Line.msg
-   Curve.msg
-   Text.msg
-)
+# add_message_files(
+#    FILES
+#    Line.msg
+#    Curve.msg
+#    Text.msg
+# )
 
-add_service_files(
-   FILES
-   ProjectionElement.srv
-   CoordinateSystem.srv
-   CoordinateSystemName.srv
-   CoordinateSystemShow.srv
-   CoordinateSystemList.srv
-   )
+# add_service_files(
+#    FILES
+#    ProjectionElement.srv
+#    CoordinateSystem.srv
+#    CoordinateSystemName.srv
+#    CoordinateSystemShow.srv
+#    CoordinateSystemList.srv
+#    )
 
 generate_messages(
    DEPENDENCIES
    std_msgs
-   geometry_msgs
+   # geometry_msgs
 )
 
 

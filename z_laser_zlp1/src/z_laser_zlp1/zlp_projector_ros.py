@@ -25,12 +25,12 @@ from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElement
 
 from geometry_msgs.msg import Point
 from std_srvs.srv import Trigger, TriggerResponse
-from z_laser_zlp1.msg import Line, Curve, Text
-from z_laser_zlp1.srv import CoordinateSystem, CoordinateSystemResponse
-from z_laser_zlp1.srv import CoordinateSystemName, CoordinateSystemNameResponse
-from z_laser_zlp1.srv import CoordinateSystemShow, CoordinateSystemShowResponse
-from z_laser_zlp1.srv import CoordinateSystemList, CoordinateSystemListResponse
-from z_laser_zlp1.srv import ProjectionElement, ProjectionElementResponse
+from z_laser_msgs.msg import Line, Curve, Text
+from z_laser_msgs.srv import CoordinateSystem, CoordinateSystemResponse
+from z_laser_msgs.srv import CoordinateSystemName, CoordinateSystemNameResponse
+from z_laser_msgs.srv import CoordinateSystemShow, CoordinateSystemShowResponse
+from z_laser_msgs.srv import CoordinateSystemList, CoordinateSystemListResponse
+from z_laser_msgs.srv import ProjectionElement, ProjectionElementResponse
 
 class ZLPProjectorROS(object):
     """This class initilizes the services and implements the functionalities of the projection_node.
