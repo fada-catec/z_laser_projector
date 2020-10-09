@@ -144,6 +144,7 @@ class ZLPProjectorManager(object):
 
         success,message = self.projector_client.start_project(self.__coordinate_system)
         if not success:
+            print("error aqui")
             raise SystemError(message)
 
     def stop_projection(self):
@@ -317,7 +318,7 @@ class ZLPProjectorManager(object):
         """Create a polyline as new projection element, associated to the active reference system.
 
         Args:
-            proj_elem_params (object): object with necessary parameters to identify a polyline 
+            proj_elem_params (object): object with the necessary parameters to define a new polyline 
 
         Raises:
             SystemError
@@ -329,8 +330,51 @@ class ZLPProjectorManager(object):
         success,message = self.projection_element.define_polyline(self.__coordinate_system,proj_elem_params)
         if not success:
             raise SystemError(message)
+
+    def create_curve(self,proj_elem_params):
+        """Create a curve (circle, oval, arc) as new projection element, associated to the active reference system.
+
+        Args:
+            proj_elem_params (object): object with the necessary parameters to define a new curve
+
+        Raises:
+            SystemError
+        """
+        if not self.__coordinate_system:
+            message = "There is not an active coordinate system. Define or set one first."
+            raise SystemError(message)
+
+        if proj_elem_params.curve_type == "circle":
+            success,message = self.projection_element.define_circle(self.__coordinate_system,proj_elem_params)
+        elif proj_elem_params.curve_type == "arc":
+            success,message = self.projection_element.define_arc(self.__coordinate_system,proj_elem_params)
+        elif proj_elem_params.curve_type == "oval":
+            success,message = self.projection_element.define_oval(self.__coordinate_system,proj_elem_params)
+        else:
+            message = "curve_type does not correspond to any possible figure"
+            raise SystemError(message)
         
-    def hide_shape(self, proj_elem_params):
+        if not success:
+            raise SystemError(message)
+
+    def create_text(self,proj_elem_params):
+        """Create a text as new projection element, associated to the active reference system.
+
+        Args:
+            proj_elem_params (object): object with the necessary parameters to define a new text
+
+        Raises:
+            SystemError
+        """
+        if not self.__coordinate_system:
+            message = "There is not an active coordinate system. Define or set one first."
+            raise SystemError(message)
+
+        success,message = self.projection_element.define_text(self.__coordinate_system,proj_elem_params)
+        if not success:
+            raise SystemError(message)
+        
+    def hide_proj_elem(self, proj_elem_params):
         """Hide a projection element from active reference system.
 
         Args:
@@ -339,11 +383,11 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        success,message = self.projection_element.deactivate_shape(proj_elem_params)
+        success,message = self.projection_element.deactivate_figure(proj_elem_params)
         if not success:
             raise SystemError(message)
         
-    def unhide_shape(self,proj_elem_params):
+    def unhide_proj_elem(self,proj_elem_params):
         """Unhide a projection element from active reference system.
 
         Args:
@@ -352,11 +396,11 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        success,message = self.projection_element.reactivate_shape(proj_elem_params)
+        success,message = self.projection_element.reactivate_figure(proj_elem_params)
         if not success:
             raise SystemError(message)
         
-    def remove_shape(self,proj_elem_params):
+    def remove_proj_elem(self,proj_elem_params):
         """Delete a projection element from active reference system.
 
         Args:
@@ -365,7 +409,7 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        success,message = self.projection_element.delete_shape(proj_elem_params)
+        success,message = self.projection_element.delete_figure(proj_elem_params)
         if not success:
             raise SystemError(message)
     
@@ -416,14 +460,14 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.__coordinate_system + "_origin"
-        proj_elem_params.shape_type = "polyline"
+        proj_elem_params                  = ProjectionElementParameters()
+        proj_elem_params.projection_group = self.__coordinate_system + "_origin"
+        proj_elem_params.figure_type      = "polyline"
         
         try:
             for axis_id in self.projection_element.axes_ids:
-                proj_elem_params.shape_id = axis_id
-                self.unhide_shape(proj_elem_params)            
+                proj_elem_params.figure_name = axis_id
+                self.unhide_proj_elem(proj_elem_params)            
             
         except SystemError as e:
             raise SystemError(e)
@@ -434,14 +478,14 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.__coordinate_system + "_origin"
-        proj_elem_params.shape_type = "polyline"
+        proj_elem_params                  = ProjectionElementParameters()
+        proj_elem_params.projection_group = self.__coordinate_system + "_origin"
+        proj_elem_params.figure_type      = "polyline"
         
         try:
             for axis_id in self.projection_element.axes_ids:
-                proj_elem_params.shape_id = axis_id
-                self.hide_shape(proj_elem_params)            
+                proj_elem_params.figure_name = axis_id
+                self.hide_proj_elem(proj_elem_params)            
 
         except SystemError as e:
             raise SystemError(e)
@@ -452,14 +496,14 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """        
-        proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.__coordinate_system + "_frame"
-        proj_elem_params.shape_type = "polyline"
+        proj_elem_params                  = ProjectionElementParameters()
+        proj_elem_params.projection_group = self.__coordinate_system + "_frame"
+        proj_elem_params.figure_type      = "polyline"
                 
         try:
             for frame_id in self.projection_element.frame_ids:
-                proj_elem_params.shape_id = frame_id
-                self.unhide_shape(proj_elem_params)
+                proj_elem_params.figure_name = frame_id
+                self.unhide_proj_elem(proj_elem_params)
                 
         except SystemError as e:
             raise SystemError(e)
@@ -470,14 +514,14 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        proj_elem_params = ProjectionElementParameters()
-        proj_elem_params.group_name = self.__coordinate_system + "_frame"
-        proj_elem_params.shape_type = "polyline"
+        proj_elem_params                  = ProjectionElementParameters()
+        proj_elem_params.projection_group = self.__coordinate_system + "_frame"
+        proj_elem_params.figure_type      = "polyline"
         
         try:
             for frame_id in self.projection_element.frame_ids:
-                proj_elem_params.shape_id = frame_id
-                self.hide_shape(proj_elem_params)
+                proj_elem_params.figure_name = frame_id
+                self.hide_proj_elem(proj_elem_params)
 
         except SystemError as e:
             raise SystemError(e)

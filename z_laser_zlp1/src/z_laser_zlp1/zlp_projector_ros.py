@@ -25,7 +25,7 @@ from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElement
 
 from geometry_msgs.msg import Point
 from std_srvs.srv import Trigger, TriggerResponse
-from z_laser_zlp1.msg import Line
+from z_laser_zlp1.msg import Line, Curve, Text
 from z_laser_zlp1.srv import CoordinateSystem, CoordinateSystemResponse
 from z_laser_zlp1.srv import CoordinateSystemName, CoordinateSystemNameResponse
 from z_laser_zlp1.srv import CoordinateSystemShow, CoordinateSystemShowResponse
@@ -61,11 +61,13 @@ class ZLPProjectorROS(object):
         self.rem_cs        = rospy.Service('remove_coordinate_system', CoordinateSystemName, self.remove_coord_sys_cb)
         self.show_cs       = rospy.Service('show_active_coordinate_system', CoordinateSystemShow, self.show_coord_sys_cb)
 
-        self.hide_shape    = rospy.Service('hide_shape', ProjectionElement, self.hide_shape_cb)
-        self.unhide_shape  = rospy.Service('unhide_shape', ProjectionElement, self.unhide_shape_cb)
-        self.remove_shape  = rospy.Service('remove_shape', ProjectionElement, self.remove_shape_cb)
+        self.hide_figure   = rospy.Service('hide_figure', ProjectionElement, self.hide_figure_cb)
+        self.unhide_figure = rospy.Service('unhide_figure', ProjectionElement, self.unhide_figure_cb)
+        self.remove_figure = rospy.Service('remove_figure', ProjectionElement, self.remove_figure_cb)
         
         self.add_line      = rospy.Subscriber("add_line", Line, self.add_line_cb)
+        self.add_curve     = rospy.Subscriber("add_curve", Curve, self.add_curve_cb)
+        self.add_text      = rospy.Subscriber("add_text", Text, self.add_text_cb)
 
         rospy.loginfo("Use ROS Services: \n\t\t\trosservice list")
 
@@ -295,10 +297,10 @@ class ZLPProjectorROS(object):
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an 
             information message string
         """
-        rospy.loginfo("Received request to add a line to the active coordinate system.")
+        rospy.loginfo("Received request to add a new line to the active coordinate system.")
 
-        if not msg.group_name or not msg.shape_id:
-            return ProjectionElementResponse(False,"group_name or shape_id request is empty.")
+        if not msg.projection_group or not msg.figure_name:
+            return ProjectionElementResponse(False,"projection_group or figure_name request is empty.")
 
         try:
             self.projector.create_polyline(msg)
@@ -309,70 +311,118 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def hide_shape_cb(self,req):
-        """Callback of ROS service to hide specific figure from active coordinate system.
+    def add_curve_cb(self,msg):
+        """Callback of ROS topic to define a new curve projection element associated to the active coordinate system.
+
+        Args:
+            msg (object): object with the necessary info to define a new curve
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an 
+            information message string
+        """
+        rospy.loginfo("Received request to add a new curve to the active coordinate system.")
+
+        if not msg.curve_type or not msg.projection_group or not msg.figure_name:
+            return ProjectionElementResponse(False,"curve_type or projection_group or figure_name request is empty.")
+
+        try:
+            self.projector.create_curve(msg)
+            rospy.loginfo("Curve added correctly.")
+            return ProjectionElementResponse(True,"Curve added correctly.")
+        
+        except Exception as e:
+            rospy.logerr(e)
+            return ProjectionElementResponse(False,str(e))
+
+    def add_text_cb(self,msg):
+        """Callback of ROS topic to define a new text projection element associated to the active coordinate system.
+
+        Args:
+            msg (object): object with the necessary info to define a new text
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        rospy.loginfo("Received request to add a new text to the active coordinate system.")
+
+        if not msg.projection_group or not msg.figure_name:
+            return ProjectionElementResponse(False,"projection_group or figure_name request is empty.")
+
+        try:
+            self.projector.create_text(msg)
+            rospy.loginfo("Text added correctly.")
+            return ProjectionElementResponse(True,"Text added correctly.")
+        
+        except Exception as e:
+            rospy.logerr(e)
+            return ProjectionElementResponse(False,str(e))
+
+    def hide_figure_cb(self,req):
+        """Callback of ROS service to hide specific projection element from active coordinate system.
 
         Args:
             req (object): object with the necessary info to identify a projection element
             
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
-        rospy.loginfo("Received request to hide shape.")
+        rospy.loginfo("Received request to hide figure.")
 
-        if not req.shape_type or not req.group_name or not req.shape_id:
-            return ProjectionElementResponse(False,"shape_type or group_name or shape_id request is empty")
+        if not req.figure_type or not req.group_name or not req.figure_name:
+            return ProjectionElementResponse(False,"figure_type or group_name or figure_name request is empty")
 
         try:        
-            self.projector.hide_shape(req)
-            return ProjectionElementResponse(True,"Hide shape")
+            self.projector.hide_proj_elem(req)
+            return ProjectionElementResponse(True,"Figure hidden")
 
         except Exception as e:
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def unhide_shape_cb(self,req):
-        """Callback of ROS service to unhide specific figure from active coordinate system.
+    def unhide_figure_cb(self,req):
+        """Callback of ROS service to unhide specific projection element from active coordinate system.
 
         Args:
             req (object): object with the necessary info to identify a projection element
             
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
-        rospy.loginfo("Received request to unhide shape.")
+        rospy.loginfo("Received request to unhide figure.")
 
-        if not req.shape_type or not req.group_name or not req.shape_id:
-            return ProjectionElementResponse(False,"shape_type or group_name or shape_id request is empty")
+        if not req.figure_type or not req.group_name or not req.figure_name:
+            return ProjectionElementResponse(False,"figure_type or group_name or figure_name request is empty")
 
         try:        
-            self.projector.unhide_shape(req)
-            return ProjectionElementResponse(True,"Hide shape")
+            self.projector.unhide_proj_elem(req)
+            return ProjectionElementResponse(True,"Figure unhidden")
 
         except Exception as e:
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def remove_shape_cb(self,req):
+    def remove_figure_cb(self,req):
         """Callback of ROS service to remove specific figure from active coordinate system.
 
         Args:
             req (object): object with the necessary info to identify a projection element
             
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an information 
-            message string
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
         """
-        rospy.loginfo("Received request to remove shape.")
+        rospy.loginfo("Received request to remove figure.")
 
-        if not req.shape_type or not req.group_name or not req.shape_id:
-            return ProjectionElementResponse(False,"shape_type or group_name or shape_id request is empty")
+        if not req.figure_type or not req.group_name or not req.figure_name:
+            return ProjectionElementResponse(False,"figure_type or group_name or figure_name request is empty")
 
         try:        
-            self.projector.remove_shape(req)
-            return ProjectionElementResponse(True,"Hide shape")
+            self.projector.remove_proj_elem(req)
+            return ProjectionElementResponse(True,"Figure removed")
 
         except Exception as e:
             rospy.logerr(e)

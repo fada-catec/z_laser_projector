@@ -1,15 +1,15 @@
-# shape_type: keyword of one of the figure types that the laser projector system is able to project:
+# figure_type: keyword of one of the figure types that the laser projector system is able to project:
 # - polyline
-# - curves: circle, oval, arc (todo)
-# - text (todo)
-string shape_type
+# - curves: circle, oval, arc
+# - text
+string figure_type
 
-# Group name that the projection element belongs
+# Group name which the projection element belongs
 # Several projection elements can be handled as a projection group
-string group_name
+string projection_group
 
 # Name of the projection element
-string shape_id
+string figure_name
 
 ---
 

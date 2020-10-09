@@ -56,21 +56,30 @@ class ProjectionElementParameters(object):
     """This class is used as data object with the necessary information to create a projection element.
     
     Attributes:
-        shape_type (str): type of projection element (polyline, circle, ...)
         group_name (str): name of the projection group to which the projection element belongs
-        shape_id (str): name of the projection element to define
-        x (float): x-position of the projection element's 'characteristic point'. 
-        The 'characteristic point' for a line refers to its starting point.
-        y (float): y-position of polyline starting point
-        angle (float): polyline slope
-        length (float): polyline length
+        figure_name (str): name of the projection element to define
+        curve_type (str): type of curve (circle, oval, arc)
+        x (float): x-position of the projection element's 'characteristic point'
+        The 'characteristic point' for a polyline refers to its starting point. For circle refers to its center 
+        y (float): y-position of the projection element's 'characteristic point'
+        angle (float): angle property for different figures (polyline slope, arc starting angle, text tilt, ...)
+        end_angle (float): end angle of arc figure
+        length (float): length property for different figures (polyline length, circle radius, text string wide, 
+        oval length size ...)
+        height (float): height property for different figures (text characters height, oval width size, ...)
+        text (str): text character string for text projection element
+        char_spacing (float): space between characters
     """
     def __init__(self):
         """Initialize the ProjectionElementParameters object."""
-        self.shape_type  = str()
-        self.group_name  = str()
-        self.shape_id    = str()
-        self.x           = float()
-        self.y           = float()
-        self.angle       = float()
-        self.length      = float()
+        self.projection_group = str()
+        self.figure_name      = str()
+        self.curve_type       = str()
+        self.x                = float()
+        self.y                = float()
+        self.angle            = float()
+        self.end_angle        = float()
+        self.length           = float()
+        self.height           = float()
+        self.text             = str()
+        self.char_spacing     = float()

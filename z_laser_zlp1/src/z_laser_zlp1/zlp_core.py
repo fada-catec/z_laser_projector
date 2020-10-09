@@ -459,7 +459,7 @@ class ProjectorClient(object):
         return success,message
 
     def function_module_create(self):
-        """Create function module to operate with GeoTreeElements (coordinate systems and shapes).
+        """Create function module to operate with GeoTreeElements (coordinate systems and figures).
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the function module identification name string, 
@@ -494,12 +494,12 @@ class ProjectorClient(object):
                 ref_obj = self.__thrift_client.GetGeoTreeElement(coord_sys)
 
                 geo_tree_list = self.__thrift_client.GetGeoTreeIds()
-                matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType == 1024]
-                polylines = [self.__thrift_client.GetProjectionElement(name) for name in matches]
-                polylines_actives = ([proj_elem for proj_elem in polylines 
+                matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType in (1024,1025,1026,1027)]
+                proj_elems = [self.__thrift_client.GetProjectionElement(name) for name in matches]
+                proj_elems_actives = ([proj_elem for proj_elem in proj_elems 
                                                     if proj_elem.activated == True and proj_elem.coordinateSystemList[0] == coord_sys])
 
-                if ref_obj.activated == False or not polylines_actives:
+                if ref_obj.activated == False or not proj_elems_actives:
                     success = False
                     message = "Coordinate_system is not activated or nothing to project"
                 else:
@@ -983,14 +983,14 @@ class ProjectionElementControl(object):
             an information message string
         """
         try:
-            shape_id = proj_elem_params.shape_id
-            group    = proj_elem_params.group_name
-            x        = proj_elem_params.x
-            y        = proj_elem_params.y
-            angle    = proj_elem_params.angle
-            length   = proj_elem_params.length
+            group  = proj_elem_params.projection_group
+            id     = proj_elem_params.figure_name
+            x      = proj_elem_params.x
+            y      = proj_elem_params.y
+            angle  = proj_elem_params.angle
+            length = proj_elem_params.length
 
-            polyline_name = group + "/my_polyline_" + shape_id
+            polyline_name = group + "/my_polyline_" + id
             polyline = self.create_polyline(polyline_name)
 
             linestring = [ self.__geometry_tool.create_3d_point(x, y),
@@ -1011,23 +1011,212 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def deactivate_shape(self, shape_params): 
+    def create_curve(self,name,curve_type):
+        """Generate a new curve (circle, arc or oval) object.
+            
+        Args:
+            name (str): curve name
+        
+        Returns:
+            curve (object): curve object with fields initialized
+        """
+        if curve_type == "circle" or curve_type == "arc":
+            curve = self.__thrift_client.thrift_interface.CircleSegment()
+        elif curve_type == "oval":
+            curve = self.__thrift_client.thrift_interface.OvalSegment()
+        curve = self.init_projection_element(curve)
+        curve.name = name
+        return curve
+
+    def define_circle(self,coord_sys,proj_elem_params):
+        """Create a new circle as projection figure.
+
+        Args:
+            coord_sys (str): name of coordinate system which the new projection figure will be added
+            proj_elem_params (list): list with the necessary parameters to identify and define a circle as a new projection element
+                
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            group    = proj_elem_params.projection_group
+            id       = proj_elem_params.figure_name
+            center_x = proj_elem_params.x
+            center_y = proj_elem_params.y
+            radius   = proj_elem_params.length
+
+            circle_name = group + "/my_circle_" + id
+            circle = self.create_curve(circle_name,"circle")
+            circle.radius = radius
+            circle.center = self.__geometry_tool.create_3d_point(center_x, center_y)
+            circle.activated = True
+            circle.coordinateSystemList = [coord_sys]
+
+            self.__thrift_client.SetCircleSegment(circle)
+            
+            success = True
+            message = circle_name + " circle created at [" + coord_sys + "] coordinate system."
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def define_arc(self,coord_sys,proj_elem_params):
+        """Create a new arc as projection figure.
+
+        Args:
+            coord_sys (str): name of coordinate system which the new projection figure will be added
+            proj_elem_params (list): list with the necessary parameters to identify and define an arc as a new projection figure
+                
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            group       = proj_elem_params.projection_group
+            id          = proj_elem_params.figure_name
+            center_x    = proj_elem_params.x
+            center_y    = proj_elem_params.y
+            start_angle = proj_elem_params.angle
+            end_angle   = proj_elem_params.end_angle
+            radius      = proj_elem_params.length
+
+            arc_name = group + "/my_arc_" + id
+            arc = self.create_curve(arc_name,"arc")
+            arc.radius = radius
+            arc.center = self.__geometry_tool.create_3d_point(center_x, center_y)
+            arc.startAngle = start_angle
+            arc.endAngle = end_angle
+            arc.activated = True
+            arc.coordinateSystemList = [coord_sys]
+
+            self.__thrift_client.SetCircleSegment(arc)
+            
+            success = True
+            message = arc_name + " arc created at [" + coord_sys + "] coordinate system."
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def define_oval(self,coord_sys,proj_elem_params):
+        """Create a new oval as projection figure.
+
+        Args:
+            coord_sys (str): name of coordinate system which the new projection figure will be added
+            proj_elem_params (list): list with the necessary parameters to identify and define an oval as a new projection figure
+                
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            group    = proj_elem_params.projection_group
+            id       = proj_elem_params.figure_name
+            center_x = proj_elem_params.x
+            center_y = proj_elem_params.y
+            angle    = proj_elem_params.angle
+            width    = proj_elem_params.length
+            height   = proj_elem_params.height
+
+            oval_name = group + "/my_oval_" + id
+            oval = self.create_curve(oval_name,"oval")
+            oval.width = width
+            oval.height = height
+            oval.center = self.__geometry_tool.create_3d_point(center_x, center_y)
+            oval.angle = angle
+            oval.activated = True
+            oval.coordinateSystemList = [coord_sys]
+
+            self.__thrift_client.SetOvalSegment(oval)
+            
+            success = True
+            message = oval_name + " oval created at [" + coord_sys + "] coordinate system."
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def create_text(self, name):
+        """Generate a new text object.
+            
+        Args:
+            name (str): text object name
+        
+        Returns:
+            text (object): text object with fields initialized
+        """
+        text = self.__thrift_client.thrift_interface.TextElement()
+        text = self.init_projection_element(text)
+        text.name = name
+        return text
+
+    def define_text(self,coord_sys,proj_elem_params):
+        """Create a new text as projection figure.
+
+        Args:
+            coord_sys (str): name of coordinate system which the new projection figure will be added
+            proj_elem_params (list): list with the necessary parameters to identify and define a text as a new projection figure
+                
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            group        = proj_elem_params.projection_group
+            id           = proj_elem_params.figure_name
+            text_proj    = proj_elem_params.text
+            x_position   = proj_elem_params.x
+            y_position   = proj_elem_params.y
+            angle        = proj_elem_params.angle
+            height       = proj_elem_params.height
+            char_spacing = proj_elem_params.char_spacing
+
+            text_name = group + "/my_text_" + id
+            text = self.create_text(text_name)
+            text.text = text_proj
+            text.charSpacing = char_spacing
+            text.position = self.__geometry_tool.create_3d_point(x_position, y_position)
+            text.angle = angle
+            text.height = height
+            text.activated = True
+            text.coordinateSystemList = [coord_sys]
+
+            self.__thrift_client.SetTextElement(text)
+            
+            success = True
+            message = text_name + " text created at [" + coord_sys + "] coordinate system."
+
+        except Exception as e:
+            success = False 
+            message = e
+
+        return success,message
+
+    def deactivate_figure(self, figure_params): 
         """Hide (deactivate) a projection element from the active reference system.
 
         Args:
-            shape_params (list): list with the necessary parameters to identify the projection element
+            figure_params (list): list with the necessary parameters to identify the projection element
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
         try:
-            shape_type  = shape_params.shape_type
-            group       = shape_params.group_name
-            shape_id    = shape_params.shape_id
+            figure_type = figure_params.figure_type
+            group       = figure_params.projection_group
+            id          = figure_params.figure_name
 
-            if shape_type == "polyline":
-                name = group + "/my_" + shape_type + "_" + shape_id
+            if figure_type == "polyline":
+                name = group + "/my_" + figure_type + "_" + id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
                     polyline.activated = False
@@ -1039,7 +1228,7 @@ class ProjectionElementControl(object):
                     message = "Polyline " + name + " does not exist."
             else:
                 success = False
-                message = "Shape name does not exist."
+                message = "Figure name does not exist."
 
         except Exception as e:
             success = False 
@@ -1047,23 +1236,23 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def reactivate_shape(self, shape_params): 
+    def reactivate_figure(self, figure_params): 
         """Unhide (activate hidden) a projection element from the active reference system.
 
         Args:
-            shape_params (list): list with the necessary parameters to identify the projection element
+            figure_params (list): list with the necessary parameters to identify the projection element
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
         try:
-            shape_type  = shape_params.shape_type
-            group       = shape_params.group_name
-            shape_id    = shape_params.shape_id
+            figure_type = figure_params.figure_type
+            group       = figure_params.projection_group
+            id          = figure_params.figure_name
 
-            if shape_type == "polyline":
-                name = group + "/my_" + shape_type + "_" + shape_id
+            if figure_type == "polyline":
+                name = group + "/my_" + figure_type + "_" + id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
                     polyline.activated = True
@@ -1072,10 +1261,10 @@ class ProjectionElementControl(object):
                     message = "Polyline " + name + " reactivated."
                 else:
                     success = False
-                    message = "Shape name does not exist."
+                    message = "Figure name does not exist."
             else:
                 success = False
-                message = "Shape name does not exist."
+                message = "Figure name does not exist."
 
         except Exception as e:
             success = False 
@@ -1083,30 +1272,30 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def delete_shape(self, shape_params):
+    def delete_figure(self, figure_params):
         """Delete a projection element from the active reference system.
 
         Args:
-            shape_params (list): list with the necessary parameters to identify the projection element
+            figure_params (list): list with the necessary parameters to identify the projection element
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
         try:
-            shape_type  = shape_params.shape_type
-            group       = shape_params.group_name
-            shape_id    = shape_params.shape_id
+            figure_type = figure_params.figure_type
+            group       = figure_params.projection_group
+            id          = figure_params.figure_name
 
-            name = group + "/my_" + shape_type + "_" + shape_id
-            shape = self.__thrift_client.GetPolyLine(name)
-            if shape:
+            name = group + "/my_" + figure_type + "_" + id
+            figure = self.__thrift_client.GetPolyLine(name)
+            if figure:
                 self.__thrift_client.RemoveGeoTreeElem(name)
                 success = True
-                message = "Shape removed"
+                message = "Figure removed"
             else:
                 success = False
-                message = "Shape name does not exist."
+                message = "Figure name does not exist."
         except Exception as e:
             success = False 
             message = e
@@ -1126,50 +1315,49 @@ class ProjectionElementControl(object):
 
         self.axes_ids = ["axis_x", "axis_y", "axis_x_arrow1", "axis_x_arrow2", "axis_y_arrow1", "axis_y_arrow2"]
 
-        proj_elem_params.shape_type = "polyline"
-        proj_elem_params.group_name = cs_params.name + "_origin"
-        proj_elem_params.x          = 0
-        proj_elem_params.y          = 0
-        proj_elem_params.length     = cs_params.resolution/2
+        proj_elem_params.projection_group = cs_params.name + "_origin"
         
-        proj_elem_params.shape_id = self.axes_ids[0]
-        proj_elem_params.angle    = 0
+        proj_elem_params.figure_name = self.axes_ids[0]
+        proj_elem_params.x           = 0
+        proj_elem_params.y           = 0
+        proj_elem_params.length      = cs_params.resolution/2
+        proj_elem_params.angle       = 0
         success,message = self.define_polyline(cs_params.name, proj_elem_params)         
         if not success:
             return success,message
         
-        proj_elem_params.shape_id = self.axes_ids[1]
-        proj_elem_params.angle    = 90
+        proj_elem_params.figure_name = self.axes_ids[1]
+        proj_elem_params.angle       = 90
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
-        proj_elem_params.shape_id = self.axes_ids[2]
-        proj_elem_params.x        = cs_params.resolution/2
-        proj_elem_params.y        = 0
-        proj_elem_params.length   = cs_params.resolution/12
-        proj_elem_params.angle    = 180 - 15
+        proj_elem_params.figure_name = self.axes_ids[2]
+        proj_elem_params.x           = cs_params.resolution/2
+        proj_elem_params.y           = 0
+        proj_elem_params.length      = cs_params.resolution/12
+        proj_elem_params.angle       = 180 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
-        proj_elem_params.shape_id = self.axes_ids[3]
-        proj_elem_params.angle    = 180 + 15
+        proj_elem_params.figure_name = self.axes_ids[3]
+        proj_elem_params.angle       = 180 + 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
-        proj_elem_params.shape_id = self.axes_ids[4]
-        proj_elem_params.x        = 0
-        proj_elem_params.y        = cs_params.resolution/2
-        proj_elem_params.length   = cs_params.resolution/14
-        proj_elem_params.angle    = 270 - 15
+        proj_elem_params.figure_name = self.axes_ids[4]
+        proj_elem_params.x           = 0
+        proj_elem_params.y           = cs_params.resolution/2
+        proj_elem_params.length      = cs_params.resolution/14
+        proj_elem_params.angle       = 270 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
-        proj_elem_params.shape_id = self.axes_ids[5]
-        proj_elem_params.angle    = 270 + 15
+        proj_elem_params.figure_name = self.axes_ids[5]
+        proj_elem_params.angle       = 270 + 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
@@ -1191,40 +1379,40 @@ class ProjectionElementControl(object):
         """
         self.frame_ids = ["T1_T2", "T2_T3", "T3_T4", "T4_T1"]
 
-        proj_elem_params.shape_type = "polyline"
-        proj_elem_params.group_name = cs_params.name + "_frame"
+        proj_elem_params.projection_group = cs_params.name + "_frame"
 
-        proj_elem_params.shape_id = self.frame_ids[0]
-        proj_elem_params.x        = T[0]
-        proj_elem_params.y        = T[1]
-        proj_elem_params.length   = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
+        proj_elem_params.figure_name = self.frame_ids[0]
+        proj_elem_params.x           = T[0]
+        proj_elem_params.y           = T[1]
+        proj_elem_params.length      = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
+        proj_elem_params.angle       = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params) 
         if not success:
             return success,message
-        proj_elem_params.shape_id = self.frame_ids[1]
-        proj_elem_params.x        = T[2]
-        proj_elem_params.y        = T[3]
-        proj_elem_params.length   = math.sqrt((T[4]-T[2])**2+(T[5]-T[3])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[5]-T[3]),(T[4]-T[2]))
+
+        proj_elem_params.figure_name = self.frame_ids[1]
+        proj_elem_params.x           = T[2]
+        proj_elem_params.y           = T[3]
+        proj_elem_params.length      = math.sqrt((T[4]-T[2])**2+(T[5]-T[3])**2)
+        proj_elem_params.angle       = 180/math.pi*math.atan2((T[5]-T[3]),(T[4]-T[2]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
-        proj_elem_params.shape_id = self.frame_ids[2]
-        proj_elem_params.x        = T[4]
-        proj_elem_params.y        = T[5]
-        proj_elem_params.length   = math.sqrt((T[6]-T[4])**2+(T[7]-T[5])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[7]-T[5]),(T[6]-T[4]))
+        proj_elem_params.figure_name = self.frame_ids[2]
+        proj_elem_params.x           = T[4]
+        proj_elem_params.y           = T[5]
+        proj_elem_params.length      = math.sqrt((T[6]-T[4])**2+(T[7]-T[5])**2)
+        proj_elem_params.angle       = 180/math.pi*math.atan2((T[7]-T[5]),(T[6]-T[4]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
-        proj_elem_params.shape_id = self.frame_ids[3]
-        proj_elem_params.x        = T[6]
-        proj_elem_params.y        = T[7]
-        proj_elem_params.length   = math.sqrt((T[0]-T[6])**2+(T[1]-T[7])**2)
-        proj_elem_params.angle    = 180/math.pi*math.atan2((T[1]-T[7]),(T[0]-T[6]))
+        proj_elem_params.figure_name = self.frame_ids[3]
+        proj_elem_params.x           = T[6]
+        proj_elem_params.y           = T[7]
+        proj_elem_params.length      = math.sqrt((T[0]-T[6])**2+(T[1]-T[7])**2)
+        proj_elem_params.angle       = 180/math.pi*math.atan2((T[1]-T[7]),(T[0]-T[6]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
