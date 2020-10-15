@@ -1105,7 +1105,7 @@ class ProjectionElementControl(object):
             angle  = proj_elem_params.angle
             length = proj_elem_params.length
 
-            polyline_name = group + "/my_polyline_" + id
+            polyline_name = group + "/polyline/" + id
             polyline = self.create_polyline(polyline_name)
 
             linestring = [ self.__geometry_tool.create_3d_point(x, y),
@@ -1161,7 +1161,7 @@ class ProjectionElementControl(object):
             center_y = proj_elem_params.y
             radius   = proj_elem_params.length
 
-            circle_name = group + "/my_circle_" + id
+            circle_name = group + "/circle/" + id
             circle = self.create_curve(circle_name,"circle")
             circle.radius = radius
             circle.center = self.__geometry_tool.create_3d_point(center_x, center_y)
@@ -1199,7 +1199,7 @@ class ProjectionElementControl(object):
             end_angle   = proj_elem_params.end_angle
             radius      = proj_elem_params.length
 
-            arc_name = group + "/my_arc_" + id
+            arc_name = group + "/arc/" + id
             arc = self.create_curve(arc_name,"arc")
             arc.radius = radius
             arc.center = self.__geometry_tool.create_3d_point(center_x, center_y)
@@ -1236,10 +1236,10 @@ class ProjectionElementControl(object):
             center_x = proj_elem_params.x
             center_y = proj_elem_params.y
             angle    = proj_elem_params.angle
-            width    = proj_elem_params.length
-            height   = proj_elem_params.height
+            width    = proj_elem_params.length*2
+            height   = proj_elem_params.height*2
 
-            oval_name = group + "/my_oval_" + id
+            oval_name = group + "/oval/" + id
             oval = self.create_curve(oval_name,"oval")
             oval.width = width
             oval.height = height
@@ -1294,7 +1294,7 @@ class ProjectionElementControl(object):
             height       = proj_elem_params.height
             char_spacing = proj_elem_params.char_spacing
 
-            text_name = group + "/my_text_" + id
+            text_name = group + "/text/" + id
             text = self.create_text(text_name)
             text.text = text_proj
             text.charSpacing = char_spacing
@@ -1315,8 +1315,8 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def deactivate_figure(self, figure_params): 
-        """Hide (deactivate) a projection element from the active reference system.
+    def activate_figure(self, figure_params, status): 
+        """Hide (deactivate) or unhide (activate hidden) a projection element from the active reference system.
 
         Args:
             figure_params (list): list with the necessary parameters to identify the projection element
@@ -1330,57 +1330,45 @@ class ProjectionElementControl(object):
             group       = figure_params.projection_group
             id          = figure_params.figure_name
 
+            name = group + "/" + figure_type + "/" + id
             if figure_type == "polyline":
-                name = group + "/my_" + figure_type + "_" + id
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
-                    polyline.activated = False
+                    polyline.activated = status
                     self.__thrift_client.SetPolyLine(polyline)
                     success = True
-                    message = "Polyline " + name + " deactivated."
-                else:
-                    success = False
-                    message = "Polyline " + name + " does not exist."
-            # if figure_type == "circle": ####################################
-            else:
-                success = False
-                message = "Figure name does not exist."
-
-        except Exception as e:
-            success = False 
-            message = e
-
-        return success,message
-
-    def reactivate_figure(self, figure_params): 
-        """Unhide (activate hidden) a projection element from the active reference system.
-
-        Args:
-            figure_params (list): list with the necessary parameters to identify the projection element
-            
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
-            an information message string
-        """
-        try:
-            figure_type = figure_params.figure_type
-            group       = figure_params.projection_group
-            id          = figure_params.figure_name
-
-            if figure_type == "polyline":
-                name = group + "/my_" + figure_type + "_" + id
-                polyline = self.__thrift_client.GetPolyLine(name)
-                if polyline:
-                    polyline.activated = True
-                    self.__thrift_client.SetPolyLine(polyline)
+            elif figure_type == "circle":
+                circle = self.__thrift_client.GetCircleSegment(name)
+                if circle:
+                    circle.activated = status
+                    self.__thrift_client.SetCircleSegment(circle)
                     success = True
-                    message = "Polyline " + name + " reactivated."
-                else:
-                    success = False
-                    message = "Figure name does not exist."
+            elif figure_type == "oval":
+                oval = self.__thrift_client.GetOvalSegment(name)
+                if oval:
+                    oval.activated = status
+                    self.__thrift_client.SetOvalSegment(oval)
+                    success = True
+            elif figure_type == "arc":
+                arc = self.__thrift_client.GetCircleSegment(name)
+                if arc:
+                    arc.activated = status
+                    self.__thrift_client.SetCircleSegment(arc)
+                    success = True
+            elif figure_type == "text":
+                text = self.__thrift_client.GetTextElement(name)
+                if text:
+                    text.activated = status
+                    self.__thrift_client.SetTextElement(text)
+                    success = True
             else:
                 success = False
-                message = "Figure name does not exist."
+                message = "Figure " + name + "does not exist."
+
+            if success and status:
+                message = "Figure " + name + "reactivated."
+            elif success and not status:
+                message = "Figure " + name + "deactivated."
 
         except Exception as e:
             success = False 
@@ -1403,7 +1391,7 @@ class ProjectionElementControl(object):
             group       = figure_params.projection_group
             id          = figure_params.figure_name
 
-            name = group + "/my_" + figure_type + "_" + id
+            name = group + "/" + figure_type + "/" + id
             figure = self.__thrift_client.GetPolyLine(name)
             if figure:
                 self.__thrift_client.RemoveGeoTreeElem(name)
@@ -1436,7 +1424,7 @@ class ProjectionElementControl(object):
             projection_group = proj_elem_params.projection_group
             id               = proj_elem_params.figure_name
 
-            name = projection_group + "/my_" + figure_type + "_" + id
+            name = projection_group + "/" + figure_type + "/" + id
 
             self.__thrift_client.Translate(name,dx,dy)
             self.__thrift_client.ApplyTransformation(name)
@@ -1466,7 +1454,7 @@ class ProjectionElementControl(object):
             projection_group = proj_elem_params.projection_group
             id               = proj_elem_params.figure_name
 
-            name = projection_group + "/my_" + figure_type + "_" + id
+            name = projection_group + "/" + figure_type + "/" + id
 
             self.__thrift_client.Scale(name,scale_factor)
             self.__thrift_client.ApplyTransformation(name)
@@ -1496,7 +1484,7 @@ class ProjectionElementControl(object):
             projection_group = proj_elem_params.projection_group
             id               = proj_elem_params.figure_name
 
-            name = projection_group + "/my_" + figure_type + "_" + id
+            name = projection_group + "/" + figure_type + "/" + id
 
             self.__thrift_client.Rotate(name,x_angle,y_angle,z_angle)
             self.__thrift_client.ApplyTransformation(name)
