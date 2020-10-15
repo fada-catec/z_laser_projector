@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="namespace" value="zlaser"/>
+    <arg name="namespace" default="zlaser"/>
     <arg name="load_user_coordinate_system" default="false"/>
 
     <group ns="$(arg namespace)">

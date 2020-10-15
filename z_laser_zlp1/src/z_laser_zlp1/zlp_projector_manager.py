@@ -290,17 +290,22 @@ class ZLPProjectorManager(object):
             raise SystemError(e)  
 
     def remove_coordinate_system(self,coord_sys):
-        """Delete active reference system.
+        """Delete a reference system.
 
         Args:
             coord_sys (str): name of reference coordinate system 
+
+        Returns:
+            (bool): 
 
         Raises:
             SystemError
         """
         success,message = self.cs_element.remove_cs(coord_sys)
         if success:
-            self.__coordinate_system = ""
+            if coord_sys == self.__coordinate_system:
+                self.__coordinate_system = ""
+                return True
         else:
             raise SystemError(message)
 
@@ -389,7 +394,7 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        success,message = self.projection_element.deactivate_figure(proj_elem_params)
+        success,message = self.projection_element.activate_figure(proj_elem_params,False)
         if not success:
             raise SystemError(message)
         
@@ -402,7 +407,7 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        success,message = self.projection_element.reactivate_figure(proj_elem_params)
+        success,message = self.projection_element.activate_figure(proj_elem_params,True)
         if not success:
             raise SystemError(message)
         

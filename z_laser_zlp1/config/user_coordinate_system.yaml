@@ -3,10 +3,10 @@ coordinate_system_resolution: 1000
 coordinate_system_distance: 1280
 
 # Projector Reference System {P}
-P1: {x:  50.0, y: -215.0}
-P2: {x: 455.0, y: -215.0}
-P3: {x: 455.0, y:   30.0}
-P4: {x:  50.0, y:   30.0}
+P1: {x:  50.0, y: -215.0, z: 0.0}
+P2: {x: 455.0, y: -215.0, z: 0.0}
+P3: {x: 455.0, y:   30.0, z: 0.0}
+P4: {x:  50.0, y:   30.0, z: 0.0}
 
 # User Reference System {T}
 T1: {x: 0, y: 0}
