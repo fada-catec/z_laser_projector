@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>z_laser_simulator</name>
+  <name>z_laser_viz</name>
   <version>0.0.0</version>
   <description> test project simulation </description>
   <author email="rluque@catec.aero">Rafael Luque </author>

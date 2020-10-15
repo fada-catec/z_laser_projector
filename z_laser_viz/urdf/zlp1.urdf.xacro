@@ -7,13 +7,13 @@
         <visual>
             <origin xyz="0.245 0.04 0" rpy="${pi} ${pi/2} 0"/>
             <geometry>
-                <mesh filename="file://$(find z_laser_simulator)/meshes/zlp1.dae"/>
+                <mesh filename="file://$(find z_laser_viz)/meshes/zlp1.dae"/>
             </geometry>
         </visual>
         <collision>
             <origin xyz="0.245 0.04 0" rpy="${pi} ${pi/2} 0"/>
             <geometry>
-                <mesh filename="file://$(find z_laser_simulator)/meshes/zlp1.stl"/>     
+                <mesh filename="file://$(find z_laser_viz)/meshes/zlp1.stl"/>     
             </geometry>
         </collision>
     </link>

@@ -4,31 +4,35 @@
     <arg name="namespace" value="zlaser"/>
     <arg name="load_user_coordinate_system" default="false"/>
 
-    <group ns="$(arg namespace)">
+    <include file="$(find z_laser_zlp1)/launch/projector_zlp1.launch">
+        <arg name="namespace" value="$(arg namespace)"/>
+        <arg name="load_user_coordinate_system" value="$(arg load_user_coordinate_system)"/>
+    </include>
 
-        <rosparam file="$(find z_laser_zlp1)/config/communication_settings.yaml"/>
-
-        <rosparam if ="$(eval arg('load_user_coordinate_system'))"
-            file="$(find z_laser_zlp1)/config/user_coordinate_system.yaml"/> 
-
-        <rosparam unless ="$(eval arg('load_user_coordinate_system'))"
-            file="$(find z_laser_zlp1)/config/projector_coordinate_system.yaml"/>
-
-        <node name="zlp_node" pkg="z_laser_zlp1" type="zlp_node.py" output="screen"/>
+    <include file="$(find z_laser_gui)/launch/projector_gui.launch" ns="$(arg namespace)"/>
 
 
-        <node name="zlp_gui" pkg="z_laser_gui" type="user_gui.py" output="screen"/>
-
+    <arg name="namespace_viz" value="zlaser_viz"/>
+    
+    <group ns="$(arg namespace_viz)">
 
         <param name="zlp1" command="$(find xacro)/xacro -i $(find z_laser_viz)/urdf/zlp1.urdf.xacro"/>
 
+        <remap from="add_line" to="/$(arg namespace)/add_line" />
+        <remap from="add_curve" to="/$(arg namespace)/add_curve" />
+        <remap from="add_text" to="/$(arg namespace)/add_text" />
         <node name="zlp_viz" pkg="z_laser_viz" type="zlp1_viz.py" output="screen"/>
 
         <node pkg="tf" type="static_transform_publisher" name="static_tf" args="0 0 0.95 -0.5 0.5 -0.5 0.5 world zlp1_link 100" />
-        <node name="tf_broadcaster" pkg="z_laser_viz" type="publish_tf.py" output="screen"/>
+    
+        <node name="tf_broadcaster" pkg="z_laser_viz" type="publish_tf.py" output="screen" >
+            <param name="namespace"  value="/$(arg namespace)" />
+        </node>
 
         <node type="rviz" name="rviz" pkg="rviz" args="-d $(find z_laser_viz)/rviz/rviz_environment.rviz"/>
 
     </group>
+
+    
 
 </launch>
