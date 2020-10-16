@@ -82,6 +82,15 @@ class ZLPProjectorManager(object):
         else:
             raise ConnectionError(message)
 
+    def get_connection_status(self):
+        """Get connection status of projector device.
+
+        Returns:
+            status(bool):
+        """
+        status = self.projector_client.connection_status()
+        return status
+
     def load_license(self,license_path):
         """Transfer license file to service.
 

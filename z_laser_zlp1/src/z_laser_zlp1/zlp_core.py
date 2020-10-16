@@ -311,6 +311,17 @@ class ProjectorClient(object):
 
         return success,message
 
+    def connection_status(self):
+        """Get status of projection connection.
+
+        Returns:
+            (bool):
+        """
+        if self.__thrift_client._event_channel:
+            return True
+        else:
+            return False
+
     def transfer_license(self, lic_path):
         """Transfer data of the local license file to remote file at ZLP-Service.
         

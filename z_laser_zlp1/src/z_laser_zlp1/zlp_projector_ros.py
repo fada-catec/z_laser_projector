@@ -648,12 +648,14 @@ class ZLPProjectorROS(object):
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
-        rospy.loginfo("Disconnecting before shutdown...")
         try:
-            self.projector.deactivate()
-            self.projector.client_server_disconnect()
-            rospy.loginfo("Projector disconnected.")
-            return TriggerResponse(True, "Projector disconnected.")
+            status = self.projector.get_connection_status()
+            if status:
+                rospy.loginfo("Disconnecting before shutdown...")
+                self.projector.deactivate()
+                self.projector.client_server_disconnect()
+                rospy.loginfo("Projector disconnected.")
+                return TriggerResponse(True, "Projector disconnected.")
 
         except Exception as e:
             rospy.logerr(e)
