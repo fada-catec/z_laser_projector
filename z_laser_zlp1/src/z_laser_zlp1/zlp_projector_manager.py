@@ -159,7 +159,7 @@ class ZLPProjectorManager(object):
         if not success:
             raise SystemError(message)
 
-    def get_coordinate_systems(self):
+    def get_coordinate_systems_list(self):
         """Get list of all defined reference systems.
 
         Raises:
@@ -175,6 +175,22 @@ class ZLPProjectorManager(object):
 
         return cs_list,self.__coordinate_system
 
+    def get_coordinate_system_params(self,coord_sys):
+        """Get parameters values of a defined coordinate system.
+
+        Args:
+            coord_sys (str): name of reference coordinate system 
+
+        Raises:
+            SystemError
+        """
+        cs_params = CoordinateSystemParameters()
+        cs_params,success,message = self.cs_element.get_cs(coord_sys,cs_params)
+        if not success:
+            raise SystemError(message)
+
+        return cs_params
+
     def define_coordinate_system(self,cs_params,do_target_search):
         """Define a new coordinate reference system.
 
@@ -184,12 +200,15 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        coord_sys,success,message = self.cs_element.define_cs(cs_params,do_target_search)
+        success,message,self.cs_scanned = self.cs_element.define_cs(cs_params,do_target_search)
         if not success:
             raise SystemError(message)
+        elif success and do_target_search:
+            success,message,_ = self.cs_element.define_cs(self.cs_scanned,False)
+        
         try:
-            self.register_coordinate_system(coord_sys)
-            self.set_coordinate_system(coord_sys)
+            self.register_coordinate_system(cs_params.name)
+            self.set_coordinate_system(cs_params.name)
         except SystemError as e:
             raise SystemError(e)
 
@@ -234,6 +253,7 @@ class ZLPProjectorManager(object):
             message = "No active coordinate system set yet."
             raise SystemError(message)
         
+        print("active coordinate system {}".format(self.__coordinate_system))
         success,message = self.cs_element.show_cs(self.__coordinate_system)
         if not success:
             raise SystemError(message)
@@ -308,22 +328,6 @@ class ZLPProjectorManager(object):
                 return True
         else:
             raise SystemError(message)
-
-    def get_coordinate_system_params(self,coord_sys):
-        """Get parameters values of a defined coordinate system.
-
-        Args:
-            coord_sys (str): name of reference coordinate system 
-
-        Raises:
-            SystemError
-        """
-        cs_params = CoordinateSystemParameters()
-        cs_params,success,message = self.cs_element.get_cs(coord_sys,cs_params)
-        if not success:
-            raise SystemError(message)
-
-        return cs_params
         
     def create_polyline(self,proj_elem_params):
         """Create a polyline as new projection element, associated to the active reference system.

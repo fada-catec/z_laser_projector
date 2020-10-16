@@ -182,12 +182,7 @@ class ZLPProjectorROS(object):
         try:
             self.projector.define_coordinate_system(req,False)
             
-            rospy.set_param('coordinate_system_name', req.name)
-            rospy.set_param('coordinate_system_distance', req.distance)
-            rospy.set_param('P1/x', req.P1.x)
-            rospy.set_param('P1/y', req.P1.y)
-            rospy.set_param('T1/x', req.T1.x)
-            rospy.set_param('T1/y', req.T1.y)
+            self.set_rosparam_coordinate_system(req)
 
             self.projector.cs_frame_create(req)
             self.projector.cs_axes_create(req)
@@ -228,25 +223,25 @@ class ZLPProjectorROS(object):
         try:
             self.projector.define_coordinate_system(req,True)
 
-            # rospy.set_param('coordinate_system_name', req.name)
-            # rospy.set_param('coordinate_system_distance', req.distance)
-            # rospy.set_param('P1/x', req.P1.x)
-            # rospy.set_param('P1/y', req.P1.y)
-            # rospy.set_param('T1/x', req.T1.x)
-            # rospy.set_param('T1/y', req.T1.y)
+            coordinate_system_scanned = self.projector.get_coordinate_system_params(req.name)
+            self.set_rosparam_coordinate_system(coordinate_system_scanned)
 
-            self.projector.cs_frame_create(req)
-            self.projector.cs_axes_create(req)
+            self.projector.cs_frame_create(coordinate_system_scanned)
+            self.projector.cs_axes_create(coordinate_system_scanned)
             message = "Coordinate system correctly scanned:"
             rospy.loginfo(message)
-            T = self.get_user_coordinate_system(req.name)
+            T = self.get_user_coordinate_system(coordinate_system_scanned.name)
+
+            # Send info to viz
+            cs_params = self.read_rosparam_coordinate_system()
+            self.viz_manual_cs(cs_params)
             
             rospy.loginfo("Projecting demonstration")
             self.projector.show_coordinate_system()
-            rospy.sleep(5)
+            rospy.sleep(3)
             self.projector.hide_coordinate_system()
             self.projector.show_frame()
-            rospy.sleep(5)
+            rospy.sleep(3)
             self.projector.hide_frame()
 
             return CoordinateSystemResponse(T, True, message)
@@ -266,7 +261,7 @@ class ZLPProjectorROS(object):
         
         cs_list = []
         try:
-            cs_list,active_cs = self.projector.get_coordinate_systems()
+            cs_list,active_cs = self.projector.get_coordinate_systems_list()
             return CoordinateSystemListResponse(True,"Coordinate system list:",cs_list,active_cs)
 
         except Exception as e:
@@ -294,12 +289,7 @@ class ZLPProjectorROS(object):
             self.projector.set_coordinate_system(req.name)
 
             coordinate_system_params = self.projector.get_coordinate_system_params(req.name)
-            rospy.set_param('coordinate_system_name', coordinate_system_params.name)
-            rospy.set_param('coordinate_system_distance', coordinate_system_params.distance)
-            rospy.set_param('P1/x', coordinate_system_params.P1.x)
-            rospy.set_param('P1/y', coordinate_system_params.P1.y)
-            rospy.set_param('T1/x', coordinate_system_params.T1.x)
-            rospy.set_param('T1/y', coordinate_system_params.T1.y)
+            self.set_rosparam_coordinate_system(coordinate_system_params)
 
             # Send info to viz
             self.viz_set_cs(req)
@@ -550,16 +540,34 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def read_coordinate_system(self):
+    def set_rosparam_coordinate_system(self,cs_params):
+        """Set rosparams from given coordinate system.
+
+        Args:
+            cs_params (object): object with the necessary info to define a new coordinate system
+        """
+        rospy.set_param('coordinate_system_name', cs_params.name)
+        rospy.set_param('coordinate_system_distance', cs_params.distance)
+        rospy.set_param('P1/x', cs_params.P1.x)
+        rospy.set_param('P1/y', cs_params.P1.y)
+        rospy.set_param('P2/x', cs_params.P2.x)
+        rospy.set_param('P2/y', cs_params.P2.y)
+        rospy.set_param('P3/x', cs_params.P3.x)
+        rospy.set_param('P3/y', cs_params.P3.y)
+        rospy.set_param('P4/x', cs_params.P4.x)
+        rospy.set_param('P4/y', cs_params.P4.y)
+        rospy.set_param('T1/x', cs_params.T1.x)
+        rospy.set_param('T1/y', cs_params.T1.y)
+        rospy.set_param('coordinate_system_resolution', cs_params.resolution)
+        
+    def read_rosparam_coordinate_system(self):
         """Read necessary info to define a new coordinate system from rosparams.
 
         Returns:
             cs_params (object): object with the necessary info to define a new coordinate system
         """
-        rospy.loginfo("Reading coordinate system data")
         cs_params            = CoordinateSystemRequest()
         cs_params.name       = rospy.get_param('coordinate_system_name', "default_cs")
-        cs_params.resolution = rospy.get_param('coordinate_system_resolution', 1000)
         cs_params.distance   = rospy.get_param('coordinate_system_distance', 1500)
         cs_params.P1.x       = rospy.get_param('P1/x', -100)
         cs_params.P1.y       = rospy.get_param('P1/y', -100)
@@ -571,6 +579,7 @@ class ZLPProjectorROS(object):
         cs_params.P4.y       = rospy.get_param('P4/y', -100)
         cs_params.T1.x       = rospy.get_param('T1/x',    0)
         cs_params.T1.y       = rospy.get_param('T1/y',    0)
+        cs_params.resolution = rospy.get_param('coordinate_system_resolution', 1000)
         return cs_params
 
     def get_user_coordinate_system(self,coordinate_system_name):
@@ -608,7 +617,7 @@ class ZLPProjectorROS(object):
 
     def initialize_coordinate_system(self):
         """Initialize the factory or user predefined coordinate system at ros projection_node launch."""
-        cs_params = self.read_coordinate_system()
+        cs_params = self.read_rosparam_coordinate_system()
         try:
             self.projector.define_coordinate_system(cs_params,False)
             self.projector.cs_frame_create(cs_params)
