@@ -1604,11 +1604,11 @@ background-color: native;
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_27">
+       <widget class="QLabel" name="start_ang">
         <property name="geometry">
          <rect>
           <x>20</x>
-          <y>190</y>
+          <y>220</y>
           <width>131</width>
           <height>21</height>
          </rect>
@@ -1726,8 +1726,8 @@ background-color: native;
        <widget class="QLineEdit" name="pe_length">
         <property name="geometry">
          <rect>
-          <x>130</x>
-          <y>250</y>
+          <x>180</x>
+          <y>190</y>
           <width>61</width>
           <height>23</height>
          </rect>
@@ -1767,11 +1767,11 @@ background-color: native;
          <string>0.0</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_29">
+       <widget class="QLabel" name="deg_start">
         <property name="geometry">
          <rect>
           <x>220</x>
-          <y>190</y>
+          <y>220</y>
           <width>71</width>
           <height>21</height>
          </rect>
@@ -1791,12 +1791,12 @@ background-color: native;
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_28">
+       <widget class="QLabel" name="length">
         <property name="geometry">
          <rect>
           <x>20</x>
-          <y>250</y>
-          <width>111</width>
+          <y>190</y>
+          <width>161</width>
           <height>21</height>
          </rect>
         </property>
@@ -1809,7 +1809,7 @@ background-color: native;
          <string notr="true">color: rgb(255, 255, 255);</string>
         </property>
         <property name="text">
-         <string>Length/Radius:</string>
+         <string>Length/Width/Radius:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1914,7 +1914,7 @@ background-color: native;
         <property name="geometry">
          <rect>
           <x>150</x>
-          <y>190</y>
+          <y>220</y>
           <width>61</width>
           <height>23</height>
          </rect>
@@ -1932,11 +1932,11 @@ background-color: native;
          <string>0.0</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_30">
+       <widget class="QLabel" name="mm_len">
         <property name="geometry">
          <rect>
-          <x>200</x>
-          <y>250</y>
+          <x>250</x>
+          <y>190</y>
           <width>41</width>
           <height>21</height>
          </rect>
@@ -2006,7 +2006,7 @@ background-color: native;
         <property name="geometry">
          <rect>
           <x>100</x>
-          <y>220</y>
+          <y>250</y>
           <width>51</width>
           <height>23</height>
          </rect>
@@ -2024,11 +2024,11 @@ background-color: native;
          <string>0.0</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_43">
+       <widget class="QLabel" name="deg_end">
         <property name="geometry">
          <rect>
           <x>160</x>
-          <y>220</y>
+          <y>250</y>
           <width>71</width>
           <height>21</height>
          </rect>
@@ -2048,11 +2048,11 @@ background-color: native;
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_47">
+       <widget class="QLabel" name="end_ang">
         <property name="geometry">
          <rect>
           <x>20</x>
-          <y>220</y>
+          <y>250</y>
           <width>81</width>
           <height>21</height>
          </rect>
@@ -2094,7 +2094,7 @@ background-color: native;
          <string>0.0</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_48">
+       <widget class="QLabel" name="height">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -2118,7 +2118,7 @@ background-color: native;
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_49">
+       <widget class="QLabel" name="mm_height">
         <property name="geometry">
          <rect>
           <x>150</x>
@@ -2142,7 +2142,7 @@ background-color: native;
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_50">
+       <widget class="QLabel" name="text">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -2182,7 +2182,7 @@ background-color: native;
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
         </property>
         <property name="placeholderText">
-         <string>text_example</string>
+         <string>text example</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="pe_char_space">
@@ -2207,7 +2207,7 @@ background-color: native;
          <string>0</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_51">
+       <widget class="QLabel" name="char_spac">
         <property name="geometry">
          <rect>
           <x>20</x>

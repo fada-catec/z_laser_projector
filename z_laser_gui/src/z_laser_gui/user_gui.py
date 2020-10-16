@@ -8,9 +8,6 @@ import rospy
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 # from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
 
-# qtCreatorFile = "test3.ui" # Enter file here.
-# Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
-
 from main_window import Ui_MainWindow
 
 
@@ -36,14 +33,74 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-        self.msg_box = QtWidgets.QMessageBox()
-        # self.msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        # self.msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        self.projector_connected = False
+        self.set_up_gui()
+
+    def set_up_gui(self):
 
         # LEDS
         self.status.setPixmap(QtGui.QPixmap(CONNECT_OFF_LED))
         self.status_2.setPixmap(QtGui.QPixmap(PROJECT_OFF_LED))
 
+        # Msgs box
+        self.msg_box = QtWidgets.QMessageBox()
+        # self.msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        # self.msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+
+        self.init_pe_menu()
+
+        self.set_buttons()
+
+        self.open_services()
+
+        rospy.wait_for_service("connect")
+        self.projector_connected = rospy.get_param('projector_connected')
+
+        if self.projector_connected:
+            self.status.setPixmap(QtGui.QPixmap(CONNECT_ON_LED))
+        else:
+            self.status.setPixmap(QtGui.QPixmap(CONNECT_OFF_LED))
+
+    def init_pe_menu(self):
+
+        # Set ComboBox callback
+        self.pe_menu.currentIndexChanged.connect(self.update_entries)
+
+        # Projection element textbox entries initial status
+        self.length.setEnabled(False)
+        self.length.setVisible(False)
+        self.pe_length.setEnabled(False)
+        self.pe_length.setVisible(False)
+        self.mm_len.setEnabled(False)
+        self.mm_len.setVisible(False)
+        self.start_ang.setEnabled(False)
+        self.start_ang.setVisible(False)
+        self.pe_angle.setEnabled(False)
+        self.pe_angle.setVisible(False)
+        self.deg_start.setEnabled(False)
+        self.deg_start.setVisible(False)
+        self.end_ang.setEnabled(False)
+        self.end_ang.setVisible(False)
+        self.pe_end_angle.setEnabled(False)
+        self.pe_end_angle.setVisible(False)
+        self.deg_end.setEnabled(False)
+        self.deg_end.setVisible(False)
+        self.height.setEnabled(False)
+        self.height.setVisible(False)
+        self.pe_height.setEnabled(False)
+        self.pe_height.setVisible(False)
+        self.mm_height.setEnabled(False)
+        self.mm_height.setVisible(False)
+        self.text.setEnabled(False)
+        self.text.setVisible(False)
+        self.pe_text.setEnabled(False)
+        self.pe_text.setVisible(False)
+        self.char_spac.setEnabled(False)
+        self.char_spac.setVisible(False)
+        self.pe_char_space.setEnabled(False)
+        self.pe_char_space.setVisible(False)
+
+    def set_buttons(self):
         # GUI Buttons
         self.connect_button.clicked.connect(self.connect_cb)
         self.disconnect_button.clicked.connect(self.disconnect_cb)
@@ -60,8 +117,8 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pe_unhide_button.clicked.connect(self.unhide_pe_cb)
         self.pe_remove_button.clicked.connect(self.remove_pe_cb)
         self.pe_monitor_button.clicked.connect(self.monitor_pe_cb)
-        
 
+    def open_services(self):
         # ROS services and topics
         self.connect       = rospy.ServiceProxy('connect', Trigger)
         self.disconnect    = rospy.ServiceProxy('disconnect', Trigger)
@@ -80,20 +137,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.add_line      = rospy.Publisher('add_line', Line, queue_size=10)
         self.add_curve     = rospy.Publisher('add_curve', Curve, queue_size=10)
         self.add_text      = rospy.Publisher('add_text', Text, queue_size=10)
-
-
-        self.projector_connected = False
-        self.set_up_gui()
-
-    def set_up_gui(self):
-
-        rospy.wait_for_service("connect")
-        self.projector_connected = rospy.get_param('projector_connected')
-
-        if self.projector_connected:
-            self.status.setPixmap(QtGui.QPixmap(CONNECT_ON_LED))
-        else:
-            self.status.setPixmap(QtGui.QPixmap(CONNECT_OFF_LED))
     
     def connect_cb(self):
         
@@ -106,8 +149,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
             self.msg_box.setWindowTitle("Connection error")
             self.msg_box.setText(resp.message)
-            # self.msg_box.setInformativeText("Please disconnect projector first.")
-            # self.msg_box.setDetailedText("The details are as follows:")
             self.msg_box.exec_()
 
     def disconnect_cb(self):
@@ -161,87 +202,187 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def define_cs_cb(self):
 
-        coord_sys            = CoordinateSystemRequest()
-        coord_sys.name       = str(self.cs_name.text())
-        coord_sys.distance   = float(self.cs_dist.text())
-        coord_sys.P1         = Point(float(self.p1_x.text()),float(self.p1_y.text()),float(self.p1_z.text()))
-        coord_sys.P2         = Point(float(self.p2_x.text()),float(self.p2_y.text()),float(self.p2_z.text()))
-        coord_sys.P3         = Point(float(self.p3_x.text()),float(self.p3_y.text()),float(self.p3_z.text()))
-        coord_sys.P4         = Point(float(self.p4_x.text()),float(self.p4_y.text()),float(self.p4_z.text()))
-        coord_sys.T1         = Point(float(self.t1_x.text()),float(self.t1_y.text()),float(self.t1_z.text()))
-        coord_sys.resolution = float(self.cs_res.text())
+        try:
+            coord_sys            = CoordinateSystemRequest()
+            coord_sys.name       = str(self.cs_name.text())
+            coord_sys.distance   = float(self.cs_dist.text())
+            coord_sys.P1         = Point(float(self.p1_x.text()),float(self.p1_y.text()),float(self.p1_z.text()))
+            coord_sys.P2         = Point(float(self.p2_x.text()),float(self.p2_y.text()),float(self.p2_z.text()))
+            coord_sys.P3         = Point(float(self.p3_x.text()),float(self.p3_y.text()),float(self.p3_z.text()))
+            coord_sys.P4         = Point(float(self.p4_x.text()),float(self.p4_y.text()),float(self.p4_z.text()))
+            coord_sys.T1         = Point(float(self.t1_x.text()),float(self.t1_y.text()),float(self.t1_z.text()))
+            coord_sys.resolution = float(self.cs_res.text())
 
-        resp = self.manual_cs(coord_sys)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+            resp = self.manual_cs(coord_sys)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
+
+        except Exception as e:
+            self.error_msg("Coordinate System Menu error",e)
 
     def scan_cs_cb(self):
-        coord_sys            = CoordinateSystemRequest()
-        coord_sys.name       = str(self.cs_name.text())
-        coord_sys.distance   = float(self.cs_dist.text())
-        coord_sys.P1         = Point(float(self.p1_x.text()),float(self.p1_y.text()),float(self.p1_z.text()))
-        coord_sys.P2         = Point(float(self.p2_x.text()),float(self.p2_y.text()),float(self.p2_z.text()))
-        coord_sys.P3         = Point(float(self.p3_x.text()),float(self.p3_y.text()),float(self.p3_z.text()))
-        coord_sys.P4         = Point(float(self.p4_x.text()),float(self.p4_y.text()),float(self.p4_z.text()))
-        coord_sys.T1         = Point(float(self.t1_x.text()),float(self.t1_y.text()),float(self.t1_z.text()))
-        coord_sys.resolution = float(self.cs_res.text())
+        
+        try:
+            coord_sys            = CoordinateSystemRequest()
+            coord_sys.name       = str(self.cs_name.text())
+            coord_sys.distance   = float(self.cs_dist.text())
+            coord_sys.P1         = Point(float(self.p1_x.text()),float(self.p1_y.text()),float(self.p1_z.text()))
+            coord_sys.P2         = Point(float(self.p2_x.text()),float(self.p2_y.text()),float(self.p2_z.text()))
+            coord_sys.P3         = Point(float(self.p3_x.text()),float(self.p3_y.text()),float(self.p3_z.text()))
+            coord_sys.P4         = Point(float(self.p4_x.text()),float(self.p4_y.text()),float(self.p4_z.text()))
+            coord_sys.T1         = Point(float(self.t1_x.text()),float(self.t1_y.text()),float(self.t1_z.text()))
+            coord_sys.resolution = float(self.cs_res.text())
 
-        resp = self.auto_cs(coord_sys)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
+            resp = self.auto_cs(coord_sys)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
             self.msg_box.exec_()
+
+        except Exception as e:
+            self.error_msg("Coordinate System Menu error",e)
 
     def set_cs_cb(self):
 
-        coord_sys      = CoordinateSystemNameRequest()
-        coord_sys.name = str(self.cs_name_handler.text())
+        try:
+            coord_sys      = CoordinateSystemNameRequest()
+            coord_sys.name = str(self.cs_name_handler.text())
 
-        resp = self.set_cs(coord_sys)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+            resp = self.set_cs(coord_sys)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
+
+        except Exception as e:
+            self.error_msg("Coordinate System Menu error",e)
 
     def show_cs_cb(self):
-        
-        # self.msg_box.setIcon(QtWidgets.QMessageBox.Information)
-        # self.msg_box.setWindowTitle("Projecting")
-        # self.msg_box.setText("Coordinate System is going to be projected.")
-        # self.msg_box.setInformativeText("Please wait until it finishes.")
-        # self.msg_box.exec_()
 
-        coord_sys      = CoordinateSystemShowRequest()
-        coord_sys.secs = int(self.cs_show_secs.text())
+        try:
+            coord_sys      = CoordinateSystemShowRequest()
+            coord_sys.secs = int(self.cs_show_secs.text())
 
-        resp = self.show_cs(coord_sys)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+            resp = self.show_cs(coord_sys)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
+
+        except Exception as e:
+            self.error_msg("Coordinate System Menu error",e)
 
     def remove_cs_cb(self):
 
-        coord_sys      = CoordinateSystemNameRequest()
-        coord_sys.name = str(self.cs_name_handler.text())
+        try:
+            coord_sys      = CoordinateSystemNameRequest()
+            coord_sys.name = str(self.cs_name_handler.text())
 
-        resp = self.rem_cs(coord_sys)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+            resp = self.rem_cs(coord_sys)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
+
+        except Exception as e:
+            self.error_msg("Coordinate System Menu error",e)
+
+    def update_entries(self):
+
+        self.init_pe_menu()
+        figure = self.pe_menu.currentText()
+
+        if figure == "polyline":
+            self.length.setEnabled(True)
+            self.length.setVisible(True)
+            self.pe_length.setEnabled(True)
+            self.pe_length.setVisible(True)
+            self.mm_len.setEnabled(True)
+            self.mm_len.setVisible(True)
+            self.start_ang.setEnabled(True)
+            self.start_ang.setVisible(True)
+            self.pe_angle.setEnabled(True)
+            self.pe_angle.setVisible(True)
+            self.deg_start.setEnabled(True)
+            self.deg_start.setVisible(True)
+        elif figure == "circle":
+            self.length.setEnabled(True)
+            self.length.setVisible(True)
+            self.pe_length.setEnabled(True)
+            self.pe_length.setVisible(True)
+            self.mm_len.setEnabled(True)
+            self.mm_len.setVisible(True)
+        elif figure == "oval":
+            self.length.setEnabled(True)
+            self.length.setVisible(True)
+            self.pe_length.setEnabled(True)
+            self.pe_length.setVisible(True)
+            self.mm_len.setEnabled(True)
+            self.mm_len.setVisible(True)
+            self.start_ang.setEnabled(True)
+            self.start_ang.setVisible(True)
+            self.pe_angle.setEnabled(True)
+            self.pe_angle.setVisible(True)
+            self.deg_start.setEnabled(True)
+            self.deg_start.setVisible(True)
+            self.height.setEnabled(True)
+            self.height.setVisible(True)
+            self.pe_height.setEnabled(True)
+            self.pe_height.setVisible(True)
+            self.mm_height.setEnabled(True)
+            self.mm_height.setVisible(True)
+        elif figure == "arc":
+            self.length.setEnabled(True)
+            self.length.setVisible(True)
+            self.pe_length.setEnabled(True)
+            self.pe_length.setVisible(True)
+            self.mm_len.setEnabled(True)
+            self.mm_len.setVisible(True)
+            self.start_ang.setEnabled(True)
+            self.start_ang.setVisible(True)
+            self.pe_angle.setEnabled(True)
+            self.pe_angle.setVisible(True)
+            self.deg_start.setEnabled(True)
+            self.deg_start.setVisible(True)
+            self.end_ang.setEnabled(True)
+            self.end_ang.setVisible(True)
+            self.pe_end_angle.setEnabled(True)
+            self.pe_end_angle.setVisible(True)
+            self.deg_end.setEnabled(True)
+            self.deg_end.setVisible(True)
+        elif figure == "text":
+            self.start_ang.setEnabled(True)
+            self.start_ang.setVisible(True)
+            self.pe_angle.setEnabled(True)
+            self.pe_angle.setVisible(True)
+            self.deg_start.setEnabled(True)
+            self.deg_start.setVisible(True)
+            self.text.setEnabled(True)
+            self.text.setVisible(True)
+            self.pe_text.setEnabled(True)
+            self.pe_text.setVisible(True)
+            self.char_spac.setEnabled(True)
+            self.char_spac.setVisible(True)
+            self.pe_char_space.setEnabled(True)
+            self.pe_char_space.setVisible(True)
+            self.height.setEnabled(True)
+            self.height.setVisible(True)
+            self.pe_height.setEnabled(True)
+            self.pe_height.setVisible(True)
+            self.mm_height.setEnabled(True)
+            self.mm_height.setVisible(True)
 
     def add_pe_cb(self):
 
@@ -262,133 +403,179 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.msg_box.setWindowTitle("Projection element definition error")
             self.msg_box.setText("No projection element type selected.")
             self.msg_box.setInformativeText("Please choose a projection element type.")
-            # self.msg_box.setDetailedText("The details are as follows:")
             self.msg_box.exec_()
 
     def line_def(self):
 
-        line                  = Line()
-        line.projection_group = str(self.pe_group.text())
-        line.figure_name      = str(self.pe_id.text())
-        line.x                = float(self.pe_x.text())
-        line.y                = float(self.pe_y.text())
-        line.angle            = float(self.pe_angle.text())
-        line.length           = float(self.pe_length.text())
+        try:
+            line                  = Line()
+            line.projection_group = str(self.pe_group.text())
+            line.figure_name      = str(self.pe_id.text())
+            line.x                = float(self.pe_x.text())
+            line.y                = float(self.pe_y.text())
+            line.angle            = float(self.pe_angle.text())
+            line.length           = float(self.pe_length.text())
 
-        self.add_line.publish(line)
+            self.add_line.publish(line)
+
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
+
 
     def circle_def(self):
 
-        circle                  = Curve()
-        circle.projection_group = str(self.pe_group.text())
-        circle.figure_name      = str(self.pe_id.text())
-        circle.curve_type       = "circle"
-        circle.x                = float(self.pe_x.text())
-        circle.y                = float(self.pe_y.text())
-        circle.length           = float(self.pe_length.text())
+        try:
+            circle                  = Curve()
+            circle.projection_group = str(self.pe_group.text())
+            circle.figure_name      = str(self.pe_id.text())
+            circle.curve_type       = "circle"
+            circle.x                = float(self.pe_x.text())
+            circle.y                = float(self.pe_y.text())
+            circle.length           = float(self.pe_length.text())
 
-        self.add_curve.publish(circle)
+            self.add_curve.publish(circle)
+
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
 
     def oval_def(self):
 
-        oval                  = Curve()
-        oval.projection_group = str(self.pe_group.text())
-        oval.figure_name      = str(self.pe_id.text())
-        oval.curve_type       = "oval"
-        oval.x                = float(self.pe_x.text())
-        oval.y                = float(self.pe_y.text())
-        oval.length           = float(self.pe_length.text())
-        oval.height           = float(self.pe_height.text())
+        try:
+            oval                  = Curve()
+            oval.projection_group = str(self.pe_group.text())
+            oval.figure_name      = str(self.pe_id.text())
+            oval.curve_type       = "oval"
+            oval.x                = float(self.pe_x.text())
+            oval.y                = float(self.pe_y.text())
+            oval.length           = float(self.pe_length.text())
+            oval.height           = float(self.pe_height.text())
+            oval.angle            = float(self.pe_angle.text())
 
-        self.add_curve.publish(oval)
+            self.add_curve.publish(oval)
+
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
 
     def arc_def(self):
 
-        arc                  = Curve()
-        arc.projection_group = str(self.pe_group.text())
-        arc.figure_name      = str(self.pe_id.text())
-        arc.curve_type       = "arc"
-        arc.x                = float(self.pe_x.text())
-        arc.y                = float(self.pe_y.text())
-        arc.angle            = float(self.pe_angle.text())
-        arc.end_angle        = float(self.pe_end_angle.text())
-        arc.length           = float(self.pe_length.text())
+        try:
+            arc                  = Curve()
+            arc.projection_group = str(self.pe_group.text())
+            arc.figure_name      = str(self.pe_id.text())
+            arc.curve_type       = "arc"
+            arc.x                = float(self.pe_x.text())
+            arc.y                = float(self.pe_y.text())
+            arc.angle            = float(self.pe_angle.text())
+            arc.end_angle        = float(self.pe_end_angle.text())
+            arc.length           = float(self.pe_length.text())
 
-        self.add_curve.publish(arc)
+            self.add_curve.publish(arc)
+
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
 
     def text_def(self):
 
-        text                  = Text()
-        text.projection_group = str(self.pe_group.text())
-        text.figure_name      = str(self.pe_id.text())
-        text.text             = str(self.pe_text.text())
-        text.x                = float(self.pe_x.text())
-        text.y                = float(self.pe_y.text())
-        text.angle            = float(self.pe_angle.text())
-        text.height           = float(self.pe_height.text())
-        text.char_spacing     = float(self.pe_char_space.text())
+        try:
+            text                  = Text()
+            text.projection_group = str(self.pe_group.text())
+            text.figure_name      = str(self.pe_id.text())
+            text.text             = str(self.pe_text.text())
+            text.x                = float(self.pe_x.text())
+            text.y                = float(self.pe_y.text())
+            text.angle            = float(self.pe_angle.text())
+            text.height           = float(self.pe_height.text())
+            text.char_spacing     = float(self.pe_char_space.text())
 
-        self.add_text.publish(text)
+            self.add_text.publish(text)
+
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
 
     def hide_pe_cb(self):
 
-        proj_elem                  = ProjectionElementRequest()
-        proj_elem.figure_type      = self.pe_menu_2.currentText()
-        proj_elem.projection_group = str(self.pe_group_2.text())
-        proj_elem.figure_name      = str(self.pe_id_2.text())
+        try:
+            proj_elem                  = ProjectionElementRequest()
+            proj_elem.figure_type      = self.pe_menu_2.currentText()
+            proj_elem.projection_group = str(self.pe_group_2.text())
+            proj_elem.figure_name      = str(self.pe_id_2.text())
 
-        resp = self.hide_figure(proj_elem)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+            resp = self.hide_figure(proj_elem)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
+
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
 
     def unhide_pe_cb(self):
 
-        proj_elem                  = ProjectionElementRequest()
-        proj_elem.figure_type      = self.pe_menu_2.currentText()
-        proj_elem.projection_group = str(self.pe_group_2.text())
-        proj_elem.figure_name      = str(self.pe_id_2.text())
+        try:
+            proj_elem                  = ProjectionElementRequest()
+            proj_elem.figure_type      = self.pe_menu_2.currentText()
+            proj_elem.projection_group = str(self.pe_group_2.text())
+            proj_elem.figure_name      = str(self.pe_id_2.text())
+            
+            resp = self.unhide_figure(proj_elem)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
         
-        resp = self.unhide_figure(proj_elem)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
 
     def remove_pe_cb(self):
 
-        proj_elem                  = ProjectionElementRequest()
-        proj_elem.figure_type      = self.pe_menu_2.currentText()
-        proj_elem.projection_group = str(self.pe_group_2.text())
-        proj_elem.figure_name      = str(self.pe_id_2.text())
-        
-        resp = self.remove_figure(proj_elem)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+        try:
+            proj_elem                  = ProjectionElementRequest()
+            proj_elem.figure_type      = self.pe_menu_2.currentText()
+            proj_elem.projection_group = str(self.pe_group_2.text())
+            proj_elem.figure_name      = str(self.pe_id_2.text())
+            
+            resp = self.remove_figure(proj_elem)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
+
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
 
     def monitor_pe_cb(self):
         
-        proj_elem                  = ProjectionElementRequest()
-        proj_elem.figure_type      = self.pe_menu_2.currentText()
-        proj_elem.projection_group = str(self.pe_group_2.text())
-        proj_elem.figure_name      = str(self.pe_id_2.text())
+        try:
+            proj_elem                  = ProjectionElementRequest()
+            proj_elem.figure_type      = self.pe_menu_2.currentText()
+            proj_elem.projection_group = str(self.pe_group_2.text())
+            proj_elem.figure_name      = str(self.pe_id_2.text())
+            
+            resp = self.monit_figure(proj_elem)
+            rospy.loginfo("Service response: \n{}".format(resp))
+            if not resp.success:
+                self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+                self.msg_box.setWindowTitle("An error ocurred")
+                self.msg_box.setText(resp.message)
+                self.msg_box.exec_()
         
-        resp = self.monit_figure(proj_elem)
-        rospy.loginfo("Service response: \n{}".format(resp))
-        if not resp.success:
-            self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
-            self.msg_box.setWindowTitle("An error ocurred")
-            self.msg_box.setText(resp.message)
-            self.msg_box.exec_()
+        except Exception as e:
+            self.error_msg("Projection element Menu error",e)
+
+    def error_msg(self,title,e):
+        
+        self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
+        self.msg_box.setWindowTitle(title)
+        self.msg_box.setText("Error at filling fields.")
+        self.msg_box.setInformativeText("error: {}".format(e))
+        self.msg_box.exec_()
+
 
     def closeEvent(self, event):
         close = QtWidgets.QMessageBox()
