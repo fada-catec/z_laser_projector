@@ -85,6 +85,8 @@ class ZLPProjectorROS(object):
         self.viz_hide_figure   = rospy.ServiceProxy('/zlaser_viz/hide_figure', ProjectionElement)
         self.viz_unhide_figure = rospy.ServiceProxy('/zlaser_viz/unhide_figure', ProjectionElement)
         self.viz_remove_figure = rospy.ServiceProxy('/zlaser_viz/remove_figure', ProjectionElement)
+       
+        self.viz_monitor_fig   = rospy.ServiceProxy('/zlaser_viz/monitor_figure', ProjectionElement)
 
     def connection_cb(self,req):
         """Callback of ROS service to connect to ZLP-Service, transfer license and activate projector.
@@ -532,6 +534,10 @@ class ZLPProjectorROS(object):
             return ProjectionElementResponse(False,"figure_type or group_name or figure_name request is empty")
         
         try:
+            # Send info to viz
+            resp = self.viz_monitor_fig(req)
+            print(resp)
+
             self.projector.monitor_proj_elem(req)
             rospy.loginfo("Monitoring ENDED.")
             return ProjectionElementResponse(True,"Figure monitored")
@@ -630,10 +636,10 @@ class ZLPProjectorROS(object):
 
             rospy.loginfo("Projecting demonstration")
             self.projector.show_coordinate_system()
-            rospy.sleep(3)
+            rospy.sleep(0.1)
             self.projector.hide_coordinate_system()
             self.projector.show_frame()
-            rospy.sleep(3)
+            rospy.sleep(0.1)
             self.projector.hide_frame()
 
         except Exception as e:

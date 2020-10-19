@@ -262,7 +262,6 @@ class ZLPProjectorManager(object):
             message = "No active coordinate system set yet."
             raise SystemError(message)
         
-        print("active coordinate system {}".format(self.__coordinate_system))
         success,message = self.cs_element.show_cs(self.__coordinate_system)
         if not success:
             raise SystemError(message)
@@ -448,6 +447,9 @@ class ZLPProjectorManager(object):
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
+        if not self.__coordinate_system:
+            raise Warning("No Active Coordinate System set yet.")
+        
         success,message = self.projector_client.start_project(self.__coordinate_system)
         if success:
             success,message = self.keyboard_control.init_keyboard_listener(self.__coordinate_system,proj_elem_params)
