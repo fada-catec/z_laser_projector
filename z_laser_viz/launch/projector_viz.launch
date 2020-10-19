@@ -9,7 +9,7 @@
         <arg name="load_user_coordinate_system" value="$(arg load_user_coordinate_system)"/>
     </include>
 
-    <include file="$(find z_laser_gui)/launch/projector_gui.launch" ns="$(arg namespace)"/>
+    <!-- <include file="$(find z_laser_gui)/launch/projector_gui.launch" ns="$(arg namespace)"/> -->
 
 
     <arg name="namespace_viz" value="zlaser_viz"/>

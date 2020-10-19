@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(z_laser_viz)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
-
 find_package(catkin REQUIRED COMPONENTS
 #   message_generation
   roscpp
@@ -13,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   visualization_msgs
   z_laser_msgs
+  z_laser_zlp1 #REQUIRED COMPONENTS zlp_utils
   tf
 )
 
