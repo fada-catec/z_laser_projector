@@ -26,6 +26,7 @@ import socket
 import copy
 import threading 
 from pynput import keyboard
+from scipy.spatial import distance
 
 import thriftpy
 from thriftpy.protocol import TBinaryProtocolFactory
@@ -33,7 +34,7 @@ from thriftpy.server import TThreadedServer, TSimpleServer
 from thriftpy.thrift import TProcessor, TClient
 from thriftpy.transport import TBufferedTransportFactory, TServerSocket, TSocket
 
-from z_laser_zlp1.zlp_utils import KeyboardParameters
+from z_laser_zlp1.zlp_utils import KeyboardParameters, ProjectionElementParameters
 
 class EventChannelInterfaceHandler(object):
     """This class implement the functions of ClientEventChannel thrift interface.
@@ -1051,6 +1052,7 @@ class CoordinateSystem(object):
         except Exception as e:
             success = False 
             message = e
+            cs_params = []
 
         return cs_params,success,message
 
@@ -1070,6 +1072,7 @@ class ProjectionElementControl(object):
         self.__thrift_client = thrift_client
         self.__geometry_tool = GeometryTool(thrift_client)
         self.module_id = module_id
+        self.figures_list = ProjectionElementParameters().figures_list
 
         self.default_projection_element = self.__thrift_client.thrift_interface.ProjectionElement()
         self.default_projection_element.pen = 0
@@ -1123,10 +1126,10 @@ class ProjectionElementControl(object):
         try:
             group  = proj_elem_params.projection_group
             id     = proj_elem_params.figure_name
-            x      = proj_elem_params.x
-            y      = proj_elem_params.y
-            angle  = proj_elem_params.angle
-            length = proj_elem_params.length
+            x      = proj_elem_params.position.x
+            y      = proj_elem_params.position.y
+            angle  = proj_elem_params.angle[0]
+            length = proj_elem_params.size[0]
 
             polyline_name = group + "/polyline/" + id
             polyline = self.create_polyline(polyline_name)
@@ -1180,9 +1183,9 @@ class ProjectionElementControl(object):
         try:
             group    = proj_elem_params.projection_group
             id       = proj_elem_params.figure_name
-            center_x = proj_elem_params.x
-            center_y = proj_elem_params.y
-            radius   = proj_elem_params.length
+            center_x = proj_elem_params.position.x
+            center_y = proj_elem_params.position.y
+            radius   = proj_elem_params.size[0]
 
             circle_name = group + "/circle/" + id
             circle = self.create_curve(circle_name,"circle")
@@ -1216,11 +1219,11 @@ class ProjectionElementControl(object):
         try:
             group       = proj_elem_params.projection_group
             id          = proj_elem_params.figure_name
-            center_x    = proj_elem_params.x
-            center_y    = proj_elem_params.y
-            start_angle = proj_elem_params.angle
-            end_angle   = proj_elem_params.end_angle
-            radius      = proj_elem_params.length
+            center_x    = proj_elem_params.position.x
+            center_y    = proj_elem_params.position.y
+            radius      = proj_elem_params.size[0]
+            start_angle = proj_elem_params.angle[0]
+            end_angle   = proj_elem_params.angle[1]
 
             arc_name = group + "/arc/" + id
             arc = self.create_curve(arc_name,"arc")
@@ -1256,11 +1259,11 @@ class ProjectionElementControl(object):
         try:
             group    = proj_elem_params.projection_group
             id       = proj_elem_params.figure_name
-            center_x = proj_elem_params.x
-            center_y = proj_elem_params.y
-            angle    = proj_elem_params.angle
-            width    = proj_elem_params.length*2
-            height   = proj_elem_params.height*2
+            center_x = proj_elem_params.position.x
+            center_y = proj_elem_params.position.y
+            angle    = proj_elem_params.angle[0]
+            width    = proj_elem_params.size[0]*2
+            height   = proj_elem_params.size[1]*2
 
             oval_name = group + "/oval/" + id
             oval = self.create_curve(oval_name,"oval")
@@ -1310,12 +1313,12 @@ class ProjectionElementControl(object):
         try:
             group        = proj_elem_params.projection_group
             id           = proj_elem_params.figure_name
+            x_position   = proj_elem_params.position.x
+            y_position   = proj_elem_params.position.y
+            angle        = proj_elem_params.angle[0]
+            height       = proj_elem_params.size[0]
+            char_spacing = proj_elem_params.size[1]
             text_proj    = proj_elem_params.text
-            x_position   = proj_elem_params.x
-            y_position   = proj_elem_params.y
-            angle        = proj_elem_params.angle
-            height       = proj_elem_params.height
-            char_spacing = proj_elem_params.char_spacing
 
             text_name = group + "/text/" + id
             text = self.create_text(text_name)
@@ -1338,6 +1341,120 @@ class ProjectionElementControl(object):
 
         return success,message
 
+    def get_figure(self,figure_params):
+        """
+        """
+        try:
+            figure_type = figure_params.figure_type
+            group       = figure_params.projection_group
+            id          = figure_params.figure_name
+            
+            name = group + self.figures_list[figure_type] + id
+
+            proj_elem = ProjectionElementParameters()
+            proj_elem.projection_group = group
+            proj_elem.figure_name      = id
+            proj_elem.figure_type      = figure_type
+
+            if figure_type == 0:
+                figure = self.get_polyline(name,proj_elem)
+            elif figure_type == 1:
+                figure = self.get_circle(name,proj_elem)
+            elif figure_type == 2:
+                figure = self.get_arc(name,proj_elem)
+            elif figure_type == 3:
+                figure = self.get_oval(name,proj_elem)
+            elif figure_type == 4:
+                figure = self.get_text(name,proj_elem)
+            else:
+                success = False
+                message = "Figure " + name + "does not exist."
+
+            if figure:
+                success = True
+                message = "Projection element get correct."
+            else:
+                success = False
+                message = "Projection element get error."
+
+        except Exception as e:
+            success = False 
+            message = e
+            figure = []
+
+        return figure,success,message
+    
+    def get_polyline(self,name,proj_elem):
+
+        polyline = self.__thrift_client.GetPolyLine(name)
+        if polyline:
+            x_start = polyline.polylineList[0][0].x
+            y_start = polyline.polylineList[0][0].y
+            x_end = polyline.polylineList[0][1].x
+            y_end = polyline.polylineList[0][1].y
+
+            angle = 180/math.pi*math.atan2((y_end - y_start),(x_end - x_start))
+            length = distance.euclidean((x_start,y_start),(x_end,y_end))
+
+            proj_elem.position.x = x_start
+            proj_elem.position.y = y_start
+            proj_elem.angle[0]   = angle
+            proj_elem.size[0]    = length
+            return proj_elem
+        else:
+            return []
+
+    def get_circle(self,name,proj_elem):
+
+        circle = self.__thrift_client.GetCircleSegment(name)
+        if circle:
+            proj_elem.position.x = circle.center.x
+            proj_elem.position.y = circle.center.y
+            proj_elem.size[0]    = circle.radius
+            return proj_elem
+        else:
+            return []
+
+    def get_arc(self,name,proj_elem):
+
+        arc = self.__thrift_client.GetCircleSegment(name)
+        if arc:
+            proj_elem.position.x = arc.center.x
+            proj_elem.position.y = arc.center.y
+            proj_elem.angle[0]   = arc.startAngle
+            proj_elem.angle[1]   = arc.endAngle
+            proj_elem.size[0]    = arc.radius
+            return proj_elem
+        else:
+            return []
+
+    def get_oval(self,name,proj_elem):
+
+        oval = self.__thrift_client.GetOvalSegment(name)
+        if oval:
+            proj_elem.position.x = oval.center.x
+            proj_elem.position.y = oval.center.y
+            proj_elem.angle[0]   = oval.angle
+            proj_elem.size[0]    = oval.width
+            proj_elem.size[1]    = oval.height
+            return proj_elem
+        else:
+            return []
+
+    def get_text(self,name,proj_elem):
+
+        text = self.__thrift_client.GetTextElement(name)
+        if text:
+            proj_elem.position.x = text.position.x
+            proj_elem.position.y = text.position.y
+            proj_elem.angle[0]   = text.angle
+            proj_elem.size[0]    = text.height
+            proj_elem.size[1]    = text.charSpacing
+            proj_elem.text       = text.text
+            return proj_elem
+        else:
+            return []
+
     def activate_figure(self, figure_params, status): 
         """Hide (deactivate) or unhide (activate hidden) a projection element from the active reference system.
 
@@ -1353,32 +1470,32 @@ class ProjectionElementControl(object):
             group       = figure_params.projection_group
             id          = figure_params.figure_name
 
-            name = group + "/" + figure_type + "/" + id
-            if figure_type == "polyline":
+            name = group + self.figures_list[figure_type] + id
+            if figure_type == 0:
                 polyline = self.__thrift_client.GetPolyLine(name)
                 if polyline:
                     polyline.activated = status
                     self.__thrift_client.SetPolyLine(polyline)
                     success = True
-            elif figure_type == "circle":
+            elif figure_type == 1:
                 circle = self.__thrift_client.GetCircleSegment(name)
                 if circle:
                     circle.activated = status
                     self.__thrift_client.SetCircleSegment(circle)
                     success = True
-            elif figure_type == "oval":
-                oval = self.__thrift_client.GetOvalSegment(name)
-                if oval:
-                    oval.activated = status
-                    self.__thrift_client.SetOvalSegment(oval)
-                    success = True
-            elif figure_type == "arc":
+            elif figure_type == 2:
                 arc = self.__thrift_client.GetCircleSegment(name)
                 if arc:
                     arc.activated = status
                     self.__thrift_client.SetCircleSegment(arc)
                     success = True
-            elif figure_type == "text":
+            elif figure_type == 3:
+                oval = self.__thrift_client.GetOvalSegment(name)
+                if oval:
+                    oval.activated = status
+                    self.__thrift_client.SetOvalSegment(oval)
+                    success = True
+            elif figure_type == 4:
                 text = self.__thrift_client.GetTextElement(name)
                 if text:
                     text.activated = status
@@ -1414,22 +1531,17 @@ class ProjectionElementControl(object):
             group       = figure_params.projection_group
             id          = figure_params.figure_name
 
-            name = group + "/" + figure_type + "/" + id
-            figure = self.__thrift_client.GetPolyLine(name)
-            if figure:
-                self.__thrift_client.RemoveGeoTreeElem(name)
-                success = True
-                message = "Figure removed"
-            else:
-                success = False
-                message = "Figure name does not exist."
+            name = group + self.figures_list[figure_type] + id
+            self.__thrift_client.RemoveGeoTreeElem(name)
+            success = True
+            message = "Figure removed"
         except Exception as e:
             success = False 
             message = e
 
         return success,message
 
-    def translate_figure(self,proj_elem_params,dx=0,dy=0,dz=0):
+    def translate_figure(self,figure_params,dx=0,dy=0,dz=0):
         """Translate a figure from one position to anotherthe current reference system.
 
         Args:
@@ -1443,11 +1555,11 @@ class ProjectionElementControl(object):
             is an information message string
         """
         try:
-            figure_type      = proj_elem_params.figure_type
-            projection_group = proj_elem_params.projection_group
-            id               = proj_elem_params.figure_name
+            figure_type = figure_params.figure_type
+            group       = figure_params.projection_group
+            id          = figure_params.figure_name
 
-            name = projection_group + "/" + figure_type + "/" + id
+            name = group + self.figures_list[figure_type] + id
 
             self.__thrift_client.Translate(name,dx,dy)
             self.__thrift_client.ApplyTransformation(name)
@@ -1461,7 +1573,7 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def scale_figure(self,proj_elem_params,scale_factor):
+    def scale_figure(self,figure_params,scale_factor):
         """Scale size of a projection figure.
 
         Args:
@@ -1473,11 +1585,11 @@ class ProjectionElementControl(object):
             an information message string
         """
         try:
-            figure_type      = proj_elem_params.figure_type
-            projection_group = proj_elem_params.projection_group
-            id               = proj_elem_params.figure_name
+            figure_type = figure_params.figure_type
+            group       = figure_params.projection_group
+            id          = figure_params.figure_name
 
-            name = projection_group + "/" + figure_type + "/" + id
+            name = group + self.figures_list[figure_type] + id
 
             self.__thrift_client.Scale(name,scale_factor)
             self.__thrift_client.ApplyTransformation(name)
@@ -1491,7 +1603,7 @@ class ProjectionElementControl(object):
 
         return success,message
 
-    def rotate_figure(self,proj_elem_params,x_angle,y_angle,z_angle):
+    def rotate_figure(self,figure_params,x_angle,y_angle,z_angle):
         """Rotate a figure an angle.
 
         Args:
@@ -1503,11 +1615,11 @@ class ProjectionElementControl(object):
             an information message string
         """
         try:
-            figure_type      = proj_elem_params.figure_type
-            projection_group = proj_elem_params.projection_group
-            id               = proj_elem_params.figure_name
+            figure_type = figure_params.figure_type
+            group       = figure_params.projection_group
+            id          = figure_params.figure_name
 
-            name = projection_group + "/" + figure_type + "/" + id
+            name = group + self.figures_list[figure_type] + id
 
             self.__thrift_client.Rotate(name,x_angle,y_angle,z_angle)
             self.__thrift_client.ApplyTransformation(name)
@@ -1537,46 +1649,46 @@ class ProjectionElementControl(object):
         proj_elem_params.projection_group = cs_params.name + "_origin"
         
         proj_elem_params.figure_name = self.axes_ids[0]
-        proj_elem_params.x           = 0
-        proj_elem_params.y           = 0
-        proj_elem_params.length      = cs_params.resolution/2
-        proj_elem_params.angle       = 0
+        proj_elem_params.position.x  = 0
+        proj_elem_params.position.y  = 0
+        proj_elem_params.size[0]     = cs_params.resolution/2
+        proj_elem_params.angle[0]    = 0
         success,message = self.define_polyline(cs_params.name, proj_elem_params)         
         if not success:
             return success,message
         
         proj_elem_params.figure_name = self.axes_ids[1]
-        proj_elem_params.angle       = 90
+        proj_elem_params.angle[0]    = 90
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
         proj_elem_params.figure_name = self.axes_ids[2]
-        proj_elem_params.x           = cs_params.resolution/2
-        proj_elem_params.y           = 0
-        proj_elem_params.length      = cs_params.resolution/12
-        proj_elem_params.angle       = 180 - 15
+        proj_elem_params.position.x  = cs_params.resolution/2
+        proj_elem_params.position.y  = 0
+        proj_elem_params.size[0]     = cs_params.resolution/12
+        proj_elem_params.angle[0]    = 180 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
         proj_elem_params.figure_name = self.axes_ids[3]
-        proj_elem_params.angle       = 180 + 15
+        proj_elem_params.angle[0]    = 180 + 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
         proj_elem_params.figure_name = self.axes_ids[4]
-        proj_elem_params.x           = 0
-        proj_elem_params.y           = cs_params.resolution/2
-        proj_elem_params.length      = cs_params.resolution/14
-        proj_elem_params.angle       = 270 - 15
+        proj_elem_params.position.x  = 0
+        proj_elem_params.position.y  = cs_params.resolution/2
+        proj_elem_params.size[0]     = cs_params.resolution/14
+        proj_elem_params.angle[0]    = 270 - 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
         proj_elem_params.figure_name = self.axes_ids[5]
-        proj_elem_params.angle       = 270 + 15
+        proj_elem_params.angle[0]    = 270 + 15
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
@@ -1601,37 +1713,37 @@ class ProjectionElementControl(object):
         proj_elem_params.projection_group = cs_params.name + "_frame"
 
         proj_elem_params.figure_name = self.frame_ids[0]
-        proj_elem_params.x           = T[0]
-        proj_elem_params.y           = T[1]
-        proj_elem_params.length      = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
-        proj_elem_params.angle       = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
+        proj_elem_params.position.x  = T[0]
+        proj_elem_params.position.y  = T[1]
+        proj_elem_params.size[0]     = math.sqrt((T[2]-T[0])**2+(T[3]-T[1])**2)
+        proj_elem_params.angle[0]    = 180/math.pi*math.atan2((T[3]-T[1]),(T[2]-T[0]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params) 
         if not success:
             return success,message
 
         proj_elem_params.figure_name = self.frame_ids[1]
-        proj_elem_params.x           = T[2]
-        proj_elem_params.y           = T[3]
-        proj_elem_params.length      = math.sqrt((T[4]-T[2])**2+(T[5]-T[3])**2)
-        proj_elem_params.angle       = 180/math.pi*math.atan2((T[5]-T[3]),(T[4]-T[2]))
+        proj_elem_params.position.x  = T[2]
+        proj_elem_params.position.y  = T[3]
+        proj_elem_params.size[0]     = math.sqrt((T[4]-T[2])**2+(T[5]-T[3])**2)
+        proj_elem_params.angle[0]    = 180/math.pi*math.atan2((T[5]-T[3]),(T[4]-T[2]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
         proj_elem_params.figure_name = self.frame_ids[2]
-        proj_elem_params.x           = T[4]
-        proj_elem_params.y           = T[5]
-        proj_elem_params.length      = math.sqrt((T[6]-T[4])**2+(T[7]-T[5])**2)
-        proj_elem_params.angle       = 180/math.pi*math.atan2((T[7]-T[5]),(T[6]-T[4]))
+        proj_elem_params.position.x  = T[4]
+        proj_elem_params.position.y  = T[5]
+        proj_elem_params.size[0]     = math.sqrt((T[6]-T[4])**2+(T[7]-T[5])**2)
+        proj_elem_params.angle[0]    = 180/math.pi*math.atan2((T[7]-T[5]),(T[6]-T[4]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
 
         proj_elem_params.figure_name = self.frame_ids[3]
-        proj_elem_params.x           = T[6]
-        proj_elem_params.y           = T[7]
-        proj_elem_params.length      = math.sqrt((T[0]-T[6])**2+(T[1]-T[7])**2)
-        proj_elem_params.angle       = 180/math.pi*math.atan2((T[1]-T[7]),(T[0]-T[6]))
+        proj_elem_params.position.x  = T[6]
+        proj_elem_params.position.y  = T[7]
+        proj_elem_params.size[0]     = math.sqrt((T[0]-T[6])**2+(T[1]-T[7])**2)
+        proj_elem_params.angle[0]    = 180/math.pi*math.atan2((T[1]-T[7]),(T[0]-T[6]))
         success,message = self.define_polyline(cs_params.name, proj_elem_params)
         if not success:
             return success,message
@@ -1668,19 +1780,19 @@ class KeyboardControl(object):
 
             if self.current == self.keyboard_params.KEY_UP:
                 print ("KEY_UP")
-                self.projection_element.translate_figure(proj_elem_params,0,50,0)
+                self.projection_element.translate_figure(proj_elem_params,0,1,0)
                 self.projector_client.update_project(coord_sys)
             elif self.current == self.keyboard_params.KEY_DOWN:
                 print ("KEY_DOWN")
-                self.projection_element.translate_figure(proj_elem_params,0,-50,0)
+                self.projection_element.translate_figure(proj_elem_params,0,-1,0)
                 self.projector_client.update_project(coord_sys)
             elif self.current == self.keyboard_params.KEY_LEFT:
                 print ("KEY_LEFT")
-                self.projection_element.translate_figure(proj_elem_params,-50,0,0)
+                self.projection_element.translate_figure(proj_elem_params,-1,0,0)
                 self.projector_client.update_project(coord_sys)
             elif self.current == self.keyboard_params.KEY_RIGHT:
                 print ("KEY_RIGHT")
-                self.projection_element.translate_figure(proj_elem_params,50,0,0)
+                self.projection_element.translate_figure(proj_elem_params,1,0,0)
                 self.projector_client.update_project(coord_sys)
             elif self.current == self.keyboard_params.KEY_PLUS:
                 print ("KEY_PLUS")
@@ -1692,11 +1804,11 @@ class KeyboardControl(object):
                 self.projector_client.update_project(coord_sys)
             elif self.current == self.keyboard_params.COMB_1:
                 print ("COMB_1")
-                self.projection_element.rotate_figure(proj_elem_params,0,0,45)
+                self.projection_element.rotate_figure(proj_elem_params,0,0,1)
                 self.projector_client.update_project(coord_sys)
             elif self.current == self.keyboard_params.COMB_2:
                 print ("COMB_2")
-                self.projection_element.rotate_figure(proj_elem_params,0,0,-45)
+                self.projection_element.rotate_figure(proj_elem_params,0,0,-1)
                 self.projector_client.update_project(coord_sys)
             elif self.current == self.keyboard_params.ESC:
                 print ("ESC")
