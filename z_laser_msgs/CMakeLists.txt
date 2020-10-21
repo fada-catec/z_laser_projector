@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(z_laser_msgs)
 
-## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
-
 find_package(catkin REQUIRED COMPONENTS
   message_generation
   geometry_msgs
@@ -11,12 +8,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_python_setup()
 
-
 add_message_files(
    FILES
-   Line.msg
-   Curve.msg
-   Text.msg
+   Figure.msg
 )
 
 add_service_files(
@@ -32,7 +26,6 @@ generate_messages(
    DEPENDENCIES
    geometry_msgs
 )
-
 
 ## CATKIN configuration
 catkin_package(
