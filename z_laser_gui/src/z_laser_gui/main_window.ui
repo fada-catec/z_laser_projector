@@ -1850,12 +1850,12 @@ background-color: native;
         </item>
         <item>
          <property name="text">
-          <string>oval</string>
+          <string>arc</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>arc</string>
+          <string>oval</string>
          </property>
         </item>
         <item>
@@ -2348,11 +2348,9 @@ background-color: native;
         <property name="editable">
          <bool>false</bool>
         </property>
-        <item>
-         <property name="text">
-          <string/>
-         </property>
-        </item>
+        <property name="currentIndex">
+         <number>5</number>
+        </property>
         <item>
          <property name="text">
           <string>polyline</string>
@@ -2365,17 +2363,22 @@ background-color: native;
         </item>
         <item>
          <property name="text">
-          <string>oval</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>arc</string>
          </property>
         </item>
         <item>
          <property name="text">
+          <string>oval</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>text</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string/>
          </property>
         </item>
        </widget>
