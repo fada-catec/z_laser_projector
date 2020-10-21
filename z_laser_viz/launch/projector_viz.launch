@@ -3,13 +3,15 @@
 
     <arg name="namespace" value="zlaser"/>
     <arg name="load_user_coordinate_system" default="false"/>
+    <arg name="using_visualizer" default="false"/>
 
     <include file="$(find z_laser_zlp1)/launch/projector_zlp1.launch">
         <arg name="namespace" value="$(arg namespace)"/>
         <arg name="load_user_coordinate_system" value="$(arg load_user_coordinate_system)"/>
+        <arg name="using_visualizer"  value="true" />
     </include>
 
-    <!-- <include file="$(find z_laser_gui)/launch/projector_gui.launch" ns="$(arg namespace)"/> -->
+    <include file="$(find z_laser_gui)/launch/projector_gui.launch" ns="$(arg namespace)"/>
 
 
     <arg name="namespace_viz" value="zlaser_viz"/>
@@ -18,9 +20,7 @@
 
         <param name="zlp1" command="$(find xacro)/xacro -i $(find z_laser_viz)/urdf/zlp1.urdf.xacro"/>
 
-        <remap from="add_line" to="/$(arg namespace)/add_line" />
-        <remap from="add_curve" to="/$(arg namespace)/add_curve" />
-        <remap from="add_text" to="/$(arg namespace)/add_text" />
+        <remap from="add_projection_element" to="/$(arg namespace)/add_projection_element"/>
         <node name="zlp_viz" pkg="z_laser_viz" type="zlp1_viz.py" output="screen"/>
 
         <node pkg="tf" type="static_transform_publisher" name="static_tf" args="0 0 0.95 -0.5 0.5 -0.5 0.5 world zlp1_link 100" />
