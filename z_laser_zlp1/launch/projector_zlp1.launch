@@ -2,6 +2,7 @@
 
     <arg name="namespace" default="zlaser"/>
     <arg name="load_user_coordinate_system" default="false"/>
+    <arg name="using_visualizer" default="false"/>
 
     <group ns="$(arg namespace)">
 
@@ -13,7 +14,9 @@
         <rosparam unless ="$(eval arg('load_user_coordinate_system'))"
             file="$(find z_laser_zlp1)/config/projector_coordinate_system.yaml"/>
 
-        <node name="zlp_node" pkg="z_laser_zlp1" type="zlp_node.py" output="screen"/>
+        <node name="zlp_node" pkg="z_laser_zlp1" type="zlp_node.py" output="screen">
+            <param name="using_visualizer"  value="$(arg using_visualizer)"/>
+        </node>
 
     </group>
 
