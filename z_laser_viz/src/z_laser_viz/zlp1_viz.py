@@ -1,19 +1,19 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 import rospy
 import math
 from math import sin,cos,pi
 import numpy as np
-import tf
-
+from scipy.spatial.transform import Rotation
 from pynput import keyboard
-from z_laser_zlp1.zlp_utils import KeyboardParameters
 
+from z_laser_zlp1.zlp_utils import KeyboardParameters
+from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from geometry_msgs.msg import Point, Quaternion, Vector3, Pose, Quaternion
 from std_srvs.srv import Trigger, TriggerResponse
 from visualization_msgs.msg import Marker, MarkerArray
-from z_laser_msgs.msg import Line, Curve, Text
+from z_laser_msgs.msg import Figure
 from z_laser_msgs.srv import CoordinateSystem, CoordinateSystemResponse
 from z_laser_msgs.srv import CoordinateSystemName, CoordinateSystemNameResponse
 from z_laser_msgs.srv import CoordinateSystemShow, CoordinateSystemShowResponse
@@ -28,7 +28,10 @@ class ZLPVisualizer(object):
         self.pe_marker_array = MarkerArray()
 
         self.active_cs = ""
-        self.cs_element = ""
+        self.cs_reference = ""
+        self.STD_WAIT_TIME = CoordinateSystemParameters().DEFAULT_WAIT_TIME
+
+        self.figures_list = ProjectionElementParameters().figures_list
 
         self.open_services()
         cs_markers_pub = rospy.Publisher('coord_sys_markers', MarkerArray, queue_size=10)
@@ -61,14 +64,8 @@ class ZLPVisualizer(object):
         self.unhide_figure  = rospy.Service('unhide_figure', ProjectionElement, self.unhide_figure_cb)
         self.remove_figure  = rospy.Service('remove_figure', ProjectionElement, self.remove_figure_cb)
         
-        self.add_line       = rospy.Subscriber("add_line", Line, self.add_line_cb)
-        self.add_curve      = rospy.Subscriber("add_curve", Curve, self.add_curve_cb)
-        self.add_text       = rospy.Subscriber("add_text", Text, self.add_text_cb)
-
-
-        self.monit_figure   = rospy.Service('monitor_figure', ProjectionElement, self.init_keyboard_listener_cb)
-
-
+        self.add_proj_elem  = rospy.Subscriber("add_projection_element", Figure, self.add_fig_cb)
+        self.monit_figure   = rospy.Subscriber("monitor_figure", Figure, self.init_keyboard_listener_cb)
 
     def projection_start_cb(self,req):
 
@@ -103,8 +100,8 @@ class ZLPVisualizer(object):
         self.cs_marker_array.markers.append(frame)
 
         self.active_cs = req.name
-        self.cs_element = "_origin"
-        self.timer_secs = 0.1
+        self.cs_reference = "_origin"
+        self.timer_secs = self.STD_WAIT_TIME
         self.update_cs_markers()
 
         return CoordinateSystemResponse([], True, "Coordinate System added manually.")
@@ -112,13 +109,13 @@ class ZLPVisualizer(object):
     def update_cs_markers(self):
 
         for cs in self.cs_marker_array.markers:
-            if (self.active_cs + self.cs_element) in cs.ns:
+            if (self.active_cs + self.cs_reference) in cs.ns:
                 cs.action = Marker.ADD
         
-        if self.cs_element in ["_origin","_frame"]:
+        if self.cs_reference in ["_origin","_frame"]:
             rospy.Timer(rospy.Duration(self.timer_secs), self.timer_cb, oneshot=True)
 
-        self.cs_element = "_frame" if self.cs_element == "_origin" else "empty"
+        self.cs_reference = "_frame" if self.cs_reference == "_origin" else "empty"
 
     def timer_cb(self, timer):
 
@@ -226,7 +223,7 @@ class ZLPVisualizer(object):
             if req.secs > 0:
 
                 self.timer_secs = req.secs
-                self.cs_element = "_origin"
+                self.cs_reference = "_origin"
                 self.update_cs_markers()
                 return CoordinateSystemShowResponse(True, "Active Coordinate System showed correctly.")
             else:
@@ -247,12 +244,33 @@ class ZLPVisualizer(object):
         else:
             return CoordinateSystemNameResponse(False, "Coordinate System does not exist.")
 
-    def add_line_cb(self,msg):
+    def add_fig_cb(self,msg):
+
+        if msg.figure_type == 0:
+            self.add_line(msg)
+        elif msg.figure_type == 1:
+            self.add_circle(msg)
+        elif msg.figure_type == 2:
+            self.add_arc(msg)
+        elif msg.figure_type == 3:
+            self.add_oval(msg)
+        elif msg.figure_type == 4:
+            self.add_text(msg)
+
+    def add_line(self,msg):
+
+        x_start = msg.position.x * 0.001
+        y_start = msg.position.y * 0.001
+        length = msg.size[0] * 0.001
+        angle = msg.angle[0] * math.pi/180
+
         marker = Marker()
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.DELETE
 
-        # marker.pose.position = Point(0,0,0)
+        marker.pose.position = Point(x_start + length/2*math.cos(angle),
+                                    y_start + length/2*math.sin(angle),
+                                    0)
         marker.pose.orientation = Quaternion(0,0,0,1)
 
         marker.scale.x = 0.01 # Vector3(0.01, 0.01, 0)
@@ -260,27 +278,7 @@ class ZLPVisualizer(object):
         marker.color.g = 1.0
         marker.color.a = 1.0
 
-        x_start = msg.x * 0.001
-        y_start = msg.y * 0.001
-        length = msg.length * 0.001
-        angle = msg.angle * math.pi/180
-
-        marker.pose.position = Point(x_start + length/2*math.cos(angle),y_start + length/2*math.sin(angle),0)
-        print(marker.pose.position)
-        # marker.pose.position = Point(0,250*0.001,0)
-
-
-        # delta_th = 0.01
-        # for th in np.arange(0.0, length, delta_th):
-        #     x = x_start + th * math.cos(angle)
-        #     y = y_start + th * math.sin(angle)
-
-        #     point = Point()
-        #     point.x = x
-        #     point.y = y
-        #     marker.points.append(point)
-
-        figure = self.line_eq(x_start,y_start,length,angle)
+        figure = self.line_eq(length,angle)
         marker.points = figure
 
         marker.ns = self.active_cs + "/" + msg.projection_group + "/polyline/" + msg.figure_name
@@ -288,7 +286,7 @@ class ZLPVisualizer(object):
 
         self.pe_marker_array.markers.append(marker)
 
-    def line_eq(self,xs,ys,leng,ang):
+    def line_eq(self,leng,ang):
         
         traject = []
 
@@ -303,20 +301,18 @@ class ZLPVisualizer(object):
             traject.append(point)
 
         return traject
-
-    def add_curve_cb(self,msg):
-        if msg.curve_type == "circle":
-            self.add_circle(msg)
-        elif msg.curve_type == "oval":
-            self.add_oval(msg)
-        elif msg.curve_type == "arc":
-            self.add_arc(msg)
     
     def add_circle(self,msg):
+
+        centre_x = msg.position.x * 0.001
+        centre_y = msg.position.y * 0.001
+        radius = msg.size[0] * 0.001
+
         marker = Marker()
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.DELETE
 
+        marker.pose.position = Point(centre_x,centre_y,0)
         marker.pose.orientation = Quaternion(0,0,0,1)
 
         marker.scale.x = 0.01
@@ -324,63 +320,27 @@ class ZLPVisualizer(object):
         marker.color.g = 1.0
         marker.color.a = 1.0
 
-        centre_x = msg.x * 0.001
-        centre_y = msg.y * 0.001
-        R = msg.length * 0.001
-
-        delta_th = 0.01
-        for th in np.arange(0.0, 2*math.pi+delta_th, delta_th):
-            x = centre_x + R * math.sin(th)
-            y = centre_y + R * math.cos(th)
-
-            point = Point()
-            point.x = x
-            point.y = y
-            marker.points.append(point)
+        figure = self.circle_eq(radius,0.0,2*math.pi)
+        marker.points = figure
 
         marker.ns = self.active_cs + "/" + msg.projection_group + "/circle/" + msg.figure_name
         marker.header.frame_id = self.active_cs
 
         self.pe_marker_array.markers.append(marker)
 
-    def add_oval(self,msg):
-        marker = Marker()
-        marker.type = Marker.LINE_STRIP
-        marker.action = Marker.DELETE
-
-        marker.pose.orientation = Quaternion(0,0,0,1)
-
-        marker.scale.x = 0.01
-
-        marker.color.g = 1.0
-        marker.color.a = 1.0
-
-        centre_x = msg.x * 0.001
-        centre_y = msg.y * 0.001
-        a = msg.length * 0.001
-        b = msg.height * 0.001
-        angle = msg.angle * math.pi/180
-
-        delta_th = 0.01
-        for th in np.arange(0.0, 2*math.pi+delta_th, delta_th):
-            x = centre_x + a * math.cos(th)*math.cos(angle) - b * math.sin(th)*math.sin(angle)
-            y = centre_y + a * math.cos(th)*math.sin(angle) + b * math.sin(th)*math.cos(angle)
-
-            point = Point()
-            point.x = x
-            point.y = y
-            marker.points.append(point)
-
-        marker.ns = self.active_cs + "/" + msg.projection_group + "/oval/" + msg.figure_name
-        marker.header.frame_id = self.active_cs
-
-        self.pe_marker_array.markers.append(marker)
-
     def add_arc(self,msg):
+
+        centre_x = msg.position.x * 0.001
+        centre_y = msg.position.y * 0.001
+        radius = msg.size[0] * 0.001
+        start_angle = msg.angle[0] * math.pi/180
+        end_angle = msg.angle[1] * math.pi/180
+
         marker = Marker()
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.DELETE
 
+        marker.pose.position = Point(centre_x,centre_y,0)
         marker.pose.orientation = Quaternion(0,0,0,1)
 
         marker.scale.x = 0.01
@@ -388,40 +348,91 @@ class ZLPVisualizer(object):
         marker.color.g = 1.0
         marker.color.a = 1.0
 
-        centre_x = msg.x * 0.001
-        centre_y = msg.y * 0.001
-        R = msg.length * 0.001
-        start_angle = msg.angle * math.pi/180
-        end_angle = msg.end_angle * math.pi/180
-
-        delta_th = 0.01
-        for th in np.arange(start_angle, end_angle, delta_th):
-            x = centre_x + R * math.cos(th)
-            y = centre_y + R * math.sin(th)
-
-            point = Point()
-            point.x = x
-            point.y = y
-            marker.points.append(point)
+        figure = self.circle_eq(radius,start_angle,end_angle)
+        marker.points = figure
 
         marker.ns = self.active_cs + "/" + msg.projection_group + "/arc/" + msg.figure_name
         marker.header.frame_id = self.active_cs
 
         self.pe_marker_array.markers.append(marker)
 
-    def add_text_cb(self,msg):
+    def circle_eq(self,radius,start_ang,end_ang):
+        
+        traject = []
+
+        delta_th = 0.01
+        # for th in np.arange(0.0, 2*math.pi+delta_th, delta_th):
+        for th in np.arange(start_ang, end_ang, delta_th):
+            x = radius * math.sin(th)
+            y = radius * math.cos(th)
+
+            point = Point()
+            point.x = x
+            point.y = y
+            traject.append(point)
+
+        return traject
+
+    def add_oval(self,msg):
+
+        centre_x = msg.position.x * 0.001
+        centre_y = msg.position.y * 0.001
+        width = msg.size[0] * 0.001
+        height = msg.size[1] * 0.001
+        angle = msg.angle[0] * math.pi/180
+
+        marker = Marker()
+        marker.type = Marker.LINE_STRIP
+        marker.action = Marker.DELETE
+
+        marker.pose.position = Point(centre_x,centre_y,0)
+        marker.pose.orientation = Quaternion(0,0,0,1)
+
+        marker.scale.x = 0.01
+
+        marker.color.g = 1.0
+        marker.color.a = 1.0
+
+        figure = self.oval_eq(width,height,angle)
+        marker.points = figure
+
+        marker.ns = self.active_cs + "/" + msg.projection_group + "/oval/" + msg.figure_name
+        marker.header.frame_id = self.active_cs
+
+        self.pe_marker_array.markers.append(marker)
+
+    def oval_eq(self,a,b,angle):
+        
+        traject = []
+
+        delta_th = 0.01
+        for th in np.arange(0.0, 2*math.pi+delta_th, delta_th):
+            x = a * math.cos(th)*math.cos(angle) - b * math.sin(th)*math.sin(angle)
+            y = a * math.cos(th)*math.sin(angle) + b * math.sin(th)*math.cos(angle)
+
+            point = Point()
+            point.x = x
+            point.y = y
+            traject.append(point)
+
+        return traject
+
+    def add_text(self,msg):
         marker = Marker()
         marker.type = Marker.TEXT_VIEW_FACING
         marker.action = Marker.DELETE
 
-        marker.pose.position.x = msg.x * 0.001
-        marker.pose.position.y = msg.y * 0.001
+        marker.pose.position.x = msg.position.x * 0.001
+        marker.pose.position.y = msg.position.y * 0.001
         marker.pose.position.z = 0.0
         
-        rotation = tf.transformations.quaternion_from_euler(0, 0, msg.angle)
-        marker.pose.orientation = Quaternion(rotation[0],rotation[1],rotation[2],rotation[3])
+        rotation = Rotation.from_euler('xyz', [0, 0, msg.angle[0]], degrees=True)        
+        marker.pose.orientation = Quaternion(rotation.as_quat()[0],
+                                            rotation.as_quat()[1],
+                                            rotation.as_quat()[2],
+                                            rotation.as_quat()[3])
 
-        marker.scale.z = msg.height * 0.001
+        marker.scale.z = msg.size[0] * 0.001
 
         marker.text = msg.text
 
@@ -460,7 +471,6 @@ class ZLPVisualizer(object):
 
         return ProjectionElementResponse(False, "Figure not found.")
 
-
     def translate(self,elem,dx,dy,dz):
         
         elem.action = Marker.DELETE
@@ -477,103 +487,121 @@ class ZLPVisualizer(object):
                 elem.pose.orientation.y,
                 elem.pose.orientation.z,
                 elem.pose.orientation.w]
-        rotation = tf.transformations.quaternion_from_euler(0, 0, angle*math.pi/180)
-        result = tf.transformations.quaternion_multiply(rotation,orig)
+        rotation = Rotation.from_euler('xyz', [0, 0, angle], degrees=True)
+        result = self.quat_multiply(rotation.as_quat(),orig)
         elem.pose.orientation = Quaternion(result[0],result[1],result[2],result[3])
         elem.action = Marker.ADD
 
-    def on_press(self,key,elem):
+    def quat_multiply(self,q1,q0):
+
+        x0, y0, z0, w0 = q0
+        x1, y1, z1, w1 = q1
+        return np.array((x1*w0 + y1*z0 - z1*y0 + w1*x0,
+                        -x1*z0 + y1*w0 + z1*x0 + w1*y0,
+                        x1*y0 - y1*x0 + z1*w0 + w1*z0,
+                        -x1*x0 - y1*y0 - z1*z0 + w1*w0), dtype=np.float64)
+
+    def scale(self,elem,factor,proj_elem_params):
+
+        elem.action = Marker.DELETE
+
+        self.scale_factor = self.scale_factor * factor
+        if proj_elem_params.figure_type == 0:
+            length = proj_elem_params.size[0] * self.scale_factor  * 0.001
+            angle = proj_elem_params.angle[0] * math.pi/180
+            figure = self.line_eq(length,angle)
+            elem.points = []
+            elem.points = figure
+        elif proj_elem_params.figure_type == 1:
+            radius = proj_elem_params.size[0] * self.scale_factor * 0.001
+            figure = self.circle_eq(radius,0.0,2*math.pi)
+            elem.points = []
+            elem.points = figure
+        elif proj_elem_params.figure_type == 2:
+            radius = proj_elem_params.size[0] * self.scale_factor * 0.001
+            start_ang = proj_elem_params.angle[0] * math.pi/180
+            end_ang = proj_elem_params.angle[1] * math.pi/180
+            figure = self.circle_eq(radius,start_ang,end_ang)
+            elem.points = []
+            elem.points = figure
+        elif proj_elem_params.figure_type == 3:
+            width = proj_elem_params.size[0] * self.scale_factor * 0.001
+            height = proj_elem_params.size[1] * self.scale_factor * 0.001
+            angle = proj_elem_params.angle[0] * math.pi/180
+            figure = self.oval_eq(width,height,angle)
+            elem.points = []
+            elem.points = figure
+        elif proj_elem_params.figure_type == 4:
+            elem.scale.z = elem.scale.z * self.scale_factor * 0.001
+        
+        elem.action = Marker.ADD
+
+    def on_press(self,key,elem,proj_elem_params):
         
         if any([key in COMBO for COMBO in self.keyboard_params.COMBINATIONS]):
             self.current.add(key)
 
             if self.current == self.keyboard_params.KEY_UP:
                 print ("KEY_UP")
-                self.translate(elem,0,0.1,0)
+                self.translate(elem,0,0.001,0)
             elif self.current == self.keyboard_params.KEY_DOWN:
                 print ("KEY_DOWN")
-                self.translate(elem,0,-0.1,0)
+                self.translate(elem,0,-0.001,0)
             elif self.current == self.keyboard_params.KEY_LEFT:
                 print ("KEY_LEFT")
-                self.translate(elem,-0.1,0,0)
+                self.translate(elem,-0.001,0,0)
             elif self.current == self.keyboard_params.KEY_RIGHT:
                 print ("KEY_RIGHT")
-                self.translate(elem,0.1,0,0)
+                self.translate(elem,0.001,0,0)
             elif self.current == self.keyboard_params.KEY_PLUS:
                 print ("KEY_PLUS")
-                # elem.action = Marker.DELETE
-                # scale = Vector3(0.5, 0.5, 0)
-                # elem.scale.x = elem.scale.x + scale.x
-                # elem.scale.y = elem.scale.y + scale.y
-                # elem.scale.z = elem.scale.z + scale.z
-                # elem.action = Marker.ADD
+                self.scale(elem,2,proj_elem_params)
             elif self.current == self.keyboard_params.KEY_MINUS:
                 print ("KEY_MINUS")
+                self.scale(elem,0.5,proj_elem_params)
             elif self.current == self.keyboard_params.COMB_1:
                 print ("COMB_1")
-                self.rotate(elem,45)
+                self.rotate(elem,1)
             elif self.current == self.keyboard_params.COMB_2:
                 print ("COMB_2")
-                self.rotate(elem,-45)
-
-                # elem.action = Marker.DELETE
-                # orig = [elem.pose.orientation.x,
-                #         elem.pose.orientation.y,
-                #         elem.pose.orientation.z,
-                #         elem.pose.orientation.w]
-                # rotation = tf.transformations.quaternion_from_euler(0, 0, -45*math.pi/180)
-                # elem.pose.orientation = tf.transformations.quaternion_multiply(rotation,orig)
-                # elem.action = Marker.ADD
+                self.rotate(elem,-1)
             elif self.current == self.keyboard_params.ESC:
                 print ("ESC")
                 elem.action = Marker.DELETE
 
-
     def on_release(self,key):
         
         if any([key in COMBO for COMBO in self.keyboard_params.COMBINATIONS]):
-            
             if self.current == self.keyboard_params.ESC:
                 self.current.remove(key)
                 return False
-
+            
             self.current.remove(key)
 
-    def init_keyboard_listener_cb(self,req):
-        
-        print("keyboard")
+    def init_keyboard_listener_cb(self,msg):
 
         self.keyboard_params = KeyboardParameters()
-
-        # self.projector_client = projector_client
-        # self.projection_element = projection_element
-
         self.current = set()
 
-        name = self.active_cs + "/" + req.projection_group + "/" + req.figure_type + "/" + req.figure_name
+        self.scale_factor = 1
+
+        name = self.active_cs + "/" + msg.projection_group + self.figures_list[msg.figure_type] + msg.figure_name
         # marker = [element for element in self.pe_marker_array.markers if name in element.ns]
         for element in self.pe_marker_array.markers:
             if name in element.ns:
                 marker = element
                 marker.action = Marker.ADD
                 break
-        print("MARKER: {}".format(marker.ns))
-
-        # if self.active_cs:
-        #     for i, element in enumerate(self.pe_marker_array.markers):
-        #         if element.ns.find(self.active_cs)>-1:
-        #             self.pe_marker_array.markers[i].action = Marker.ADD
 
         try:
-            # listener = keyboard.Listener(on_press=self.on_press,on_release=self.on_release)
-            listener = keyboard.Listener(on_press=lambda event: self.on_press(event, elem=marker),on_release=self.on_release)
+            listener = keyboard.Listener(on_press=lambda event: self.on_press(event, elem=marker, proj_elem_params=msg),
+                                        on_release=self.on_release)
             listener.start()
 
             return ProjectionElementResponse(True, "Viz monitor.")
 
         except Exception as e:
             print(e)
-
 
 if __name__ == '__main__':
 
