@@ -1,0 +1,201 @@
+# Generic .travis.yml file for running continuous integration on Travis-CI for
+# any ROS package.
+#
+# Available here:
+#   - https://github.com/felixduvallet/ros-travis-integration
+#
+# This installs ROS on a clean Travis-CI virtual machine, creates a ROS
+# workspace, resolves all listed dependencies, and sets environment variables
+# (setup.bash). Then, it compiles the entire ROS workspace (ensuring there are
+# no compilation errors), and runs all the tests. If any of the compilation/test
+# phases fail, the build is marked as a failure.
+#
+# We handle two types of package dependencies specified in the package manifest:
+#   - system dependencies that can be installed using `rosdep`, including other
+#     ROS packages and system libraries. These dependencies must be known to
+#     `rosdistro` and are installed using apt-get.
+#   - package dependencies that must be checked out from source. These are handled by
+#     `wstool`, and should be listed in a file named dependencies.rosinstall.
+#
+
+################################################################################
+
+# General setup
+sudo: required
+cache:
+  - apt
+# language: python
+language: generic
+
+
+
+# python:
+#   - "3.6"
+
+# virtualenv:
+  # system_site_packages: true
+
+
+matrix:
+  include:
+  - name: "Bionic melodic"
+    dist: bionic
+    env: ROS_DISTRO=melodic
+  # - name: "Xenial kinetic"
+    # dist: xenial
+    # env: ROS_DISTRO=kinetic
+
+# Environmental variables. All variables are global now.
+env:
+  global:
+    - ROS_CI_DESKTOP="`lsb_release -cs`"
+    - CI_SOURCE_PATH=$(pwd)
+    # - CODECOV_TOKEN="71ed5ee2-47f7-4b84-998f-a7515b23c9d3"
+    # - ROSINSTALL_FILE=$CI_SOURCE_PATH/dependencies.rosinstall
+    # - CATKIN_OPTIONS=$CI_SOURCE_PATH/catkin.options
+    - ROS_PARALLEL_JOBS='-j8 -l6'
+#    - PYTHONPATH=$PYTHONPATH:./.local/lib/python3.5/site-packages
+
+################################################################################
+
+# Install system dependencies, namely a very barebones ROS setup.
+before_install:
+  - sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $ROS_CI_DESKTOP main\" > /etc/apt/sources.list.d/ros-latest.list"
+  - sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+  - sudo apt-get update -qq
+#  - sudo apt-get install dpkg
+#  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-ros-base
+  - sudo apt-get install -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-desktop-full
+
+  - source /opt/ros/$ROS_DISTRO/setup.bash
+
+  - sudo rosdep init
+  - rosdep update --include-eol-distros
+
+  - sudo apt-get install -y python3-catkin-pkg-modules
+  - sudo apt-get install -y python3-rospkg-modules
+  # - python3 -m pip install catkin-pkg
+  # - python3 -m pip install rospkg
+
+  - sudo apt-get install -y python3-defusedxml
+
+  - sudo apt-get install -y python3-numpy 
+  - sudo apt-get install -y python3-thriftpy
+  - sudo apt-get install -y python3-psutil
+  - sudo apt-get install -y python3-scipy 
+
+
+  # - sudo apt-get install ros-melodic-rostest 
+  # - sudo apt-get install ros-melodic-rosunit
+  - sudo apt-get install -y python3-empy
+  - sudo apt-get install -y python3-nose
+  - sudo apt-get install -y python3-unittest2
+
+  - sudo apt-get install python3-setuptools
+  - sudo apt-get install -y python3-pip
+  - python3 -m pip install pynput
+
+  # - python3 -m pip install scipy==1.2.1
+
+  # - /usr/bin/python3 -m pip install --upgrade pip
+  # - python3 -m pip install --upgrade pip
+  # - python3 -m pip install thriftpy 
+  # - python3 -m pip install numpy 
+  # - pip3 install numpy 
+  # - pip3 install thriftpy
+  # - pip3 install psutil
+
+  # - export PYTHONPATH="./.local/lib/python3.6/site-packages"
+
+  # - pip install numpy 
+  # - pip install thriftpy
+  # - pip install psutil
+  # - sudo apt-get install -y ros-$ROS_DISTRO-code-coverage
+  # - sudo apt-get install -y python3-coverage
+
+  # - pip install coverage
+  # - pip install codecov
+
+  # - python3 -m pip install psutil
+
+
+
+  # - sudo apt-get install -y python3-coverage
+  # - sudo apt-get install -y python3-pip
+  # - pip3 install coverage
+  # - pip3 install codecov
+
+
+
+  # - sudo apt-get install python3.5
+  # - sudo apt-get install python3-pip python3-yaml
+  # - sudo pip3 install rospkg catkin_pkg
+  # - sudo apt-get install python3-pip
+  # - sudo apt-get install python3-setuptools
+  # - sudo apt-get install python3-catkin-pkg-modules
+  # - sudo apt-get install python3-rospkg-modules
+  # - /usr/bin/python3 -m pip install --upgrade pip
+  # - pip3 install thriftpy 
+  # - pip3 install numpy 
+  # - pip3 install psutil
+  # - pip3 install rostest
+  # - sudo rosdep init
+  # - rosdep update --include-eol-distros  # Support EOL distros.
+
+# Create a catkin workspace with the package under integration.
+install:
+  - mkdir -p ~/catkin_ws/src
+  - cd ~/catkin_ws/src
+  - catkin_init_workspace
+  - cd ~/catkin_ws
+  - catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_VERSION=3.6
+  - source devel/setup.bash
+  - cd ~/catkin_ws/src
+  - ln -s $CI_SOURCE_PATH .
+
+# Install package dependencies.
+before_script:
+  - cd ~/catkin_ws
+  - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+
+################################################################################
+
+# Compile.
+script:
+  - source /opt/ros/$ROS_DISTRO/setup.bash
+
+  # - source ~/virtualenv/python3.6/bin/activate
+
+  - cd ~/catkin_ws
+  # - source devel/setup.bash
+  - catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_VERSION=3.6
+
+  - source devel/setup.bash
+
+  # - catkin_make -DCATKIN_ENABLE_TESTING=ON -DENABLE_COVERAGE_TESTING=ON z_laser_projector_coverage_report
+  - catkin_make run_tests -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_VERSION=3.6 
+  # - catkin_test_results
+
+
+  # - codecov --gcov-root ~/catkin_ws/build/
+
+  # - coverage run test/connection_test.py
+  # - coverage run test/connection_test2.py
+  # - coverage report -m
+  
+  
+
+
+# after_success:
+#   - codecov
+#   - bash <(curl -s https://codecov.io/bash)
+
+
+#   - codecov -t CODECOV_TOKEN
+  # - codecov --root ~/catkin_ws/build -t $CODECOV_TOKEN
+  # - bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+
+
+
+  
+
