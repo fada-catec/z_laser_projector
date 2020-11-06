@@ -8,7 +8,7 @@
     <include file="$(find z_laser_zlp1)/launch/projector_zlp1.launch">
         <arg name="namespace" value="$(arg namespace)"/>
         <arg name="load_user_coordinate_system" value="$(arg load_user_coordinate_system)"/>
-        <arg name="using_visualizer"  value="true" />
+        <arg name="using_visualizer"  value="$(arg using_visualizer)" />
     </include>
 
     <include file="$(find z_laser_gui)/launch/projector_gui.launch" ns="$(arg namespace)"/>
@@ -16,6 +16,7 @@
 
     <arg name="namespace_viz" value="zlaser_viz"/>
     
+    <!-- <group ns="$(arg namespace_viz)" if="$(eval arg('using_visualizer') == true)"> -->
     <group ns="$(arg namespace_viz)">
 
         <param name="zlp1" command="$(find xacro)/xacro -i $(find z_laser_viz)/urdf/zlp1.urdf.xacro"/>

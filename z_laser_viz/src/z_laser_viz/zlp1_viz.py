@@ -581,6 +581,7 @@ class ZLPVisualizer(object):
     def init_keyboard_listener_cb(self,msg):
 
         self.keyboard_params = KeyboardParameters()
+
         self.current = set()
 
         self.scale_factor = 1
