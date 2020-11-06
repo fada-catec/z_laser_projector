@@ -16,8 +16,6 @@
 
 """Complementary module with useful classes to support the usage of zlp library."""
 
-from pynput import keyboard
-
 class Point3D(object):
     def __init__(self,x=0,y=0,z=0):
         self.x = float(x)
@@ -93,8 +91,11 @@ class ProjectionElementParameters(object):
 
 class KeyboardParameters(object):
     """."""
+
     def __init__(self):
         """."""
+        from pynput import keyboard
+
         self.KEY_UP    = {keyboard.Key.up}
         self.KEY_DOWN  = {keyboard.Key.down}
         self.KEY_LEFT  = {keyboard.Key.left}

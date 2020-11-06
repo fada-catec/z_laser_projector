@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="namespace" value="projector_zlp1"/>
+    <arg name="namespace" value="zlaser"/>
     <arg name="load_user_coordinate_system" default="false"/>
     <arg name="using_visualizer" default="false"/>
 
@@ -18,7 +18,7 @@
             <param name="using_visualizer"  value="$(arg using_visualizer)"/>
         </node>
 
-        <test test-name="connection_test" pkg="z_laser_zlp1" type="connection_test.py" />
+        <test test-name="test2" pkg="z_laser_zlp1" type="test2.py" />
         
     </group>
 

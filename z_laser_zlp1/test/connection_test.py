@@ -5,26 +5,33 @@ import rospy
 import psutil
 from std_srvs.srv import Trigger
 
-def remote_ip_present(ip):
-    remote_ips = [] # list of IPs for current active connections
+import socket
 
-    connections = psutil.net_connections(kind='inet')
-    for connection in connections:
-        if connection.laddr.ip not in remote_ips:
-            remote_ips.append(connection.laddr.ip)
+def ip_open(ip,port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(2)
+    
+    try:
+        s.connect((ip, int(port)))
+        success = True
+    
+    except:
+        success = False
 
-    return ip in remote_ips
+    s.close()
+    return success
 
 class TestServiceCall(unittest.TestCase):
+    
     def setUp(self):
         # check projector is on network
-        if not remote_ip_present("192.168.10.10") or not remote_ip_present("192.168.10.11"):
+        if not ip_open("192.168.10.11",9090):
             self.skipTest("projector is not found on network")
 
     # the node is automatically connected when launched, so perform disconnection first
 
     # test service should return error
-    def test_disconnection_fail(self):
+    def test1_disconnection_fail(self):
         rospy.wait_for_service("disconnect")
         s = rospy.ServiceProxy('disconnect', Trigger)
         try:
@@ -35,7 +42,7 @@ class TestServiceCall(unittest.TestCase):
                 rospy.loginfo("success. service exception: %s" %e)   
 
     # test service answer correctly
-    def test_disconnection_no_fail(self):
+    def test2_disconnection_no_fail(self):
         rospy.wait_for_service("disconnect")
         s = rospy.ServiceProxy('disconnect', Trigger)
 
@@ -49,7 +56,7 @@ class TestServiceCall(unittest.TestCase):
     # once disconnected, reconnect again
 
     # test service should return error
-    def test_connection_fail(self):
+    def test3_connection_fail(self):
         rospy.wait_for_service("connect")
         s = rospy.ServiceProxy('connect', Trigger)
         try:
@@ -60,7 +67,7 @@ class TestServiceCall(unittest.TestCase):
                 rospy.loginfo("success. service exception: %s" %e)   
 
     # test service answer correctly
-    def test_connection_no_fail(self):
+    def test4_connection_no_fail(self):
         rospy.wait_for_service("connect")
         s = rospy.ServiceProxy('connect', Trigger)
 

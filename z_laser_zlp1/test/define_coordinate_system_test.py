@@ -2,25 +2,29 @@
 
 import unittest
 import rospy
-import psutil
+import socket
 from std_srvs.srv import Trigger
 from geometry_msgs.msg import Point
 from z_laser_zlp1.srv import CoordinateSystem, CoordinateSystemRequest, CoordinateSystemResponse
 
-def remote_ip_present(ip):
-    remote_ips = [] # list of IPs for current active connections
-
-    connections = psutil.net_connections(kind='inet')
-    for connection in connections:
-        if connection.laddr.ip not in remote_ips:
-            remote_ips.append(connection.laddr.ip)
-
-    return ip in remote_ips
+def ip_open(ip,port):
+   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+   try:
+      s.connect((ip, int(port)))
+      s.shutdown(2)
+      return True
+   except:
+      return False
 
 class TestServiceCall(unittest.TestCase):
 
+    def setUp(self):
+        # check projector is on network
+        if not ip_open("192.168.10.11",9090):
+            self.skipTest("projector is not found on network")
+
     # test service should return error
-    def test_fail(self):
+    def test1_fail(self):
         # at this point we asume projector is connected
         rospy.wait_for_service("define_coordinate_system")
         s = rospy.ServiceProxy('define_coordinate_system', CoordinateSystem)
@@ -58,7 +62,7 @@ class TestServiceCall(unittest.TestCase):
                 rospy.loginfo("success. service exception: %s" %e)   
 
     # test service answer correctly
-    def test_no_fail(self):
+    def test2_no_fail(self):
         # at this point we asume projector is connected
         rospy.wait_for_service("define_coordinate_system")
         s = rospy.ServiceProxy('define_coordinate_system', CoordinateSystem)

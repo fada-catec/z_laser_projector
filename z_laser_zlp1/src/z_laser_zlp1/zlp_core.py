@@ -25,7 +25,7 @@ import numpy as np
 import socket
 import copy
 import threading 
-from pynput import keyboard
+# from pynput import keyboard
 from scipy.spatial import distance
 
 import thriftpy
@@ -337,9 +337,13 @@ class ProjectorClient(object):
             license_path = os.path.abspath(lic_path)
             license_file = os.path.basename(license_path)
             content = open(license_path, 'r').read()
-
             self.__thrift_client.TransferDataToFile(content, license_file, True)
-        
+
+            self.__thrift_client.LoadLicense(license_file)
+
+            success = True
+            message = "License transfered."
+
         except self.__thrift_client.thrift_interface.CantWriteFile as e:
             success = False
             message = e
@@ -348,11 +352,10 @@ class ProjectorClient(object):
             success = False
             message = e
 
-        self.__thrift_client.LoadLicense(license_file)
+        except Exception as e:
+            success = False
+            message = e
 
-        success = True
-        message = "License transfered."
-        
         return success,message
 
     def check_license(self):
@@ -1830,6 +1833,8 @@ class KeyboardControl(object):
             
     def init_keyboard_listener(self,cs,figure_params):
         """."""
+        from pynput import keyboard
+        
         try:
             with keyboard.Listener(on_press=lambda event: self.on_press(event, coord_sys=cs, proj_elem_params=figure_params),
                         on_release=self.on_release) as listener:
