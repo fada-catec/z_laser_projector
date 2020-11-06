@@ -37,7 +37,7 @@ if __name__ == '__main__':
     zlp_node = ZLPProjectorROS(projector_IP, server_IP, connection_port, license_path)
 
     # set run viz
-    use_viz = rospy.get_param(node_name + '/using_visualizer', "false") 
+    use_viz = rospy.get_param(node_name + '/using_visualizer', False) 
     zlp_node.set_viz_run(use_viz)
 
     # connect, load license and activate projector
