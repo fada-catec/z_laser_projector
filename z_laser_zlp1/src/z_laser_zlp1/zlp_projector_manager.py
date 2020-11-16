@@ -17,11 +17,13 @@
 """This module imports the core and utils libraries and manages the functionalities provided from a layer of abstraction, simplifying the 
 task of developing advanced applications."""
 
-import sys
-import math
-
-from z_laser_zlp1.zlp_core import ProjectorClient, CoordinateSystem, ProjectionElementControl, KeyboardControl
+from z_laser_zlp1.zlp_connections import ProjectorClient
+from z_laser_zlp1.zlp_coordinate_system import CoordinateSystem
+from z_laser_zlp1.zlp_projection_element import ProjectionElement
+from z_laser_zlp1.zlp_keyboard import KeyboardControl
 from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+
+from z_laser_msgs.msg import Figure
 
 class ZLPProjectorManager(object):
     """This class envolves the methods from the libraries imported.
@@ -141,7 +143,7 @@ class ZLPProjectorManager(object):
         thrift_client = self.projector_client.get_thrift_client()
 
         self.cs_element = CoordinateSystem(self.__projector_id, module_id, thrift_client)
-        self.projection_element = ProjectionElementControl(module_id,thrift_client)
+        self.projection_element = ProjectionElement(module_id,thrift_client)
         self.keyboard_control = KeyboardControl(self.projector_client,self.projection_element)
 
     def start_projection(self):
@@ -184,7 +186,7 @@ class ZLPProjectorManager(object):
 
         return cs_list,self.__active_coord_sys
 
-    def get_coordinate_system_params(self,coord_sys):
+    def get_coordinate_system_params(self, coord_sys):
         """Get parameters values of a defined coordinate system.
 
         Args:
@@ -193,14 +195,13 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        cs_params = CoordinateSystemParameters()
-        cs_params,success,message = self.cs_element.get_cs(coord_sys,cs_params)
+        cs_params,success,message = self.cs_element.get_cs(coord_sys, CoordinateSystemParameters())
         if not success:
             raise SystemError(message)
 
         return cs_params
 
-    def define_coordinate_system(self,cs_params,do_target_search):
+    def define_coordinate_system(self, cs_params, do_target_search):
         """Define a new coordinate reference system.
 
         Args:
@@ -209,7 +210,7 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        success,message,self.cs_scanned = self.cs_element.define_cs(cs_params,do_target_search)
+        success,message,self.cs_scanned = self.cs_element.define_cs(cs_params, do_target_search)
         if not success:
             raise SystemError(message)
         elif success and do_target_search:
@@ -234,18 +235,18 @@ class ZLPProjectorManager(object):
         if not success:
             raise SystemError(message)
         
-    def set_coordinate_system(self,coord_sys):
+    def set_coordinate_system(self,cs_name):
         """Set the active reference system.
 
         Args:
-            coord_sys (str): name of reference coordinate system
+            cs_name (str): name of reference coordinate system
 
         Raises:
             SystemError
         """
-        success,message = self.cs_element.set_cs(coord_sys)
+        success,message = self.cs_element.set_cs(cs_name)
         if success:
-            self.__active_coord_sys = coord_sys
+            self.__active_coord_sys = cs_name
         if not success:
             raise SystemError(message)
         
@@ -364,55 +365,55 @@ class ZLPProjectorManager(object):
         if not success:
             raise SystemError(message)
 
-    def get_proj_elem(self,figure_params):
+    def get_proj_elem(self, params):
         """
         """
-        proj_elem,success,message = self.projection_element.get_figure(figure_params)
+        proj_elem,success,message = self.projection_element.get_figure(params)
         if not success:
             raise SystemError(message)
 
         return proj_elem
 
-    def hide_proj_elem(self, proj_elem_params):
+    def hide_proj_elem(self, params):
         """Hide a projection element from active reference system.
 
         Args:
-            proj_elem_params (object): object with necessary parameters to identify a projection element
+            params (object): object with necessary parameters to identify a projection element
 
         Raises:
             SystemError
         """
-        success,message = self.projection_element.activate_figure(proj_elem_params,False)
+        success,message = self.projection_element.activate_figure(params,False)
         if not success:
             raise SystemError(message)
         
-    def unhide_proj_elem(self,proj_elem_params):
+    def unhide_proj_elem(self,params):
         """Unhide a projection element from active reference system.
 
         Args:
-            proj_elem_params (object): object with necessary parameters to identify a projection element 
+            params (object): object with necessary parameters to identify a projection element 
 
         Raises:
             SystemError
         """
-        success,message = self.projection_element.activate_figure(proj_elem_params,True)
+        success,message = self.projection_element.activate_figure(params,True)
         if not success:
             raise SystemError(message)
         
-    def remove_proj_elem(self,proj_elem_params):
+    def remove_proj_elem(self,params):
         """Delete a projection element from active reference system.
 
         Args:
-            proj_elem_params (object): object with necessary parameters to identify a projection element  
+            params (object): object with necessary parameters to identify a projection element  
 
         Raises:
             SystemError
         """
-        success,message = self.projection_element.delete_figure(proj_elem_params)
+        success,message = self.projection_element.delete_figure(params)
         if not success:
             raise SystemError(message)
     
-    def monitor_proj_elem(self,proj_elem_params):
+    def monitor_proj_elem(self,params):
         """Monitor transformation operations (translation, rotation, scalation) to a specific figure on real time projection 
         by the use of keyboard.
 
@@ -423,7 +424,7 @@ class ZLPProjectorManager(object):
         
         success,message = self.projector_client.start_project(self.__active_coord_sys)
         if success:
-            success,message = self.keyboard_control.init_keyboard_listener(self.__active_coord_sys,proj_elem_params)
+            success,message = self.keyboard_control.init_keyboard_listener(self.__active_coord_sys,params)
             if not success:
                 raise SystemError(message)
     
@@ -469,8 +470,7 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        proj_elem_params = ProjectionElementParameters()
-        success,message = self.projection_element.cs_axes_create(cs_params,proj_elem_params)
+        success,message = self.projection_element.cs_axes_create(cs_params, ProjectionElementParameters())
         if not success:
             raise SystemError(message)
 
@@ -489,10 +489,10 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        proj_elem_params = ProjectionElementParameters()
-        cs = self.get_coordinate_system_params(cs_params.name)
-        T = [cs.T1.x, cs.T1.y, cs.T2.x, cs.T2.y, cs.T3.x, cs.T3.y, cs.T4.x, cs.T4.y]
-        success,message = self.projection_element.cs_frame_create(cs_params,proj_elem_params,T)
+        # cs = self.get_coordinate_system_params(cs_params.name)
+        # success,message = self.projection_element.cs_frame_create(cs_params, ProjectionElementParameters())
+
+        success,message = self.projection_element.cs_frame_create(cs_params.name, ProjectionElementParameters(), cs_params.T)
         if not success:
             raise SystemError(message)
 
@@ -509,10 +509,10 @@ class ZLPProjectorManager(object):
         """
         proj_elem_params                  = ProjectionElementParameters()
         proj_elem_params.projection_group = self.__active_coord_sys + "_origin"
-        proj_elem_params.figure_type      = 0
+        proj_elem_params.figure_type      = Figure.POLYLINE
         
         try:
-            for axis_id in self.projection_element.axes_ids:
+            for axis_id in ["axis_x","axis_y"]:
                 proj_elem_params.figure_name = axis_id
                 self.unhide_proj_elem(proj_elem_params)            
             
@@ -527,10 +527,10 @@ class ZLPProjectorManager(object):
         """
         proj_elem_params                  = ProjectionElementParameters()
         proj_elem_params.projection_group = self.__active_coord_sys + "_origin"
-        proj_elem_params.figure_type      = 0
+        proj_elem_params.figure_type      = Figure.POLYLINE
         
         try:
-            for axis_id in self.projection_element.axes_ids:
+            for axis_id in ["axis_x","axis_y"]:
                 proj_elem_params.figure_name = axis_id
                 self.hide_proj_elem(proj_elem_params)            
 
@@ -544,13 +544,13 @@ class ZLPProjectorManager(object):
             SystemError
         """        
         proj_elem_params                  = ProjectionElementParameters()
-        proj_elem_params.projection_group = self.__active_coord_sys + "_frame"
-        proj_elem_params.figure_type      = 0
+        proj_elem_params.projection_group = self.__active_coord_sys + "_origin"
+        proj_elem_params.figure_type      = Figure.POLYLINE
                 
         try:
-            for frame_id in self.projection_element.frame_ids:
-                proj_elem_params.figure_name = frame_id
-                self.unhide_proj_elem(proj_elem_params)
+            # for frame_id in self.projection_element.frame_ids:
+            proj_elem_params.figure_name = "frame"
+            self.unhide_proj_elem(proj_elem_params)
                 
         except SystemError as e:
             raise SystemError(e)
@@ -562,13 +562,13 @@ class ZLPProjectorManager(object):
             SystemError
         """
         proj_elem_params                  = ProjectionElementParameters()
-        proj_elem_params.projection_group = self.__active_coord_sys + "_frame"
-        proj_elem_params.figure_type      = 0
+        proj_elem_params.projection_group = self.__active_coord_sys + "_origin"
+        proj_elem_params.figure_type      = Figure.POLYLINE
         
         try:
-            for frame_id in self.projection_element.frame_ids:
-                proj_elem_params.figure_name = frame_id
-                self.hide_proj_elem(proj_elem_params)
+            # for frame_id in self.projection_element.frame_ids:
+            proj_elem_params.figure_name = "frame"
+            self.hide_proj_elem(proj_elem_params)
 
         except SystemError as e:
             raise SystemError(e)

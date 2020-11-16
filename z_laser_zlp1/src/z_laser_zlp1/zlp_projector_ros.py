@@ -50,7 +50,7 @@ class ZLPProjectorROS(object):
 
         self.run_viz = False
 
-        self.STD_WAIT_TIME = CoordinateSystemParameters().DEFAULT_WAIT_TIME
+        self.STD_WAIT_TIME = CoordinateSystemParameters().DEFAULT_SHOW_TIME
 
     def open_services(self):
         """Open ROS services that allow projector device control."""
@@ -68,10 +68,10 @@ class ZLPProjectorROS(object):
         self.rem_cs        = rospy.Service('remove_coordinate_system', CoordinateSystemName, self.remove_coord_sys_cb)
         self.show_cs       = rospy.Service('show_active_coordinate_system', CoordinateSystemShow, self.show_coord_sys_cb)
 
-        self.hide_figure   = rospy.Service('hide_figure', ProjectionElement, self.hide_figure_cb)
-        self.unhide_figure = rospy.Service('unhide_figure', ProjectionElement, self.unhide_figure_cb)
-        self.remove_figure = rospy.Service('remove_figure', ProjectionElement, self.remove_figure_cb)
-        self.monit_figure  = rospy.Service('monitor_figure', ProjectionElement, self.keyboard_monitor_figure_cb)
+        self.hide_proj_elem   = rospy.Service('hide_projection_element', ProjectionElement, self.hide_proj_elem_cb)
+        self.unhide_proj_elem = rospy.Service('unhide_projection_element', ProjectionElement, self.unhide_proj_elem_cb)
+        self.remove_proj_elem = rospy.Service('remove_projection_element', ProjectionElement, self.remove_proj_elem_cb)
+        self.monit_proj_elem  = rospy.Service('monitor_projection_element', ProjectionElement, self.keyboard_monitor_proj_elem_cb)
         
         self.add_proj_elem   = rospy.Subscriber("add_projection_element", Figure, self.add_fig_cb)
 
@@ -81,7 +81,7 @@ class ZLPProjectorROS(object):
 
         if run:
             self.run_viz = True
-            self.viz_monitor_fig = rospy.Publisher('/zlaser_viz/monitor_figure', Figure, queue_size=10)
+            self.viz_monitor_fig = rospy.Publisher('/zlaser_viz/monitor_projection_element', Figure, queue_size=10)
 
     def connection_cb(self,req):
         """Callback of ROS service to connect to ZLP-Service, transfer license and activate projector.
@@ -183,15 +183,16 @@ class ZLPProjectorROS(object):
         rospy.loginfo("Received request to create a new coordinate system manually. Please wait for the system to indicate the end.")
         
         try:
-            self.projector.define_coordinate_system(req,False)
+            params = CoordinateSystemParameters.req_to_param(req)
+            self.projector.define_coordinate_system(params, False)
             
-            self.set_rosparam_coordinate_system(req)
+            self.set_rosparam_coordinate_system(params)
 
-            self.projector.cs_frame_create(req)
-            self.projector.cs_axes_create(req)
+            cs = self.projector.get_coordinate_system_params(params.name)
+            self.projector.cs_frame_create(cs)
+            self.projector.cs_axes_create(cs)
             message = "Coordinate system correctly defined:"
             rospy.loginfo(message)
-            T = self.get_user_coordinate_system(req.name)
 
             # Send info to viz
             if self.run_viz:
@@ -207,7 +208,7 @@ class ZLPProjectorROS(object):
             rospy.sleep(self.STD_WAIT_TIME)
             self.projector.hide_frame()
 
-            return CoordinateSystemResponse(T, True, message)
+            return CoordinateSystemResponse(cs.T, True, message)
 
         except Exception as e:
             rospy.logerr(e)
@@ -227,23 +228,23 @@ class ZLPProjectorROS(object):
         rospy.loginfo("Received request to scan a new reference system.")
 
         try:
-            self.projector.define_coordinate_system(req,True)
+            params = CoordinateSystemParameters.req_to_param(req)
+            self.projector.define_coordinate_system(params,True)
 
-            coordinate_system_scanned = self.projector.get_coordinate_system_params(req.name)
+            coordinate_system_scanned = self.projector.get_coordinate_system_params(params.name)
             self.set_rosparam_coordinate_system(coordinate_system_scanned)
 
             self.projector.cs_frame_create(coordinate_system_scanned)
             self.projector.cs_axes_create(coordinate_system_scanned)
             message = "Coordinate system correctly scanned:"
             rospy.loginfo(message)
-            T = self.get_user_coordinate_system(coordinate_system_scanned.name)
 
             # Send info to viz
             if self.run_viz:
                 rospy.wait_for_service("/zlaser_viz/define_coordinate_system")
                 viz_manual_cs = rospy.ServiceProxy('/zlaser_viz/define_coordinate_system', CoordinateSystem)
-                cs_params = self.read_rosparam_coordinate_system()
-                viz_manual_cs(cs_params)
+                cs_scanned_req = CoordinateSystemParameters.param_to_req(coordinate_system_scanned)
+                viz_manual_cs(cs_scanned_req)
 
             rospy.loginfo("Projecting demonstration")
             self.projector.show_coordinate_system()
@@ -253,7 +254,7 @@ class ZLPProjectorROS(object):
             rospy.sleep(self.STD_WAIT_TIME)
             self.projector.hide_frame()
 
-            return CoordinateSystemResponse(T, True, message)
+            return CoordinateSystemResponse(coordinate_system_scanned.T, True, message)
 
         except Exception as e:
             rospy.logerr(e)
@@ -277,7 +278,7 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return CoordinateSystemListResponse(False,str(e),cs_list,active_cs)
 
-    def set_coord_sys_cb(self,req):
+    def set_coord_sys_cb(self, req):
         """Callback of ROS service to set the indicated coordinate system as 'active coordinate system'.
         It means that services as projection_start or show_active_coordinate_system, ..., automatically use this 
         active coordinate system to perform their task.
@@ -297,8 +298,8 @@ class ZLPProjectorROS(object):
         try:
             self.projector.set_coordinate_system(req.name)
 
-            coordinate_system_params = self.projector.get_coordinate_system_params(req.name)
-            self.set_rosparam_coordinate_system(coordinate_system_params)
+            cs = self.projector.get_coordinate_system_params(req.name)
+            self.set_rosparam_coordinate_system(cs)
 
             # Send info to viz
             if self.run_viz:
@@ -366,7 +367,7 @@ class ZLPProjectorROS(object):
             active_cs = self.projector.remove_coordinate_system(req.name)
 
             if active_cs:
-                rospy.set_param('coordinate_system_name', "")
+                self.set_rosparam_coordinate_system(CoordinateSystemParameters())
 
             # Send info to viz
             if self.run_viz:
@@ -389,13 +390,13 @@ class ZLPProjectorROS(object):
             return ProjectionElementResponse(False,"projection_group or figure_name request is empty.")
 
         try:
-            if msg.figure_type == 0:
+            if msg.figure_type == Figure.POLYLINE:
                 self.projector.create_polyline(msg)
                 rospy.loginfo("Line added correctly.")
-            elif 1 <= msg.figure_type <= 3:
+            elif Figure.CIRCLE <= msg.figure_type <= Figure.OVAL:
                 self.projector.create_curve(msg)
                 rospy.loginfo("Curve added correctly.")
-            elif msg.figure_type == 4:
+            elif msg.figure_type == Figure.TEXT:
                 self.projector.create_text(msg)
                 rospy.loginfo("Text added correctly.")
             else:
@@ -407,7 +408,7 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def hide_figure_cb(self,req):
+    def hide_proj_elem_cb(self,req):
         """Callback of ROS service to hide specific projection element from active coordinate system.
 
         Args:
@@ -427,8 +428,8 @@ class ZLPProjectorROS(object):
 
             # Send info to viz
             if self.run_viz:
-                rospy.wait_for_service("/zlaser_viz/hide_figure")
-                viz_hide_figure = rospy.ServiceProxy('/zlaser_viz/hide_figure', ProjectionElement)
+                rospy.wait_for_service("/zlaser_viz/hide_proj_elem")
+                viz_hide_figure = rospy.ServiceProxy('/zlaser_viz/hide_proj_elem', ProjectionElement)
                 viz_hide_figure(req)
 
             return ProjectionElementResponse(True,"Figure hidden")
@@ -437,7 +438,7 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def unhide_figure_cb(self,req):
+    def unhide_proj_elem_cb(self,req):
         """Callback of ROS service to unhide specific projection element from active coordinate system.
 
         Args:
@@ -457,8 +458,8 @@ class ZLPProjectorROS(object):
 
             # Send info to viz
             if self.run_viz:
-                rospy.wait_for_service("/zlaser_viz/unhide_figure")
-                viz_unhide_figure = rospy.ServiceProxy('/zlaser_viz/unhide_figure', ProjectionElement)
+                rospy.wait_for_service("/zlaser_viz/unhide_proj_elem")
+                viz_unhide_figure = rospy.ServiceProxy('/zlaser_viz/unhide_proj_elem', ProjectionElement)
                 viz_unhide_figure(req)
 
             return ProjectionElementResponse(True,"Figure unhidden")
@@ -467,7 +468,7 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def remove_figure_cb(self,req):
+    def remove_proj_elem_cb(self,req):
         """Callback of ROS service to remove specific figure from active coordinate system.
 
         Args:
@@ -487,8 +488,8 @@ class ZLPProjectorROS(object):
 
             # Send info to viz
             if self.run_viz:
-                rospy.wait_for_service("/zlaser_viz/remove_figure")
-                viz_remove_figure = rospy.ServiceProxy('/zlaser_viz/remove_figure', ProjectionElement)
+                rospy.wait_for_service("/zlaser_viz/remove_proj_elem")
+                viz_remove_figure = rospy.ServiceProxy('/zlaser_viz/remove_proj_elem', ProjectionElement)
                 viz_remove_figure(req)
 
             return ProjectionElementResponse(True,"Figure removed")
@@ -497,7 +498,7 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def keyboard_monitor_figure_cb(self,req):
+    def keyboard_monitor_proj_elem_cb(self,req):
         """Callback of ROS service to apply on real time different transformation operations (translation, rotation, scalation) to a 
         specific figure by the use of keyboard.
 
@@ -517,13 +518,7 @@ class ZLPProjectorROS(object):
             # Send info to viz
             if self.run_viz:
                 proj_elem = self.projector.get_proj_elem(req)
-                figure = Figure(proj_elem.figure_type,
-                                proj_elem.projection_group,
-                                proj_elem.figure_name,
-                                Point(proj_elem.position.x,proj_elem.position.y,proj_elem.position.z),
-                                proj_elem.size,
-                                proj_elem.angle,
-                                proj_elem.text)
+                figure = proj_elem.to_figure()
                 
                 if self.viz_monitor_fig.get_num_connections() < 1:
                     return ProjectionElementResponse(False,"No subscribers")
@@ -538,7 +533,7 @@ class ZLPProjectorROS(object):
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
 
-    def set_rosparam_coordinate_system(self,cs_params):
+    def set_rosparam_coordinate_system(self, cs_params):
         """Set rosparams from given coordinate system.
 
         Args:
@@ -546,16 +541,11 @@ class ZLPProjectorROS(object):
         """
         rospy.set_param('coordinate_system_name', cs_params.name)
         rospy.set_param('coordinate_system_distance', cs_params.distance)
-        rospy.set_param('P1/x', cs_params.P1.x)
-        rospy.set_param('P1/y', cs_params.P1.y)
-        rospy.set_param('P2/x', cs_params.P2.x)
-        rospy.set_param('P2/y', cs_params.P2.y)
-        rospy.set_param('P3/x', cs_params.P3.x)
-        rospy.set_param('P3/y', cs_params.P3.y)
-        rospy.set_param('P4/x', cs_params.P4.x)
-        rospy.set_param('P4/y', cs_params.P4.y)
-        rospy.set_param('T1/x', cs_params.T1.x)
-        rospy.set_param('T1/y', cs_params.T1.y)
+        for i in range(4):
+            rospy.set_param('P%d/x' % i, cs_params.P[i].x)
+            rospy.set_param('P%d/y' % i, cs_params.P[i].y)
+        rospy.set_param('T0/x', cs_params.T[0].x)
+        rospy.set_param('T0/y', cs_params.T[0].y)
         rospy.set_param('coordinate_system_resolution', cs_params.resolution)
         
     def read_rosparam_coordinate_system(self):
@@ -564,36 +554,21 @@ class ZLPProjectorROS(object):
         Returns:
             cs_params (object): object with the necessary info to define a new coordinate system
         """
-        cs_params            = CoordinateSystemRequest()
+        cs_params            = CoordinateSystemParameters()
         cs_params.name       = rospy.get_param('coordinate_system_name', "default_cs")
         cs_params.distance   = rospy.get_param('coordinate_system_distance', 1500)
-        cs_params.P1.x       = rospy.get_param('P1/x', -100)
-        cs_params.P1.y       = rospy.get_param('P1/y', -100)
-        cs_params.P2.x       = rospy.get_param('P2/x', -100)
-        cs_params.P2.y       = rospy.get_param('P2/y',  100)
-        cs_params.P3.x       = rospy.get_param('P3/x',  100)
-        cs_params.P3.y       = rospy.get_param('P3/y',  100)
-        cs_params.P4.x       = rospy.get_param('P4/x',  100)
-        cs_params.P4.y       = rospy.get_param('P4/y', -100)
-        cs_params.T1.x       = rospy.get_param('T1/x',    0)
-        cs_params.T1.y       = rospy.get_param('T1/y',    0)
+        cs_params.P[0].x     = rospy.get_param('P0/x', -100)
+        cs_params.P[0].y     = rospy.get_param('P0/y', -100)
+        cs_params.P[1].x     = rospy.get_param('P1/x', -100)
+        cs_params.P[1].y     = rospy.get_param('P1/y',  100)
+        cs_params.P[2].x     = rospy.get_param('P2/x',  100)
+        cs_params.P[2].y     = rospy.get_param('P2/y',  100)
+        cs_params.P[3].x     = rospy.get_param('P3/x',  100)
+        cs_params.P[3].y     = rospy.get_param('P3/y', -100)
+        cs_params.T[0].x     = rospy.get_param('T0/x',    0)
+        cs_params.T[0].y     = rospy.get_param('T0/y',    0)
         cs_params.resolution = rospy.get_param('coordinate_system_resolution', 1000)
         return cs_params
-
-    def get_user_coordinate_system(self,coordinate_system_name):
-        """Get the parameters values of a defined coordinate system.
-
-        Returns:
-            list: list with the (x,y) position of points T1,T2,T3 and T4 from user reference system {T}
-        """
-        cs_params = self.projector.get_coordinate_system_params(coordinate_system_name)
-        T1 = Point(cs_params.T1.x, cs_params.T1.y, cs_params.distance)
-        T2 = Point(cs_params.T2.x, cs_params.T2.y, cs_params.distance)
-        T3 = Point(cs_params.T3.x, cs_params.T3.y, cs_params.distance)
-        T4 = Point(cs_params.T4.x, cs_params.T4.y, cs_params.distance)
-        rospy.loginfo("[T] Reference points: \nT1: \n{}, \nT2: \n{}, \nT3: \n{}, \nT4: \n{}".format(T1,T2,T3,T4))
-
-        return [T1,T2,T3,T4]
 
     def setup_projector(self):
         """Setup projector at initialization (connect to ZLP-Service, transfer license file and activate projector).
@@ -614,19 +589,21 @@ class ZLPProjectorROS(object):
 
     def initialize_coordinate_system(self):
         """Initialize the factory or user predefined coordinate system at ros projection_node launch."""
-        cs_params = self.read_rosparam_coordinate_system()
+        params = self.read_rosparam_coordinate_system()
         try:
-            self.projector.define_coordinate_system(cs_params,False)
-            self.projector.cs_frame_create(cs_params)
-            self.projector.cs_axes_create(cs_params)
-            rospy.loginfo("Coordinate System [{}] loaded".format(cs_params.name))
-            self.get_user_coordinate_system(cs_params.name)
+            self.projector.define_coordinate_system(params, False)
+            
+            cs = self.projector.get_coordinate_system_params(params.name)
+            self.projector.cs_frame_create(cs)
+            self.projector.cs_axes_create(cs)
+            rospy.loginfo("Coordinate System [{}] loaded".format(params.name))
 
             # Send info to viz
             if self.run_viz:
                 rospy.wait_for_service("/zlaser_viz/define_coordinate_system")
                 viz_manual_cs = rospy.ServiceProxy('/zlaser_viz/define_coordinate_system', CoordinateSystem)
-                viz_manual_cs(cs_params)
+                cs_req = CoordinateSystemParameters.param_to_req(params)
+                viz_manual_cs(cs_req)
 
             rospy.loginfo("Projecting demonstration")
             self.projector.show_coordinate_system()

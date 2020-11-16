@@ -16,11 +16,40 @@
 
 """Complementary module with useful classes to support the usage of zlp library."""
 
-class Point3D(object):
-    def __init__(self,x=0,y=0,z=0):
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
+from scipy.spatial import distance
+import math
+
+from geometry_msgs.msg import Point
+from z_laser_msgs.msg import Figure
+from z_laser_msgs.srv import CoordinateSystemRequest
+
+
+class UserT(object):
+    def __init__(self, x0, y0, resolution, size_horiz, size_vert):
+        T0 = Point()
+        T1 = Point()
+        T2 = Point()
+        T3 = Point()
+
+        T0.x = x0
+        T0.y = y0
+        T1.x = T0.x + resolution*size_horiz/max(size_horiz,size_vert)
+        T1.y = T0.y
+        T2.x = T1.x
+        T2.y = T0.y + resolution*size_vert/max(size_horiz,size_vert)
+        T3.x = T0.x
+        T3.y = T2.y
+
+        self.T = [T0, T1, T2, T3]
+
+class UserP(object):
+    def __init__(self):
+        P0 = Point()
+        P1 = Point()
+        P2 = Point()
+        P3 = Point()
+
+        self.P = [P0, P1, P2, P3]
 
 class CoordinateSystemParameters(object):
     """This class is used as data object with the necessary parameters to define a coordinate system.
@@ -38,21 +67,36 @@ class CoordinateSystemParameters(object):
         T3 (object): object with the x,y,z position of point T3 from user reference system {T}
         T4 (object): object with the x,y,z position of point T4 from user reference system {T}
     """
-    DEFAULT_WAIT_TIME = 1
+    DEFAULT_SHOW_TIME = 1
 
     def __init__(self):
         """Initialize the CoordinateSystemParameters object."""
         self.name        = str()
         self.distance    = float()
         self.resolution  = float()
-        self.P1          = Point3D()
-        self.P2          = Point3D()
-        self.P3          = Point3D()
-        self.P4          = Point3D()
-        self.T1          = Point3D()
-        self.T2          = Point3D()
-        self.T3          = Point3D()
-        self.T4          = Point3D()
+        self.P           = [Point(), Point(), Point(), Point()]
+        self.T           = [Point(), Point(), Point(), Point()]
+
+    @staticmethod
+    def req_to_param(req):
+        params = CoordinateSystemParameters()
+        params.name       = req.name
+        params.distance   = req.distance
+        params.resolution = req.resolution
+        params.P = req.P
+        params.T[0] = req.T0
+        return params
+
+    @staticmethod
+    def param_to_req(params):
+        req = CoordinateSystemRequest()
+        req.name       = params.name
+        req.distance   = params.distance
+        req.resolution = params.resolution
+        req.P = params.P
+        req.T0 = params.T[0]
+        return req
+
 
 class ProjectionElementParameters(object):
     """This class is used as data object with the necessary information to create a projection element.
@@ -84,27 +128,71 @@ class ProjectionElementParameters(object):
         self.figure_type      = int()
         self.projection_group = str()
         self.figure_name      = str()
-        self.position         = Point3D()
+        self.position         = Point()
         self.size             = [float(),float()]
         self.angle            = [float(),float()]
         self.text             = str()
 
-class KeyboardParameters(object):
-    """."""
+    def to_figure(self):
+        figure = Figure()
+        figure.projection_group = self.projection_group
+        figure.figure_type      = self.figure_type
+        figure.figure_name      = self.figure_name
+        figure.position         = self.position
+        figure.size             = self.size
+        figure.angle            = self.angle
+        figure.text             = self.text
+        return figure
+    
 
-    def __init__(self):
-        """."""
-        from pynput import keyboard
+class GeometryTool(object):
+    """This class implement functions to generate basic geometry and math tools.
+    
+    Args:
+        thrift_client (object): object with the generated client to communicate with the projector
+    """
+    def __init__(self, thrift_client):
+        """Initialize the GeometryTool object."""
+        self.__thrift_client = thrift_client
 
-        self.KEY_UP    = {keyboard.Key.up}
-        self.KEY_DOWN  = {keyboard.Key.down}
-        self.KEY_LEFT  = {keyboard.Key.left}
-        self.KEY_RIGHT = {keyboard.Key.right}
-        self.KEY_PLUS  = {keyboard.KeyCode(char='+')}
-        self.KEY_MINUS = {keyboard.KeyCode(char='-')}
-        self.COMB_1    = {keyboard.Key.left, keyboard.Key.ctrl}
-        self.COMB_2    = {keyboard.Key.right, keyboard.Key.ctrl}
-        self.ESC       = {keyboard.Key.esc}
+    def create_matrix4x4(self):
+        """Initialize 4x4 matrix.
+            
+        Returns:
+            object: matrix struct initialized with empty values
+        """
+        mat = self.__thrift_client.thrift_interface.Matrix4x4(list())
+        return mat
 
-        self.COMBINATIONS = [self.KEY_UP,self.KEY_UP,self.KEY_DOWN,self.KEY_LEFT,self.KEY_RIGHT,
-                            self.KEY_PLUS,self.KEY_MINUS,self.COMB_1,self.COMB_2,self.ESC]
+    def create_2d_point(self, x=0, y=0):
+        """Initialize 2-dimension array.
+            
+        Args:
+            x (float): x position value
+            y (float): y position value
+
+        Returns:
+            object: struct with the values of the 2 axes (x,y)
+        """
+        return self.__thrift_client.thrift_interface.Vector2D(x, y)
+
+    def create_3d_point(self, x=0, y=0, z=0):
+        """Initialize 3-dimension array.
+            
+        Args:
+            x (float): x position value
+            y (float): y position value
+            z (float): z position value
+
+        Returns:
+            object: struct with the values of the 3 axes (x,y,z)
+        """
+        return self.__thrift_client.thrift_interface.Vector3D(x, y, z)
+
+    @staticmethod
+    def vector_point_distance(point1, point2):
+        return distance.euclidean((point1.x, point1.y), (point2.x, point2.y))
+
+    @staticmethod
+    def vector_point_angle(point1, point2):
+        return 180/math.pi*math.atan2((point2.y-point1.y), (point2.x-point1.x))
