@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="namespace" value="zlaser"/>
+    <arg name="load_user_coordinate_system" default="false"/>
+
+    <!-- Projector node -->
+    <include file="$(find z_laser_zlp1)/launch/z_laser_zlp1.launch">
+        <arg name="namespace" value="$(arg namespace)"/>
+        <arg name="load_user_coordinate_system" value="$(arg load_user_coordinate_system)"/>
+        <arg name="using_visualizer"  value="true" />
+    </include>
+    
+    <!-- Visualizer node -->
+    <group ns="zlaser_viz">
+
+        <param name="zlp1" command="$(find xacro)/xacro -i $(find z_laser_viz)/urdf/zlp1.urdf.xacro"/>
+
+        <node name="zlp_viz" pkg="z_laser_viz" type="zlp1_viz.py" output="screen">
+            <remap from="add_projection_element" to="/$(arg namespace)/add_projection_element"/>
+        </node>
+
+        <node name="static_tf" pkg="tf" type="static_transform_publisher" args="0 0 0.95 -0.5 0.5 -0.5 0.5 world zlp1_link 100" />
+    
+        <node name="tf_broadcaster" pkg="z_laser_viz" type="publish_tf.py" output="screen" >
+            <param name="namespace"  value="/$(arg namespace)" />
+        </node>
+
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find z_laser_viz)/rviz/rviz_environment.rviz"/>
+
+    </group>
+
+    
+
+</launch>
