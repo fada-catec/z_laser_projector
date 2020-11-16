@@ -3,12 +3,11 @@
 import sys
 import os
 import rospy
-
+import rospkg
 
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-# from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
 
-from main_window import Ui_MainWindow
+from z_laser_gui.main_window import Ui_MainWindow
 
 from std_srvs.srv import Trigger, TriggerResponse
 from geometry_msgs.msg import Point
@@ -20,17 +19,16 @@ from z_laser_msgs.srv import CoordinateSystemList, CoordinateSystemListResponse
 from z_laser_msgs.srv import ProjectionElement, ProjectionElementRequest, ProjectionElementResponse
 
 
-CONNECT_ON_LED  = os.path.dirname(os.path.abspath(__file__)) + "/icons/ON.png"
-CONNECT_OFF_LED = os.path.dirname(os.path.abspath(__file__)) + "/icons/OFF.png"
-PROJECT_ON_LED  = os.path.dirname(os.path.abspath(__file__)) + "/icons/ON.png"
-PROJECT_OFF_LED = os.path.dirname(os.path.abspath(__file__)) + "/icons/OFF.png"
-
 class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
-        # USER GUI setup
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
+
+        rospack = rospkg.RosPack()
+        pkg_path = rospack.get_path('z_laser_gui')
+        self.ON_LED  = pkg_path + "/images/icons/ON.png"
+        self.OFF_LED = pkg_path + "/images/icons/OFF.png"
 
         self.projector_connected = False
         self.set_up_gui()
@@ -38,13 +36,11 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def set_up_gui(self):
 
         # LEDS
-        self.status.setPixmap(QtGui.QPixmap(CONNECT_OFF_LED))
-        self.status_2.setPixmap(QtGui.QPixmap(PROJECT_OFF_LED))
+        self.status.setPixmap(QtGui.QPixmap(self.OFF_LED))
+        self.status_2.setPixmap(QtGui.QPixmap(self.OFF_LED))
 
         # Msgs box
         self.msg_box = QtWidgets.QMessageBox()
-        # self.msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        # self.msg_box.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
 
         self.init_pe_menu()
 
@@ -56,9 +52,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.projector_connected = rospy.get_param('projector_connected')
 
         if self.projector_connected:
-            self.status.setPixmap(QtGui.QPixmap(CONNECT_ON_LED))
+            self.status.setPixmap(QtGui.QPixmap(self.ON_LED))
         else:
-            self.status.setPixmap(QtGui.QPixmap(CONNECT_OFF_LED))
+            self.status.setPixmap(QtGui.QPixmap(self.OFF_LED))
 
     def init_pe_menu(self):
 
@@ -100,7 +96,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pe_char_space.setVisible(False)
 
     def set_buttons(self):
-        # GUI Buttons
         self.connect_button.clicked.connect(self.connect_cb)
         self.disconnect_button.clicked.connect(self.disconnect_cb)
         self.start_button.clicked.connect(self.start_proj_cb)
@@ -129,10 +124,10 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.set_cs        = rospy.ServiceProxy('set_coordinate_system', CoordinateSystemName)
         self.show_cs       = rospy.ServiceProxy('show_active_coordinate_system', CoordinateSystemShow)
         self.rem_cs        = rospy.ServiceProxy('remove_coordinate_system', CoordinateSystemName)
-        self.hide_figure   = rospy.ServiceProxy('hide_figure', ProjectionElement)
-        self.unhide_figure = rospy.ServiceProxy('unhide_figure', ProjectionElement)
-        self.remove_figure = rospy.ServiceProxy('remove_figure', ProjectionElement)
-        self.monit_figure  = rospy.ServiceProxy('monitor_figure', ProjectionElement)
+        self.hide_figure   = rospy.ServiceProxy('hide_projection_element', ProjectionElement)
+        self.unhide_figure = rospy.ServiceProxy('unhide_projection_element', ProjectionElement)
+        self.remove_figure = rospy.ServiceProxy('remove_projection_element', ProjectionElement)
+        self.monit_figure  = rospy.ServiceProxy('monitor_projection_element', ProjectionElement)
 
         self.add_proj_elem = rospy.Publisher('add_projection_element', Figure, queue_size=10)
     
@@ -142,7 +137,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         rospy.loginfo("Service response: \n{}".format(resp))
         
         if resp.success:
-            self.status.setPixmap(QtGui.QPixmap(CONNECT_ON_LED))
+            self.status.setPixmap(QtGui.QPixmap(self.ON_LED))
         else:
             self.error_msg("Connection error",resp.message)
 
@@ -152,7 +147,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         rospy.loginfo("Service response: \n{}".format(resp))
 
         if resp.success:
-            self.status.setPixmap(QtGui.QPixmap(CONNECT_OFF_LED))
+            self.status.setPixmap(QtGui.QPixmap(self.OFF_LED))
         else:
             self.error_msg("Disconnection error",resp.message)
 
@@ -162,7 +157,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         rospy.loginfo("Service response: \n{}".format(resp))
 
         if resp.success:
-            self.status_2.setPixmap(QtGui.QPixmap(PROJECT_ON_LED))
+            self.status_2.setPixmap(QtGui.QPixmap(self.ON_LED))
         else:
             self.error_msg("Projection error",resp.message)
 
@@ -172,7 +167,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         rospy.loginfo("Service response: \n{}".format(resp))
 
         if resp.success:
-            self.status_2.setPixmap(QtGui.QPixmap(PROJECT_OFF_LED))
+            self.status_2.setPixmap(QtGui.QPixmap(self.OFF_LED))
         else:
             self.error_msg("Projection error",resp.message)
     
@@ -183,20 +178,22 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not resp.success:
             self.error_msg("Coordinate System Manager error",resp.message)
 
+    def create_req(self):
+        coord_sys = CoordinateSystemRequest()
+        coord_sys.name = str(self.cs_name.text())
+        coord_sys.distance = float(self.cs_dist.text())
+        coord_sys.resolution = float(self.cs_res.text())
+        coord_sys.T0 = Point(float(self.t1_x.text()),float(self.t1_y.text()),float(self.t1_z.text()))
+        coord_sys.P.append(Point(float(self.p1_x.text()),float(self.p1_y.text()),float(self.p1_z.text())))
+        coord_sys.P.append(Point(float(self.p2_x.text()),float(self.p2_y.text()),float(self.p2_z.text())))
+        coord_sys.P.append(Point(float(self.p3_x.text()),float(self.p3_y.text()),float(self.p3_z.text())))
+        coord_sys.P.append(Point(float(self.p4_x.text()),float(self.p4_y.text()),float(self.p4_z.text())))
+        return coord_sys
+
     def define_cs_cb(self):
 
         try:
-            coord_sys            = CoordinateSystemRequest()
-            coord_sys.name       = str(self.cs_name.text())
-            coord_sys.distance   = float(self.cs_dist.text())
-            coord_sys.P1         = Point(float(self.p1_x.text()),float(self.p1_y.text()),float(self.p1_z.text()))
-            coord_sys.P2         = Point(float(self.p2_x.text()),float(self.p2_y.text()),float(self.p2_z.text()))
-            coord_sys.P3         = Point(float(self.p3_x.text()),float(self.p3_y.text()),float(self.p3_z.text()))
-            coord_sys.P4         = Point(float(self.p4_x.text()),float(self.p4_y.text()),float(self.p4_z.text()))
-            coord_sys.T1         = Point(float(self.t1_x.text()),float(self.t1_y.text()),float(self.t1_z.text()))
-            coord_sys.resolution = float(self.cs_res.text())
-
-            resp = self.manual_cs(coord_sys)
+            resp = self.manual_cs(self.create_req())
             rospy.loginfo("Service response: \n{}".format(resp))
             if not resp.success:
                 self.error_msg("Coordinate System Menu error",resp.message)
@@ -207,17 +204,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def scan_cs_cb(self):
         
         try:
-            coord_sys            = CoordinateSystemRequest()
-            coord_sys.name       = str(self.cs_name.text())
-            coord_sys.distance   = float(self.cs_dist.text())
-            coord_sys.P1         = Point(float(self.p1_x.text()),float(self.p1_y.text()),float(self.p1_z.text()))
-            coord_sys.P2         = Point(float(self.p2_x.text()),float(self.p2_y.text()),float(self.p2_z.text()))
-            coord_sys.P3         = Point(float(self.p3_x.text()),float(self.p3_y.text()),float(self.p3_z.text()))
-            coord_sys.P4         = Point(float(self.p4_x.text()),float(self.p4_y.text()),float(self.p4_z.text()))
-            coord_sys.T1         = Point(float(self.t1_x.text()),float(self.t1_y.text()),float(self.t1_z.text()))
-            coord_sys.resolution = float(self.cs_res.text())
-
-            resp = self.auto_cs(coord_sys)
+            resp = self.auto_cs(self.create_req())
             rospy.loginfo("Service response: \n{}".format(resp))
             if not resp.success:
                 self.error_msg("Coordinate System Menu error",resp.message)
@@ -537,7 +524,6 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
         self.msg_box.setWindowTitle(title)
         self.msg_box.setText("Error: {}".format(e))
-        # self.msg_box.setInformativeText("error: {}".format(e))
         self.msg_box.exec_()
 
     def closeEvent(self, event):
@@ -546,11 +532,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         close.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
         close = close.exec()
 
-        # quit = QtWidgets.QAction("Quit", self)
-        # quit.triggered.connect(self.close)
-
         if close == QtWidgets.QMessageBox.Yes:
-            # QtWidgets.QApplication.quit()
             event.accept()
         else:
             event.ignore()

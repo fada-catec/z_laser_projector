@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>515</width>
+    <width>530</width>
     <height>499</height>
    </rect>
   </property>
@@ -28,7 +28,7 @@
      <rect>
       <x>20</x>
       <y>60</y>
-      <width>471</width>
+      <width>491</width>
       <height>421</height>
      </rect>
     </property>
@@ -183,9 +183,6 @@ background-color: native;
       <property name="text">
        <string/>
       </property>
-      <property name="pixmap">
-       <pixmap>icons/OFF.png</pixmap>
-      </property>
      </widget>
      <widget class="QLabel" name="status_2">
       <property name="geometry">
@@ -198,9 +195,6 @@ background-color: native;
       </property>
       <property name="text">
        <string/>
-      </property>
-      <property name="pixmap">
-       <pixmap>icons/OFF.png</pixmap>
       </property>
      </widget>
      <zorder>start_button</zorder>
@@ -219,7 +213,7 @@ background-color: native;
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>441</width>
+        <width>461</width>
         <height>421</height>
        </rect>
       </property>
@@ -1520,7 +1514,7 @@ background-color: native;
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>441</width>
+        <width>461</width>
         <height>421</height>
        </rect>
       </property>
@@ -1654,7 +1648,7 @@ background-color: native;
          <rect>
           <x>350</x>
           <y>160</y>
-          <width>41</width>
+          <width>71</width>
           <height>21</height>
          </rect>
         </property>
@@ -1667,7 +1661,7 @@ background-color: native;
          <string notr="true">color: rgb(255, 255, 255);</string>
         </property>
         <property name="text">
-         <string>[mm]</string>
+         <string>{T} ref pos</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -1736,7 +1730,7 @@ background-color: native;
          <string notr="true">color: rgb(255, 255, 255);</string>
         </property>
         <property name="text">
-         <string>2000.0</string>
+         <string>500.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1937,7 +1931,7 @@ background-color: native;
          <rect>
           <x>250</x>
           <y>190</y>
-          <width>41</width>
+          <width>71</width>
           <height>21</height>
          </rect>
         </property>
@@ -1950,7 +1944,7 @@ background-color: native;
          <string notr="true">color: rgb(255, 255, 255);</string>
         </property>
         <property name="text">
-         <string>[mm]</string>
+         <string>{T} ref dim</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -2123,7 +2117,7 @@ background-color: native;
          <rect>
           <x>150</x>
           <y>280</y>
-          <width>41</width>
+          <width>71</width>
           <height>21</height>
          </rect>
         </property>
@@ -2136,7 +2130,7 @@ background-color: native;
          <string notr="true">color: rgb(255, 255, 255);</string>
         </property>
         <property name="text">
-         <string>[mm]</string>
+         <string>{T} ref dim</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
