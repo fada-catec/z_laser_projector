@@ -34,6 +34,7 @@ class TestServiceCall(unittest.TestCase):
         req.name = ""
         req.distance = 1500     
         req.resolution = 1000
+        # TODO es P0,P1 ...
         req.P1 = Point(  0,   0, 0) 
         req.P2 = Point(594,   0, 0) 
         req.P3 = Point(594, 420, 0) 
