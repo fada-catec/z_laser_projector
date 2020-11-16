@@ -8,8 +8,8 @@ def get_ros_params(ns):
 
     cs_name = rospy.get_param(ns + '/coordinate_system_name', "")
     d       = rospy.get_param(ns + '/coordinate_system_distance', 1500) * 0.001
-    Px      = rospy.get_param(ns + '/P1/x', -100) * 0.001
-    Py      = rospy.get_param(ns + '/P1/y', -100) * 0.001
+    Px      = rospy.get_param(ns + '/P0/x', -100) * 0.001
+    Py      = rospy.get_param(ns + '/P0/y', -100) * 0.001
 
     return cs_name,d,Px,Py
 
