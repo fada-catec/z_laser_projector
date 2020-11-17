@@ -16,7 +16,7 @@
 
         <param name="zlp1" command="$(find xacro)/xacro -i $(find z_laser_viz)/urdf/zlp1.urdf.xacro"/>
 
-        <node name="zlp_viz" pkg="z_laser_viz" type="zlp1_viz.py" output="screen">
+        <node name="zlp_viz_node" pkg="z_laser_viz" type="zlp_viz_node.py" output="screen">
             <remap from="add_projection_element" to="/$(arg namespace)/add_projection_element"/>
         </node>
 

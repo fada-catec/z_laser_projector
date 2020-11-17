@@ -1,5 +1,21 @@
 #! /usr/bin/env python3
 
+# Copyright (c) 2020, FADA-CATEC
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""This module contains utility classes and methods to run a projections visualizer."""
+
 import rospy
 import math
 import numpy as np
@@ -21,9 +37,18 @@ from z_laser_msgs.srv import CoordinateSystemList, CoordinateSystemListResponse
 from z_laser_msgs.srv import ProjectionElement, ProjectionElementResponse
 
 class ZLPVisualizer(object):
-
+    """This class implement the functions related with projection elements.
+    
+    Attributes:
+        cs_marker_array (list): coordinate systems' markers list (origin axes and frame of each system)
+        pe_marker_array (list): markers list of projection elements
+        active_cs (str): name of active reference system
+        cs_reference (str): auxiliar variable to differentiate and find the origin axes and frames markers
+        STD_WAIT_TIME (int): predefined number of projection seconds in reference system definition
+        figures_list (list): list with the figures' identificator names
+    """
     def __init__(self):
-
+        """Initialize the ZLPVisualizer object."""
         self.cs_marker_array = MarkerArray()
         self.pe_marker_array = MarkerArray()
 
@@ -33,24 +58,8 @@ class ZLPVisualizer(object):
 
         self.figures_list = ProjectionElementParameters().figures_list
 
-        self.open_services()
-        cs_markers_pub = rospy.Publisher('coord_sys_markers', MarkerArray, queue_size=10)
-        pe_markers_pub = rospy.Publisher('proj_elem_markers', MarkerArray, queue_size=10)
-
-        try:
-            rate = rospy.Rate(10.0)
-            while not rospy.is_shutdown():
-                cs_markers_pub.publish(self.cs_marker_array)
-                pe_markers_pub.publish(self.pe_marker_array)
-                rate.sleep()
-            
-            rospy.spin()
-
-        except Exception as e:
-            rospy.logerr(e)
-
     def open_services(self):
-        
+        """Open ROS services for visualizer."""
         self.start_proj     = rospy.Service('projection_start', Trigger, self.projection_start_cb)
         self.stop_proj      = rospy.Service('projection_stop', Trigger, self.projection_stop_cb)
 
@@ -67,7 +76,15 @@ class ZLPVisualizer(object):
         self.monit_proj_elem = rospy.Subscriber("monitor_projection_element", Figure, self.init_keyboard_listener_cb)
         
     def projection_start_cb(self, req):
+        """Callback of ROS service to start projection of elements related to the active reference system on the surface.
 
+        Args:
+            req (object): trigger request ROS service object 
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         if not self.active_cs:
             return TriggerResponse(False, "No Coordinate System set as active.")
         
@@ -78,13 +95,30 @@ class ZLPVisualizer(object):
         return TriggerResponse(True, "Projection started.")
     
     def projection_stop_cb(self, req):
+        """Callback of ROS service to stop projection of all elements.
 
+        Args:
+            req (object): trigger request ROS service object 
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         for i in range(len(self.pe_marker_array.markers)):
             self.pe_marker_array.markers[i].action = Marker.DELETE
 
         return TriggerResponse(True, "Projection stopped.")
 
     def manual_define_coord_sys_cb(self, req):
+        """Callback of ROS service to define a new reference system, stating the points coordinates manually by the user.
+
+        Args:
+            req (object): object with the necessary info to define a new coordinate system
+            
+        Returns:
+            tuple[list, bool, str]: the first value in the returned tuple is a list of the user reference points T0, T1, T2, T3,
+            the second is a bool success value and the third s an information message string
+        """
         for marker in self.cs_marker_array.markers:
             if req.name in marker.ns:
                 return CoordinateSystemResponse([], False, "Coordinate System already exists.")
@@ -103,14 +137,14 @@ class ZLPVisualizer(object):
         return CoordinateSystemResponse([], True, "Coordinate System added manually.")
 
     def timer_cb(self, timer):
-
+        """Timer for controlling the projection pause between the reference systems's different markers."""
         for i in range(len(self.cs_marker_array.markers)):
             self.cs_marker_array.markers[i].action = Marker.DELETE
 
         self.update_cs_markers()
 
     def update_cs_markers(self):
-
+        """Change projection between origin axes and frame markers."""
         for marker in self.cs_marker_array.markers:
             if (self.active_cs + self.cs_reference) in marker.ns:
                 marker.action = Marker.ADD
@@ -121,6 +155,14 @@ class ZLPVisualizer(object):
         self.cs_reference = "_frame" if self.cs_reference == "_origin" else "empty"
 
     def base_marker(self, cs_name):
+        """Initialize the common and basic parameters of a marker.
+
+        Args:
+            cs_name (object): name of the reference system with which the marker is associated
+            
+        Returns:
+            object: marker initialized
+        """
         # define marker common fields
         marker = Marker()
         marker.type = Marker.LINE_STRIP
@@ -133,7 +175,15 @@ class ZLPVisualizer(object):
         return marker
 
     def coord_sys_axes(self, cs_points):
+        """Create the origin axes markers.
 
+        Args:
+            cs_points (object): object with the x,y,z position of the reference points from the reference system
+            
+        Returns:
+            tuple[object, object]: the first value in the returned tuple is the x-axis marker and
+            the second is the y-axis marker
+        """
         # read axes points
         orig = Point()  # axes origin point
         orig.x = cs_points.P[0].x * 0.001
@@ -164,7 +214,14 @@ class ZLPVisualizer(object):
         return axis_x_marker, axis_y_marker
 
     def coord_sys_frame(self, cs_points):
+        """Create the frame marker.
 
+        Args:
+            cs_points (object): object with the x,y,z position of the reference points from the reference system
+            
+        Returns:
+            object: frame marker
+        """
         frame = self.base_marker("[P]")
 
         # read frame points
@@ -179,12 +236,28 @@ class ZLPVisualizer(object):
         return frame
 
     def set_coord_sys_cb(self, req):
+        """Callback of ROS service to set the indicated reference system as 'active reference system'.
 
+        Args:
+            req (object): object with the necessary parameters to identify a coordinate system
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         self.active_cs = req.name
         return CoordinateSystemNameResponse(True, "Coordinate System set as active.")
         
     def show_coord_sys_cb(self, req):
+        """Callback of ROS service to project reference points, origin axes and frame of the active reference system.
 
+        Args:
+            req (object): object with the necessary parameters to identify a reference system
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         if not self.active_cs:
             return CoordinateSystemShowResponse(False, "None Coordinate System is set.")
             
@@ -198,7 +271,15 @@ class ZLPVisualizer(object):
         return CoordinateSystemShowResponse(True, "Active Coordinate System showed correctly.")
 
     def remove_coord_sys_cb(self, req):
+        """Callback of ROS service to remove a reference system.
 
+        Args:
+            req (object): object with the necessary parameters to identify a reference system
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         if any(req.name in cs.ns for cs in self.cs_marker_array.markers):
             self.cs_marker_array.markers = [cs for cs in self.cs_marker_array.markers if cs.ns.find(req.name)==-1]
             self.pe_marker_array.markers = [pe for pe in self.pe_marker_array.markers if pe.ns.find(req.name)==-1]
@@ -211,47 +292,68 @@ class ZLPVisualizer(object):
             return CoordinateSystemNameResponse(False, "Coordinate System does not exist.")
 
     def add_fig_cb(self, msg):
+        """Callback of ROS topic to define a new projection element.
 
+        Args:
+            msg (object): object with the necessary parameters to define a new projection element
+        """
         # define marker common fields
         marker = self.base_marker(self.active_cs)
 
         step = self.compute_step()
-        # common params from msg
-        size = msg.size[0] * step
-        angle = radians(msg.angle[0])
+        
         marker.pose.position.x = msg.position.x * step 
         marker.pose.position.y = msg.position.y * step 
 
         if msg.figure_type == Figure.POLYLINE:
+            length = msg.size[0] * step
+            angle = radians(msg.angle[0])
             # overwrite position for polyline ()
-            marker.pose.position.x += size/2*cos(angle)
-            marker.pose.position.y += size/2*sin(angle)
-            figure = self.line_eq(size, angle)
+            marker.pose.position.x += length/2*cos(angle)
+            marker.pose.position.y += length/2*sin(angle)
+            figure = self.line_eq(length, angle)
 
         elif msg.figure_type == Figure.CIRCLE:
-            figure = self.circle_eq(size, 0.0, 2*pi) # size is circle radius
+            radius = msg.size[0] * step
+            figure = self.circle_eq(radius, 0.0, 2*pi)
 
         elif msg.figure_type == Figure.ARC:
-            end_angle = radians(msg.angle[1]) # arc needs an end angle
-            figure = self.circle_eq(size, angle, end_angle) # size is arc radius
+            radius = msg.size[0] * step
+            start_angle = radians(msg.angle[0]) 
+            end_angle = radians(msg.angle[1])
+            figure = self.circle_eq(radius, start_angle, end_angle) 
 
         elif msg.figure_type == Figure.OVAL:
-            height_size = msg.size[1]*0.001 # oval also needs height size
-            figure = self.oval_eq(size, height_size, angle) 
+            wide_size = msg.size[0] * step
+            height_size = msg.size[1] * step
+            angle = radians(msg.angle[0]) 
+            figure = self.oval_eq(wide_size, height_size, angle) 
 
         elif msg.figure_type == Figure.TEXT:
-            # overwrite some marker fields for text
+            angle = radians(msg.angle[0])
             marker.type = Marker.TEXT_VIEW_FACING
+            marker.scale.z = msg.size[0] * step
+            # overwrite some marker fields for text
             rotation = Rotation.from_euler('xyz', [0, 0, angle], degrees=False)        
             marker.pose.orientation = Quaternion(*rotation.as_quat())
             marker.text = msg.text
 
-        marker.points = figure
-        marker.ns = self.active_cs+"/" + msg.projection_group + self.figures_list[msg.figure_type] + msg.figure_name
+        if msg.figure_type != Figure.TEXT:
+            marker.points = figure
+
+        marker.ns = self.active_cs+ "/" + msg.projection_group + self.figures_list[msg.figure_type] + msg.figure_name
         self.pe_marker_array.markers.append(marker)
 
     def line_eq(self, length, ang):
-        
+        """Calculate points array of a new line from its parametrics equation.
+
+        Args:
+            length (float): line length
+            ang (float): line angle slope 
+
+        Returns:
+            list: list of calculated points
+        """
         line_points = []
         delta_th = 0.01
         for th in np.arange(-length/2, length/2, delta_th):
@@ -263,7 +365,16 @@ class ZLPVisualizer(object):
         return line_points
 
     def circle_eq(self, radius, start_ang, end_ang):
-        
+        """Calculate points array of a new circle or arc from its parametrics equation.
+
+        Args:
+            radius (float): circle or arc radius
+            start_ang (float): arc start angle
+            end_ang (float): arc end angle 
+
+        Returns:
+            list: list of calculated points
+        """
         circle_points = []
         delta_th = 0.01
         for th in np.arange(start_ang, end_ang, delta_th):
@@ -275,7 +386,16 @@ class ZLPVisualizer(object):
         return circle_points
 
     def oval_eq(self, a, b, angle):
-        
+        """Calculate points array of a new ellipse from its parametrics equation.
+
+        Args:
+            a (float): ellipse width
+            b (float): ellipse height
+            angle (float): rotation angle
+
+        Returns:
+            list: list of calculated points
+        """
         oval_points = []
         delta_th = 0.01
         for th in np.arange(0.0, 2*pi+delta_th, delta_th):
@@ -287,7 +407,15 @@ class ZLPVisualizer(object):
         return oval_points
 
     def hide_proj_elem_cb(self, req):
+        """Callback of ROS service to hide specific projection element from active reference system.
 
+        Args:
+            req (object): object with the necessary parameters to identify a projection element
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         for i, marker in enumerate(self.pe_marker_array.markers):
             if marker.ns.find(req.projection_group)>-1 and marker.ns.find(req.figure_name)>-1:
                 self.pe_marker_array.markers[i].color.a = 0
@@ -296,7 +424,15 @@ class ZLPVisualizer(object):
         return ProjectionElementResponse(False, "Figure not found.")
 
     def unhide_proj_elem_cb(self, req):
+        """Callback of ROS service to unhide specific projection element from active reference system.
 
+        Args:
+            req (object): object with the necessary parameters to identify a projection element
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         for i, marker in enumerate(self.pe_marker_array.markers):
             if marker.ns.find(req.projection_group)>-1 and marker.ns.find(req.figure_name)>-1:
                 self.pe_marker_array.markers[i].color.a = 1
@@ -305,7 +441,15 @@ class ZLPVisualizer(object):
         return ProjectionElementResponse(False, "Figure not found.")
 
     def remove_proj_elem_cb(self, req):
+        """Callback of ROS service to remove specific figure from active reference system.
 
+        Args:
+            req (object): object with the necessary parameters to identify a projection element
+            
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         for i, marker in enumerate(self.pe_marker_array.markers):
             if marker.ns.find(req.projection_group)>-1 and marker.ns.find(req.figure_name)>-1:
                 self.pe_marker_array.markers.pop(i)
@@ -314,7 +458,14 @@ class ZLPVisualizer(object):
         return ProjectionElementResponse(False, "Figure not found.")
 
     def translate(self, marker, dx=0, dy=0, dz=0):
-        
+        """Translate marker from one position to another.
+
+        Args:
+            marker (object): marker object to translate
+            dx (float): offset in x direction
+            dy (float): offset in y direction
+            dz (float): offset in z direction
+        """
         marker.action = Marker.DELETE
         marker.pose.position.x += dx
         marker.pose.position.y += dy
@@ -322,7 +473,11 @@ class ZLPVisualizer(object):
         marker.action = Marker.ADD
 
     def compute_step(self):
+        """Calculate the resolution step of the active reference system.
 
+        Returns:
+            float: resolution step (real dimension system {P} in mm / user dimension system {T})
+        """
         res = rospy.get_param('/zlaser/coordinate_system_resolution', 1000)
         P0_x  = rospy.get_param('/zlaser/P0/x', 1000) * 0.001
         P1_x  = rospy.get_param('/zlaser/P1/x', 1000) * 0.001
@@ -331,7 +486,12 @@ class ZLPVisualizer(object):
         return step
 
     def rotate(self, marker, angle):
-        
+        """Rotate marker an angle.
+
+        Args:
+            marker (object): marker object to rotate
+            angle (float): rotation angle
+        """
         marker.action = Marker.DELETE
         q = marker.pose.orientation
         rotation = Rotation.from_euler('xyz', [0, 0, angle], degrees=True)
@@ -340,14 +500,24 @@ class ZLPVisualizer(object):
         marker.action = Marker.ADD
 
     def quat_multiply(self, q1, q0):
+        """Calculate the product of two quaternions.
 
+        Returns:
+            object: object with the x,y,z,w values of the result quaternion
+        """
         return Quaternion( q1.x*q0.w + q1.y*q0.z - q1.z*q0.y + q1.w*q0.x,
                           -q1.x*q0.z + q1.y*q0.w + q1.z*q0.x + q1.w*q0.y,
                            q1.x*q0.y - q1.y*q0.x + q1.z*q0.w + q1.w*q0.z,
                           -q1.x*q0.x - q1.y*q0.y - q1.z*q0.z + q1.w*q0.w)
 
     def scale(self, marker, factor, proj_elem_params):
+        """Scale size of marker by redefining figure equation.
 
+        Args:
+            marker (object): marker object to scale
+            factor (float): scale factor
+            proj_elem_params (object): object with the parameters of the projection element to transform
+        """
         marker.action = Marker.DELETE
 
         self.scale_factor *= factor # update factor
@@ -377,7 +547,13 @@ class ZLPVisualizer(object):
         marker.action = Marker.ADD
 
     def on_press(self, key, marker, proj_elem_params):
+        """Check if the key pressed if one of the list and execute the respective tasks.
         
+        Args:
+            key (enum): key pressed
+            marker (object): monitored marker object 
+            proj_elem_params (object): object with the parameters of the projection element to monitor
+        """
         if any([key in COMBO for COMBO in self.keyboard_params.COMBINATIONS]):
             self.current.add(key)
 
@@ -410,7 +586,11 @@ class ZLPVisualizer(object):
                 marker.action = Marker.DELETE
 
     def on_release(self, key):
+        """Remove current stored key, on release.
         
+        Args:
+            key (enum): key pressed
+        """
         if any([key in COMBO for COMBO in self.keyboard_params.COMBINATIONS]):
             if self.current == self.keyboard_params.ESC:
                 return False # stop listener
@@ -418,13 +598,31 @@ class ZLPVisualizer(object):
             self.current.remove(key)
 
     def marker_from_name(self, name):
+        """Find marker object in the markers array with the name.
+        
+        Args:
+            name (str): name of the marker
+        
+        Returns:
+            object: marker found
+        """
         for marker in self.pe_marker_array.markers:
             if name in marker.ns:
                 marker.action = Marker.ADD
                 return marker
 
-    def init_keyboard_listener_cb(self, msg):
+        return []      
 
+    def init_keyboard_listener_cb(self, msg):
+        """Start keyboard listener for monitoring key presses.
+        
+        Args:
+            msg (object): object with the necessary parameters to identify a projection element
+        
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
         self.keyboard_params = KeyboardParameters()
         self.current = set()
         self.scale_factor = 1
@@ -432,6 +630,8 @@ class ZLPVisualizer(object):
         name = self.active_cs + "/" + msg.projection_group + self.figures_list[msg.figure_type] + msg.figure_name
 
         marker = self.marker_from_name(name)
+        if not marker:
+            return ProjectionElementResponse(False, "Marker not found.")
 
         try:
             on_press_handler = lambda event: self.on_press(event, marker=marker, proj_elem_params=msg)
@@ -443,9 +643,4 @@ class ZLPVisualizer(object):
 
         except Exception as e:
             rospy.logerr(e)
-
-if __name__ == '__main__':
-
-    rospy.init_node('zlp_viz_node')
-
-    zlp_visualizer = ZLPVisualizer()
+            return ProjectionElementResponse(False, "Error viz monitor.")
