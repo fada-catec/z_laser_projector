@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2020, FADA-CATEC
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""This module contains utility classes and methods to run the ZLP GUI."""
+
 import sys
 import os
 import rospy
@@ -20,7 +36,15 @@ from z_laser_msgs.srv import ProjectionElement, ProjectionElementRequest, Projec
 
 
 class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    """This class implement the functions related with the projector Qt GUI.
+    
+    Attributes:
+        ON_LED (str): path file of icon image ON
+        OFF_LED (str): path file of icon image OFF
+        projector_connected (bool): projector connection status
+    """
     def __init__(self):
+        """Initialize MyWindow object."""
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
@@ -34,13 +58,16 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.set_up_gui()
 
     def set_up_gui(self):
-
+        """Initial GUI set up."""
         # LEDS
         self.status.setPixmap(QtGui.QPixmap(self.OFF_LED))
         self.status_2.setPixmap(QtGui.QPixmap(self.OFF_LED))
 
         # Msgs box
         self.msg_box = QtWidgets.QMessageBox()
+
+        # Set ComboBox callback
+        self.pe_menu.currentIndexChanged.connect(self.update_entries) ###
 
         self.init_pe_menu()
 
@@ -57,10 +84,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.status.setPixmap(QtGui.QPixmap(self.OFF_LED))
 
     def init_pe_menu(self):
-
-        # Set ComboBox callback
-        self.pe_menu.currentIndexChanged.connect(self.update_entries)
-
+        """Hide most of input text boxes from projection element GUI submenu."""
         # Projection element textbox entries initial status
         self.length.setEnabled(False)
         self.length.setVisible(False)
@@ -96,6 +120,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pe_char_space.setVisible(False)
 
     def set_buttons(self):
+        """Set callbacks of GUI buttons."""
         self.connect_button.clicked.connect(self.connect_cb)
         self.disconnect_button.clicked.connect(self.disconnect_cb)
         self.start_button.clicked.connect(self.start_proj_cb)
@@ -113,6 +138,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pe_monitor_button.clicked.connect(self.monitor_pe_cb)
 
     def open_services(self):
+        """Open ROS services."""
         # ROS services and topics
         self.connect       = rospy.ServiceProxy('connect', Trigger)
         self.disconnect    = rospy.ServiceProxy('disconnect', Trigger)
@@ -132,7 +158,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.add_proj_elem = rospy.Publisher('add_projection_element', Figure, queue_size=10)
     
     def connect_cb(self):
-        
+        """Button callback to call: connect service."""
         resp = self.connect()
         rospy.loginfo("Service response: \n{}".format(resp))
         
@@ -142,7 +168,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Connection error",resp.message)
 
     def disconnect_cb(self):
-
+        """Button callback to call: disconnect service."""
         resp = self.disconnect()
         rospy.loginfo("Service response: \n{}".format(resp))
 
@@ -152,7 +178,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Disconnection error",resp.message)
 
     def start_proj_cb(self): 
-        
+        """Button callback to call: start projection service."""
         resp = self.start_proj()
         rospy.loginfo("Service response: \n{}".format(resp))
 
@@ -162,7 +188,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection error",resp.message)
 
     def stop_proj_cb(self):
-
+        """Button callback to call: stop projection service."""
         resp = self.stop_proj()
         rospy.loginfo("Service response: \n{}".format(resp))
 
@@ -172,13 +198,18 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection error",resp.message)
     
     def get_list_cs_cb(self):
-
+        """Button callback to call: get coordinate system list service."""
         resp = self.get_cs_list()
         rospy.loginfo("Service response: \n{}".format(resp))
         if not resp.success:
             self.error_msg("Coordinate System Manager error",resp.message)
 
     def create_req(self):
+        """Read parameters from text boxes to define a new coordinate system.
+        
+        Returns:
+            object: object with the parameters read from the GUI
+        """
         coord_sys = CoordinateSystemRequest()
         coord_sys.name = str(self.cs_name.text())
         coord_sys.distance = float(self.cs_dist.text())
@@ -191,7 +222,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return coord_sys
 
     def define_cs_cb(self):
-
+        """Button callback to call: define coordinate system service."""
         try:
             resp = self.manual_cs(self.create_req())
             rospy.loginfo("Service response: \n{}".format(resp))
@@ -202,7 +233,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Coordinate System Menu error",e)
 
     def scan_cs_cb(self):
-        
+        """Button callback to call: scan targets service."""
         try:
             resp = self.auto_cs(self.create_req())
             rospy.loginfo("Service response: \n{}".format(resp))
@@ -213,7 +244,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Coordinate System Menu error",e)
 
     def set_cs_cb(self):
-
+        """Button callback to call: set coordinate system service."""
         try:
             coord_sys      = CoordinateSystemNameRequest()
             coord_sys.name = str(self.cs_name_handler.text())
@@ -227,7 +258,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Coordinate System Menu error",e)
 
     def show_cs_cb(self):
-
+        """Button callback to call: show coordinate system service."""
         try:
             coord_sys      = CoordinateSystemShowRequest()
             coord_sys.secs = int(self.cs_show_secs.text())
@@ -241,7 +272,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Coordinate System Menu error",e)
 
     def remove_cs_cb(self):
-
+        """Button callback to call: remove coordinate system service."""
         try:
             coord_sys      = CoordinateSystemNameRequest()
             coord_sys.name = str(self.cs_name_handler.text())
@@ -255,7 +286,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Coordinate System Menu error",e)
 
     def update_entries(self):
-
+        """Callback of drop down list object: update input text boxes from projection element GUI submenu."""
         self.init_pe_menu()
         figure = self.pe_menu.currentText()
 
@@ -340,7 +371,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.mm_height.setVisible(True)
 
     def add_pe_cb(self):
-
+        """Button callback to pub: add projection element topic."""
         figure = self.pe_menu.currentText()
 
         if figure == "polyline":
@@ -357,7 +388,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element definition error","No projection element type selected.")
 
     def line_def(self):
-
+        """Publish new line projection element on topic."""
         try:
             line                  = Figure()
             line.figure_type      = int(0)
@@ -373,7 +404,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def circle_def(self):
-
+        """Publish new circle projection element on topic."""
         try:
             circle                  = Figure()
             circle.figure_type      = int(1)
@@ -389,7 +420,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def arc_def(self):
-
+        """Publish new arc projection element on topic."""
         try:
             arc                  = Figure()
             arc.figure_type      = int(2)
@@ -407,7 +438,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def oval_def(self):
-
+        """Publish new ellipse projection element on topic."""
         try:
             oval                  = Figure()
             oval.figure_type      = int(3)
@@ -425,7 +456,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def text_def(self):
-
+        """Publish new text projection element on topic."""
         try:
             text                  = Figure()
             text.figure_type      = int(4)
@@ -444,7 +475,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def hide_pe_cb(self):
-
+        """Button callback to call: hide projection element service."""
         try:
             proj_elem                  = ProjectionElementRequest()
             proj_elem.figure_type      = int(self.pe_menu_2.currentIndex())
@@ -463,7 +494,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def unhide_pe_cb(self):
-
+        """Button callback to call: unhide projection element service."""
         try:
             proj_elem                  = ProjectionElementRequest()
             proj_elem.figure_type      = int(self.pe_menu_2.currentIndex())
@@ -482,7 +513,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def remove_pe_cb(self):
-
+        """Button callback to call: remove projection element service."""
         try:
             proj_elem                  = ProjectionElementRequest()
             proj_elem.figure_type      = int(self.pe_menu_2.currentIndex())
@@ -501,7 +532,7 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def monitor_pe_cb(self):
-        
+        """Button callback to call: monitor projection element service."""
         try:
             proj_elem                  = ProjectionElementRequest()
             proj_elem.figure_type      = int(self.pe_menu_2.currentIndex())
@@ -520,13 +551,14 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.error_msg("Projection element Menu error",e)
 
     def error_msg(self,title,e):
-        
+        """Run and set message of pop-up error window."""
         self.msg_box.setIcon(QtWidgets.QMessageBox.Critical)
         self.msg_box.setWindowTitle(title)
         self.msg_box.setText("Error: {}".format(e))
         self.msg_box.exec_()
 
     def closeEvent(self, event):
+        """Stop GUI on press close key button."""
         close = QtWidgets.QMessageBox()
         close.setText("Are you sure you want to quit?")
         close.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
@@ -536,17 +568,3 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             event.accept()
         else:
             event.ignore()
-
-if __name__ == "__main__":
-
-    rospy.init_node('zlp_gui_node')
-
-    app = QtWidgets.QApplication(sys.argv)
-    window = MyWindow()
-    window.show()
-
-    result = app.exec_()
-
-    sys.exit(result)
-
-    rospy.spin()

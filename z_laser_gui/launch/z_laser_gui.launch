@@ -3,7 +3,7 @@
 
     <arg name="namespace" default="zlaser"/>
 
-    <node name="gui_node" pkg="z_laser_gui" type="user_gui.py" ns="$(arg namespace)" output="screen">
+    <node name="zlp_gui_node" pkg="z_laser_gui" type="zlp_gui_node.py" ns="$(arg namespace)" output="screen">
     </node>
 
 </launch>
