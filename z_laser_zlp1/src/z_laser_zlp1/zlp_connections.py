@@ -15,7 +15,8 @@
 # limitations under the License.
 
 """Helper module for python thrift interface to ZLP Service. 
-This module contains utility classes and methods which ease the usage of the thrift interface to ZLP Service."""
+This module contains utility classes and methods which ease the usage of the thrift interface to 
+communicate with the ZLP Service."""
 
 import os
 import sys
@@ -225,7 +226,7 @@ class ThriftClient(TClient):
             raise ValueError("Error: Can't install callback, because event_handler = none!")
 
 class ProjectorClient(object):
-    """This class implement the functions to connect with the projector and fundamental projection features.
+    """This class implements the functions for connecting to the projector and basic projection features.
 
     Attributes:
         projector_id (str): serial number of the projector
@@ -244,7 +245,7 @@ class ProjectorClient(object):
         """Return the object generated to communicate with the projector.
             
         Returns:
-            object: object with the generated thrift client to communicate with the projector
+            object: thrift client object generated to communicate with the projector
         """
         try:
             return self.__thrift_client
@@ -253,7 +254,8 @@ class ProjectorClient(object):
             return e
 
     def connect(self,server_IP,connection_port):
-        """Create and connect the client to thrift server (located at projector) of ZLP-Service and establish an event channel if needed.
+        """Create and connect the client to thrift server (located at projector) of ZLP-Service and establish an event channel if 
+        needed.
 
         Args:
             server_IP (str): ipv6 network address of ZLP-Service
@@ -310,7 +312,7 @@ class ProjectorClient(object):
         """Get status of projection connection.
 
         Returns:
-            (bool):
+            bool: status of the event channel object. Projector connected if true, disconnected otherwise
         """
         return self.__thrift_client._event_channel
 
@@ -470,7 +472,7 @@ class ProjectorClient(object):
         return success,message
 
     def function_module_create(self):
-        """Create function module to operate with GeoTreeElements (coordinate systems and figures).
+        """Create function module to operate with GeoTreeElements (coordinate systems and projection elements).
 
         Returns:
             tuple[str, bool, str]: the first value in the returned tuple is the function module identification name string, 
@@ -487,33 +489,33 @@ class ProjectorClient(object):
         
         return self.module_id,success,message
 
-    def start_project(self, coord_sys):
+    def start_project(self, cs_name):
         """Start projection on the surface of all projection elements that belong to the active coordinate system.
             
         Args:
-            coord_sys (str): name of the active coordinate system
+            cs_name (str): name of the active coordinate system
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
         try:
-            if not coord_sys:
+            if not cs_name:
                 success = False
                 message = "None Coordinate System set"
 
-            if not self.__thrift_client.GetGeoTreeElement(coord_sys).activated:
+            if not self.__thrift_client.GetGeoTreeElement(cs_name).activated:
                 success = False
                 message = "Coordinate_system is not activated"
 
-            if self.is_empty(coord_sys):
+            if self.is_empty(cs_name):
                 success = False
                 message = "Nothing to project"
 
             else:
                 self.__thrift_client.TriggerProjection()
                 success = True
-                message = "Projecting elements from [" + coord_sys + "] coordinate system."
+                message = "Projecting elements from [" + cs_name + "] coordinate system."
         
         except Exception as e:
             success = False
@@ -541,8 +543,11 @@ class ProjectorClient(object):
         
         return success,message
 
-    def update_project(self,coord_sys): 
+    def update_project(self,cs_name): 
         """Update changes on figures projected (restart projection).
+
+        Args:
+            cs_name (str): name of the coordinate system to update
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
@@ -550,7 +555,7 @@ class ProjectorClient(object):
         """
         try:
             self.stop_project()
-            self.start_project(coord_sys)
+            self.start_project(cs_name)
             success = True
             message = "Projection updated."
         
@@ -560,15 +565,24 @@ class ProjectorClient(object):
 
         return success,message
 
-    def is_empty(self, coord_sys):
+    def is_empty(self, cs_name):
+        """Check if coordinate system has associated projection elements.
+
+        Args:
+            cs_name (str): name of the coordinate system to check
+
+        Returns:
+            bool: true if there is any projection element defined at the coordinate system, false otherwise
+        """
         is_empty = False
         try:
             geo_tree_list = self.__thrift_client.GetGeoTreeIds()
+            # elemType = 1024, 1025, 1026, 1027 refers to projection element identificator at the projector device
             matches = [elem.name for elem in geo_tree_list if elem.elemType in (1024,1025,1026,1027)]
             proj_elems = [self.__thrift_client.GetProjectionElement(name) for name in matches]
             
             for proj_elem in proj_elems:
-                if proj_elem.activated == True and proj_elem.coordinateSystemList[0] == coord_sys:
+                if proj_elem.activated == True and proj_elem.coordinateSystemList[0] == cs_name:
                     proj_elems_actives = proj_elem
 
             if not proj_elems_actives:

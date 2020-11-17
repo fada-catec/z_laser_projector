@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module imports the core and utils libraries and manages the functionalities provided from a layer of abstraction, simplifying the 
-task of developing advanced applications."""
+"""This module imports all the other modules and manages the functionalities provided from a layer of abstraction, 
+simplifying the task of developing advanced applications."""
 
 from z_laser_zlp1.zlp_connections import ProjectorClient
 from z_laser_zlp1.zlp_coordinate_system import CoordinateSystem
@@ -26,7 +26,7 @@ from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElement
 from z_laser_msgs.msg import Figure
 
 class ZLPProjectorManager(object):
-    """This class envolves the methods from the libraries imported.
+    """This class envolves the methods from the modules imported.
     
     Args:
         projector_IP (str): IP number of projector device
@@ -88,12 +88,12 @@ class ZLPProjectorManager(object):
         """Get connection status of projector device.
 
         Returns:
-            status(bool):
+            bool: true if projector is connected, false otherwise 
         """
         status = self.projector_client.connection_status()
         return status
 
-    def load_license(self,license_path):
+    def load_license(self, license_path):
         """Transfer license file to service.
 
         Args:
@@ -107,7 +107,7 @@ class ZLPProjectorManager(object):
             raise FileNotFoundError(message)
 
     def activate(self):
-        """Activate projector once it is connected and license is transfered.
+        """Activate projector once it is connected and license is transferred.
 
         Raises:
             SystemError
@@ -176,9 +176,9 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
 
-        Return:
-            cs_list(list): list of defined coordinate systems
-            (string): name of the active coordinate system if it exists
+        Returns:
+            list: list of defined coordinate systems
+            string: name of the active coordinate system if it exists
         """
         cs_list,success,message = self.cs_element.coordinate_system_list()
         if not success:
@@ -186,16 +186,16 @@ class ZLPProjectorManager(object):
 
         return cs_list,self.__active_coord_sys
 
-    def get_coordinate_system_params(self, coord_sys):
+    def get_coordinate_system_params(self, cs_name):
         """Get parameters values of a defined coordinate system.
 
         Args:
-            coord_sys (str): name of reference coordinate system 
+            cs_name (str): name of reference coordinate system 
 
         Raises:
             SystemError
         """
-        cs_params,success,message = self.cs_element.get_cs(coord_sys, CoordinateSystemParameters())
+        cs_params,success,message = self.cs_element.get_cs(cs_name, CoordinateSystemParameters())
         if not success:
             raise SystemError(message)
 
@@ -205,7 +205,7 @@ class ZLPProjectorManager(object):
         """Define a new coordinate reference system.
 
         Args:
-            cs_params (list): list of necessary parameters to define a new reference system (coordinates of reference system points)
+            cs_params (list): list of necessary parameters to define a new reference system
 
         Raises:
             SystemError
@@ -222,7 +222,7 @@ class ZLPProjectorManager(object):
         except SystemError as e:
             raise SystemError(e)
 
-    def register_coordinate_system(self,coord_sys):
+    def register_coordinate_system(self, cs_name):
         """Register new coordinate reference system.
 
         Args:
@@ -231,15 +231,15 @@ class ZLPProjectorManager(object):
         Raises:
             SystemError
         """
-        success,message = self.cs_element.register_cs(coord_sys)
+        success,message = self.cs_element.register_cs(cs_name)
         if not success:
             raise SystemError(message)
         
-    def set_coordinate_system(self,cs_name):
+    def set_coordinate_system(self, cs_name):
         """Set the active reference system.
 
         Args:
-            cs_name (str): name of reference coordinate system
+            cs_name (str): name of reference system
 
         Raises:
             SystemError
@@ -285,27 +285,29 @@ class ZLPProjectorManager(object):
         if not success:
             raise SystemError(message)
 
-    def remove_coordinate_system(self,coord_sys):
+    def remove_coordinate_system(self, cs_name):
         """Delete a reference system.
 
         Args:
-            coord_sys (str): name of reference coordinate system 
+            cs_name (str): name of reference system 
 
         Returns:
-            (bool): 
+            bool: true if the reference system to remove is the active coordinate system, false otherwise
 
         Raises:
             SystemError
         """
-        success,message = self.cs_element.remove_cs(coord_sys)
+        success,message = self.cs_element.remove_cs(cs_name)
         if success:
-            if coord_sys == self.__active_coord_sys:
+            if cs_name == self.__active_coord_sys:
                 self.__active_coord_sys = ""
                 return True
+            else:
+                return False
         else:
             raise SystemError(message)
         
-    def create_polyline(self,proj_elem_params):
+    def create_polyline(self, proj_elem_params):
         """Create a polyline as new projection element, associated to the active reference system.
 
         Args:
@@ -318,11 +320,11 @@ class ZLPProjectorManager(object):
             message = "There is not an active coordinate system. Define or set one first."
             raise SystemError(message)
         
-        success,message = self.projection_element.define_polyline(self.__active_coord_sys,proj_elem_params)
+        success,message = self.projection_element.define_polyline(self.__active_coord_sys, proj_elem_params)
         if not success:
             raise SystemError(message)
 
-    def create_curve(self,proj_elem_params):
+    def create_curve(self, proj_elem_params):
         """Create a curve (circle, oval, arc) as new projection element, associated to the active reference system.
 
         Args:
@@ -348,7 +350,7 @@ class ZLPProjectorManager(object):
         if not success:
             raise SystemError(message)
 
-    def create_text(self,proj_elem_params):
+    def create_text(self, proj_elem_params):
         """Create a text as new projection element, associated to the active reference system.
 
         Args:
@@ -366,7 +368,13 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
 
     def get_proj_elem(self, params):
-        """
+        """Get the parameters of a defined projection element.
+
+        Args:
+            params (object): object with the necessary parameters to identify a projection element
+
+        Raises:
+            SystemError
         """
         proj_elem,success,message = self.projection_element.get_figure(params)
         if not success:
@@ -387,7 +395,7 @@ class ZLPProjectorManager(object):
         if not success:
             raise SystemError(message)
         
-    def unhide_proj_elem(self,params):
+    def unhide_proj_elem(self, params):
         """Unhide a projection element from active reference system.
 
         Args:
@@ -413,11 +421,16 @@ class ZLPProjectorManager(object):
         if not success:
             raise SystemError(message)
     
-    def monitor_proj_elem(self,params):
-        """Monitor transformation operations (translation, rotation, scalation) to a specific figure on real time projection 
-        by the use of keyboard.
+    def monitor_proj_elem(self, params):
+        """Monitor transformation operations (translation, rotation, scalation) to a specific projection element
+        on real time projection by the use of keyboard.
+
+        Args:
+            params (object): object with necessary parameters to identify a projection element
 
         Raises:  
+            Warning
+            SystemError
         """
         if not self.__active_coord_sys:
             raise Warning("No Active Coordinate System set yet.")
@@ -461,11 +474,11 @@ class ZLPProjectorManager(object):
         except SystemError as e:
             raise SystemError(e) 
 
-    def cs_axes_create(self,cs_params):
-        """Create projection elements of user reference system origin axes.
+    def cs_axes_create(self, cs_params):
+        """Create the projection elements of the origin axes for the user reference system.
 
         Args:
-            cs_params (object): object with necessary parameters to identify a coordinate system
+            cs_params (object): object with the parameters of the new reference system defined
 
         Raises:
             SystemError
@@ -479,19 +492,15 @@ class ZLPProjectorManager(object):
         except SystemError as e:
             raise SystemError(e)
     
-    def cs_frame_create(self,cs_params):
-        """Create projection elements of user reference system frame.
+    def cs_frame_create(self, cs_params):
+        """Create the projection element of the system frame for the user reference system.
 
         Args:
-            T (list): list of the User System Reference Points
-            cs_params (list): list of definition parameters of the reference system
+            cs_params (object): object with the parameters of the new reference system defined
 
         Raises:
             SystemError
         """
-        # cs = self.get_coordinate_system_params(cs_params.name)
-        # success,message = self.projection_element.cs_frame_create(cs_params, ProjectionElementParameters())
-
         success,message = self.projection_element.cs_frame_create(cs_params.name, ProjectionElementParameters(), cs_params.T)
         if not success:
             raise SystemError(message)
@@ -548,7 +557,6 @@ class ZLPProjectorManager(object):
         proj_elem_params.figure_type      = Figure.POLYLINE
                 
         try:
-            # for frame_id in self.projection_element.frame_ids:
             proj_elem_params.figure_name = "frame"
             self.unhide_proj_elem(proj_elem_params)
                 
@@ -556,7 +564,7 @@ class ZLPProjectorManager(object):
             raise SystemError(e)
 
     def cs_frame_hide(self):
-        """Hide frame lines of user reference system.
+        """Hide frame of user reference system.
 
         Raises:
             SystemError
@@ -566,7 +574,6 @@ class ZLPProjectorManager(object):
         proj_elem_params.figure_type      = Figure.POLYLINE
         
         try:
-            # for frame_id in self.projection_element.frame_ids:
             proj_elem_params.figure_name = "frame"
             self.hide_proj_elem(proj_elem_params)
 
@@ -575,7 +582,7 @@ class ZLPProjectorManager(object):
 
     @property        
     def projector_IP(self):
-        """str: Get or set projector IP address."""
+        """Get or set the projector IP address."""
         return self.__projector_IP
 
     @projector_IP.setter
@@ -584,7 +591,7 @@ class ZLPProjectorManager(object):
     
     @property
     def server_IP(self):
-        """str: Get or set IP address of server running at projector device."""
+        """Get or set IP address of server running at projector device."""
         return self.__server_IP    
     
     @server_IP.setter
@@ -593,7 +600,7 @@ class ZLPProjectorManager(object):
     
     @property
     def connection_port(self):
-        """int: Get or set connection port number."""
+        """Get or set connection port number."""
         return self.__connection_port    
 
     @connection_port.setter
@@ -602,7 +609,7 @@ class ZLPProjectorManager(object):
     
     @property
     def license_path(self):
-        """str: Get or set license file path."""
+        """Get or set license file path."""
         return self.__license_path    
     
     @license_path.setter

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Complementary module with useful classes to support the usage of zlp library."""
+"""Complementary module with useful classes to support the usage of zlp libraries."""
 
 from scipy.spatial import distance
 import math
@@ -25,7 +25,21 @@ from z_laser_msgs.srv import CoordinateSystemRequest
 
 
 class UserT(object):
+    """This class provides a method to calculate the user points T1, T2, T3 from T0 and 
+    the properties of the reference system.
+    
+    Args:
+        x0 (float): x-position of the user T0 point
+        y0 (float): y-position of the user T0 point
+        resolution (float): resolution of the user reference system {T}
+        size_horiz (float): horizontal dimension of the refence system in real dimensions {P}
+        size_vert (float): vertical size of the refence system in real dimensions {P}
+
+    Attributes:
+        T (list): list of the calculated user {T} points
+    """
     def __init__(self, x0, y0, resolution, size_horiz, size_vert):
+        """Initialize the UserT object."""
         T0 = Point()
         T1 = Point()
         T2 = Point()
@@ -42,30 +56,16 @@ class UserT(object):
 
         self.T = [T0, T1, T2, T3]
 
-class UserP(object):
-    def __init__(self):
-        P0 = Point()
-        P1 = Point()
-        P2 = Point()
-        P3 = Point()
-
-        self.P = [P0, P1, P2, P3]
-
 class CoordinateSystemParameters(object):
     """This class is used as data object with the necessary parameters to define a coordinate system.
 
     Attributes:
-        name (str): coordinate system name
+        DEFAULT_SHOW_TIME (int): number of seconds for projecting reference system's projection elements
+        name (str): reference system name
         distance (float): distance between the projection surface and the projector device
         resolution (float): resolution of user reference system {T}
-        P1 (object): object with the x,y,z position of point p1 from projector reference system {P}
-        P2 (object): object with the x,y,z position of point p2 from projector reference system {P}
-        P3 (object): object with the x,y,z position of point p3 from projector reference system {P}
-        P4 (object): object with the x,y,z position of point p4 from projector reference system {P}
-        T1 (object): object with the x,y,z position of point T1 from user reference system {T}
-        T2 (object): object with the x,y,z position of point T2 from user reference system {T}
-        T3 (object): object with the x,y,z position of point T3 from user reference system {T}
-        T4 (object): object with the x,y,z position of point T4 from user reference system {T}
+        P (list): list with the x,y,z position of reference points from projector reference system {P}
+        T (list): list with the x,y,z position of user reference points from user reference system {T}
     """
     DEFAULT_SHOW_TIME = 1
 
@@ -79,6 +79,14 @@ class CoordinateSystemParameters(object):
 
     @staticmethod
     def req_to_param(req):
+        """Convert ROS request object to CoordinateSystemParameters object.
+
+        Args:
+            req (object): ROS request object with the parameters of a coordinate system
+
+        Returns:
+            object: same parameters of the coordinate system now in a CoordinateSystemParameters object 
+        """
         params = CoordinateSystemParameters()
         params.name       = req.name
         params.distance   = req.distance
@@ -89,6 +97,14 @@ class CoordinateSystemParameters(object):
 
     @staticmethod
     def param_to_req(params):
+        """Convert CoordinateSystemParameters object to ROS request object.
+
+        Args:
+            params (object): CoordinateSystemParameters object with the parameters of a coordinate system
+
+        Returns:
+            object: same parameters of the coordinate system now in a ROS request object
+        """
         req = CoordinateSystemRequest()
         req.name       = params.name
         req.distance   = params.distance
@@ -102,20 +118,14 @@ class ProjectionElementParameters(object):
     """This class is used as data object with the necessary information to create a projection element.
     
     Attributes:
+        figures_list (list): list with the projection elements' identificator names
+        figure_type (int): projection element id (see Figure.msg for more information)
         projection_group (str): name of the projection group to which the projection element belongs
         figure_name (str): name of the projection element to define
-        curve_type (str): type of curve (circle, oval, arc)
-        x (float): x-position of the projection element's 'characteristic point'
-        The 'characteristic point' for a polyline refers to its starting point. For circle refers to its center 
-        y (float): y-position of the projection element's 'characteristic point'
-        angle (float): angle property for different figures (polyline slope, arc starting angle, text tilt, ...)
-        end_angle (float): end angle of arc figure
-        length (float): length property for different figures (polyline length, circle radius, text string wide, 
-        oval length size ...)
-        height (float): height property for different figures (text characters height, oval width size, ...)
+        position (object): object with the x,y,z position of the projection element's characteristic point
+        size (list): list with the characteristic sizes of the projection element
+        angle (list): list with the characteristic angles of the projection element
         text (str): text character string for text projection element
-        char_spacing (float): space between characters
-        ..........................CAMBIAR.............................................
     """
     figures_list = ["/polyline/",
                     "/circle/",
@@ -134,6 +144,11 @@ class ProjectionElementParameters(object):
         self.text             = str()
 
     def to_figure(self):
+        """Return ProjectionElementParameters attributes converted to ROS msg format.
+
+        Returns:
+            object: ROS msg object with the parameters of the projection element
+        """
         figure = Figure()
         figure.projection_group = self.projection_group
         figure.figure_type      = self.figure_type
@@ -144,7 +159,6 @@ class ProjectionElementParameters(object):
         figure.text             = self.text
         return figure
     
-
 class GeometryTool(object):
     """This class implement functions to generate basic geometry and math tools.
     
@@ -159,7 +173,7 @@ class GeometryTool(object):
         """Initialize 4x4 matrix.
             
         Returns:
-            object: matrix struct initialized with empty values
+            object: matrix object initialized with empty values
         """
         mat = self.__thrift_client.thrift_interface.Matrix4x4(list())
         return mat
@@ -172,7 +186,7 @@ class GeometryTool(object):
             y (float): y position value
 
         Returns:
-            object: struct with the values of the 2 axes (x,y)
+            object: object with the values of the 2 axes (x,y)
         """
         return self.__thrift_client.thrift_interface.Vector2D(x, y)
 
@@ -185,14 +199,32 @@ class GeometryTool(object):
             z (float): z position value
 
         Returns:
-            object: struct with the values of the 3 axes (x,y,z)
+            object: object with the values of the 3 axes (x,y,z)
         """
         return self.__thrift_client.thrift_interface.Vector3D(x, y, z)
 
     @staticmethod
     def vector_point_distance(point1, point2):
+        """Return the euclidean distance between 2 points.
+
+        Args:
+            point1 (list): x,y,z position of the first point
+            point2 (list): x,y,z position of the second point
+
+        Returns:
+            float: euclidean distance between point1 and point2
+        """
         return distance.euclidean((point1.x, point1.y), (point2.x, point2.y))
 
     @staticmethod
     def vector_point_angle(point1, point2):
+        """Angle of the vector consisting in two points, regards to the horizontal 0 degrees.
+
+        Args:
+            point1 (list): x,y,z position of the first point of the vector
+            point2 (list): x,y,z position of the second point of the vector
+
+        Returns:
+            float: vector angle regards to the horizontal 0 degrees
+        """
         return 180/math.pi*math.atan2((point2.y-point1.y), (point2.x-point1.x))

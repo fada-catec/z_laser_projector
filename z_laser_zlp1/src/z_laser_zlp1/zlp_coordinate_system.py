@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Helper module for python thrift interface to ZLP Service. 
-This module contains utility classes and methods which ease the usage of the thrift interface to ZLP Service."""
+"""This module contains utility classes and methods which ease the management and operation of reference systems."""
 
 import os
 import sys
@@ -48,7 +47,7 @@ class CoordinateSystem(object):
         self.cv = threading.Condition()
 
     def coordinate_system_list(self):
-        """Get list of active available coordinate systems from projector.
+        """Get list of defined coordinate systems from projector.
 
         Returns:
             tuple[list, bool, str]: the first value in the returned tuple is a names' list of available coordinate systems, 
@@ -107,12 +106,13 @@ class CoordinateSystem(object):
         """Generate new coordinate system.
 
         Args:
-            cs (object): struct with the necessary parameters to create the coordinate system 
-            do_target_search(bool): 
+            cs (object): object with the necessary parameters to definea a new coordinate system 
+            do_target_search (bool): true if scan targets, false otherwise
 
         Returns:
-            tuple[str, bool, str]: the first value in the returned tuple is the name string of the coordinate system generated, 
-            the second is a bool success value and the third value in the tuple is an information message string
+            tuple[str, bool, object]: the first value in the returned tuple is a bool success value, the second is 
+            an information message string and the third value an object with the properties of the new coordinate 
+            system defined
         """
         try:
             reference_object = self.create_reference_object()
@@ -157,6 +157,15 @@ class CoordinateSystem(object):
         return success,message,cs
 
     def update_cs(self, cs, scan_result):
+        """Update coordinate system with the results of scanned targets.
+
+        Args:
+            cs (object): object with the original parameters of the coordinate system 
+            scan_result (object): object with the parameters of the scanned targets
+
+        Returns:
+            object: object with the updated parameters of the coordinate system 
+        """
         cs.P[0].x = float(scan_result[0])
         cs.P[0].y = float(scan_result[1])
         cs.P[1].x = float(scan_result[2])
@@ -168,11 +177,11 @@ class CoordinateSystem(object):
         return cs
 
     def function_module_changed_callback(self, module_id, old_state, new_state):
-        """Callback for function module state change, events handler. It is used for stopping running code while the projector is 
-        scanning targets.
+        """Callback for function module state change, events handler. It is used for stopping running code while until 
+        the projector ends scanning targets.
 
         Args:
-            module_id (str): function module identification name
+            module_id (str): function module identificator name
             old_state (str): old state of the function module
             new_state (str): new state of the function module
         """
@@ -188,8 +197,8 @@ class CoordinateSystem(object):
             ref_obj_name (str): object with the necessary parameters to create the coordinate system 
 
         Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is an 
-            information message string
+            tuple[bool, str, list]: the first value in the returned tuple is a bool success value, the second value 
+            is an information message string and the third is a list with the results of the scanned targets
         """
         result_tracepoints = []
         try:
@@ -237,18 +246,18 @@ class CoordinateSystem(object):
         return success,message,result_tracepoints
 
     def __define_reference_point(self, reference_object, cross_size, n, d, x, y):
-        """Fill other fields of the coordinate system structure.
+        """Fill other fields of the coordinate system object.
 
         Args:
-            reference_object (object): object of the active coordinate system
-            cross_size (object): struct with the dimensions of the crosses
+            reference_object (object): object of the coordinate system
+            cross_size (object): object with the dimensions of the crosses
             n (int): vector index
             d (float): distance between the projection surface and the projector
             x (float): value of the x-axis coordinate
             y (float): value of the y-axis coordinate
         
         Returns:
-            object: coordinate system parameters structure updated
+            object: parameters of the coordinate system object updated
         """
         reference_object.refPointList[n].tracePoint.x = x
         reference_object.refPointList[n].tracePoint.y = y
@@ -261,24 +270,24 @@ class CoordinateSystem(object):
         """Activate or deactivate a reference object.
 
         Args:
-            state (bool): activation/deactivation parameter
-            reference_object (object): reference object to be activated/deactivated
+            state (bool): true if activate, false otherwise
+            reference_object (object): reference object to be activated or deactivated
         """
         ref_obj.activated = state
         self.__thrift_client.SetReferenceobject(ref_obj)
 
-    def register_cs(self, coord_sys):
-        """Register the new coordinate system at the projector once it has been generated and activated.
+    def register_cs(self, cs_name):
+        """Register a new coordinate system at the projector after it has been defined.
 
         Args:
-            coord_sys (str): name of the coordinate system
+            cs_name (str): name of the coordinate system
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
         try:
-            self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", coord_sys)
+            self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", cs_name)
             self.__thrift_client.FunctionModuleSetProperty(self.module_id, "runMode", "1")
             self.__thrift_client.FunctionModuleRun(self.module_id)
 
@@ -288,7 +297,7 @@ class CoordinateSystem(object):
                 message = "Function module is not in idle state, hence an error has occured."
             else:
                 success = True
-                message = "Coordinate system [" + coord_sys + "] registered on projector."
+                message = "Coordinate system [" + cs_name + "] registered on projector."
 
         except Exception as e:
             success = False 
@@ -296,11 +305,11 @@ class CoordinateSystem(object):
 
         return success,message
 
-    def set_cs(self, coord_sys): 
-        """Activate the new generated coordinate system and deactivate the other existing coordinate systems at the projector.
+    def set_cs(self, cs_name): 
+        """Activate the new defined coordinate system and deactivate the other existing coordinate systems at the projector.
 
         Args:
-            coord_sys (str): name of the new coordinate system
+            cs_name (str): name of the new coordinate system
         
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
@@ -311,19 +320,19 @@ class CoordinateSystem(object):
             matches = [geo_tree_id.name for geo_tree_id in geo_tree_list if geo_tree_id.elemType == 4096]
             coordinate_systems = [self.__thrift_client.GetReferenceobject(name) for name in matches]
             
-            if any(coord_sys in cs.name for cs in coordinate_systems):
+            if any(cs_name in cs.name for cs in coordinate_systems):
                 for cs in coordinate_systems:
-                    if cs.name == coord_sys:
+                    if cs.name == cs_name:
                         self.__ref_obj_state(True, cs)
                         self.__thrift_client.FunctionModuleSetProperty(self.module_id, "referenceData", cs.name)
                     else:
                         self.__ref_obj_state(False, cs)
                 
                 success = True
-                message = coord_sys + " set as active coordinate system"
+                message = cs_name + " set as active coordinate system"
             else:
                 success = False
-                message = coord_sys + " does not exist"
+                message = cs_name + " does not exist"
 
         except Exception as e:
             success = False 
@@ -331,12 +340,11 @@ class CoordinateSystem(object):
 
         return success,message
 
-    def show_cs(self, coord_sys):
+    def show_cs(self, cs_name):
         """Project a coordinate system on the projection surface.
 
         Args:
-            coord_sys (str): name of the coordinate system
-            secs (int): number of seconds the projection lasts
+            cs_name (str): name of the coordinate system
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
@@ -346,7 +354,7 @@ class CoordinateSystem(object):
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","1")
             
             success = True
-            message = "Show [" + coord_sys + "] coordinate system"
+            message = "Show [" + cs_name + "] coordinate system"
         
         except Exception as e:
             success = False 
@@ -354,12 +362,11 @@ class CoordinateSystem(object):
 
         return success,message
 
-    def hide_cs(self, coord_sys):
+    def hide_cs(self, cs_name):
         """Project a coordinate system on the projection surface.
 
         Args:
-            coord_sys (str): name of the coordinate system
-            secs (int): number of seconds the projection lasts
+            cs_name (str): name of the coordinate system
 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
@@ -369,7 +376,7 @@ class CoordinateSystem(object):
             self.__thrift_client.FunctionModuleSetProperty(self.module_id,"showAllRefPts","0")
             
             success = True
-            message = ("Hide [{}] coordinate system".format(coord_sys))
+            message = ("Hide [{}] coordinate system".format(cs_name))
         
         except Exception as e:
             success = False 
@@ -377,20 +384,20 @@ class CoordinateSystem(object):
 
         return success,message
 
-    def remove_cs(self, coord_sys):
+    def remove_cs(self, cs_name):
         """Delete a coordinate system.
             
         Args:
-            coord_sys (str): name of the coordinate system
+            cs_name (str): name of the coordinate system
                 
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
             an information message string
         """
         try:
-            self.__thrift_client.RemoveGeoTreeElem(coord_sys)
+            self.__thrift_client.RemoveGeoTreeElem(cs_name)
             success = True
-            message = "Coordinate system [" + coord_sys + "] removed. Set other coordinate system or define a new one before continue."
+            message = "Coordinate system [" + cs_name + "] removed. Set other coordinate system or define a new one before continue."
 
         except Exception as e:
             success = False 
@@ -398,18 +405,19 @@ class CoordinateSystem(object):
 
         return success,message
 
-    def get_cs(self, coord_sys, cs_params):
+    def get_cs(self, cs_name, cs_params):
         """Get the parameters values of a defined coordinate system.
             
         Args:
-            coord_sys (str): name of the coordinate system
+            cs_name (str): name of the coordinate system
                 
         Returns:
-            tuple[object, bool, str]: the first value in the returned tuple is an object with the coordinate system parameters values,
-            the second is a bool success value and the third value in the tuple is an information message string
+            tuple[object, bool, str]: the first value in the returned tuple is an object with the coordinate system 
+            parameters values, the second is a bool success value and the third value in the tuple is an information 
+            message string
         """
         try:
-            cs_ref_obj         = self.__thrift_client.GetReferenceobject(coord_sys)
+            cs_ref_obj         = self.__thrift_client.GetReferenceobject(cs_name)
 
             cs_params.name     = cs_ref_obj.coordinateSystem
             cs_params.distance = cs_ref_obj.refPointList[0].distance
@@ -421,7 +429,7 @@ class CoordinateSystem(object):
                 cs_params.T[i].z = cs_params.distance
             
             success = True
-            message = "[" + coord_sys + "] coordinate system params returned."
+            message = "[" + cs_name + "] coordinate system params returned."
 
         except Exception as e:
             success = False 
