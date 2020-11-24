@@ -1,0 +1,23 @@
+actions: []
+authors: Rafael Luque <rluque@catec.aero>, Ines M. Lara <imlara@catec.aero>
+brief: ''
+bugtracker: ''
+depends:
+- message_generation
+- catkin
+- message_runtime
+- geometry_msgs
+description: "<p>\n      T\n    </p>"
+license: Apache 2.0
+maintainers: Rafael Luque <rluque@catec.aero>, Ines M. Lara <imlara@catec.aero>
+msgs:
+- Figure
+package_type: package
+repo_url: ''
+srvs:
+- ProjectionElement
+- CoordinateSystem
+- CoordinateSystemList
+- CoordinateSystemShow
+- CoordinateSystemName
+url: http://wiki.ros.org/z_laser_projector
