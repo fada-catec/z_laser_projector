@@ -36,5 +36,9 @@
   <exec_depend>z_laser_zlp1</exec_depend>
   <exec_depend>z_laser_msgs</exec_depend>
   <exec_depend>tf</exec_depend>
+
+  <export>
+    <rosdoc config="rosdoc.yaml"/>    
+  </export>
   
 </package>
