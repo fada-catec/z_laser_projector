@@ -21,6 +21,7 @@ import sys
 import threading 
 
 from z_laser_zlp1.zlp_utils import UserT, GeometryTool
+# from zlp_utils import UserT, GeometryTool
 
 class CoordinateSystem(object):
     """This class implement the functions related with coordinate systems management.

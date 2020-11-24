@@ -22,6 +22,11 @@ from z_laser_zlp1.zlp_coordinate_system import CoordinateSystem
 from z_laser_zlp1.zlp_projection_element import ProjectionElement
 from z_laser_zlp1.zlp_keyboard import KeyboardControl
 from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
+# from zlp_connections import ProjectorClient
+# from zlp_coordinate_system import CoordinateSystem
+# from zlp_projection_element import ProjectionElement
+# from zlp_keyboard import KeyboardControl
+# from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from z_laser_msgs.msg import Figure
 

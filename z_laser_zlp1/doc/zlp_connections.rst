@@ -1,7 +1,7 @@
-zlp\_utils module
-=================
+zlp\_connections module
+=======================
 
-.. automodule:: zlp_utils
+.. automodule:: zlp_connections
     :members:
     :undoc-members:
     :special-members: __init__

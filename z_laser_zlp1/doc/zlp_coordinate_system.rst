@@ -1,7 +1,7 @@
-zlp\_projector\_manager module
+zlp\_coordinate\_system module
 ==============================
 
-.. automodule:: zlp_projector_manager
+.. automodule:: zlp_coordinate_system
     :members:
     :undoc-members:
     :special-members: __init__
