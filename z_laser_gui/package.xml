@@ -27,5 +27,9 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>z_laser_msgs</exec_depend>
+
+  <export>
+    <rosdoc config="rosdoc.yaml"/>    
+  </export>
   
 </package>

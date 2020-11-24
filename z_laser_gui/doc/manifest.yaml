@@ -1,0 +1,20 @@
+actions: []
+authors: Rafael Luque <rluque@catec.aero>
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- roscpp
+- std_msgs
+- python-catkin-pkg
+- z_laser_msgs
+- geometry_msgs
+- rospy
+description: test project simulation
+license: Apache 2.0
+maintainers: Rafael Luque <rluque@catec.aero>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

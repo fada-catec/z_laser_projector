@@ -24,6 +24,7 @@ import rospkg
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from z_laser_gui.main_window import Ui_MainWindow
+# from main_window import Ui_MainWindow
 
 from std_srvs.srv import Trigger, TriggerResponse
 from geometry_msgs.msg import Point
@@ -562,9 +563,9 @@ class MyWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         close = QtWidgets.QMessageBox()
         close.setText("Are you sure you want to quit?")
         close.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
-        close = close.exec()
+        closed = close.exec_()
 
-        if close == QtWidgets.QMessageBox.Yes:
+        if closed == QtWidgets.QMessageBox.Yes:
             event.accept()
         else:
             event.ignore()
