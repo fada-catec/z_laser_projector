@@ -109,10 +109,4 @@ class TestProjectorManager(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print("main")
-
     rosunit.unitrun('z_laser_zlp1', 'test_projector_manager', TestProjectorManager,  sysargs=None)
-    # rosunit.unitrun('z_laser_zlp1', 'test1', Test1,  sysargs=None, coverage_packages=['z_laser_zlp1'])
-    # rosunit.unitrun('z_laser_zlp1', 'test1', Test1,  sysargs=['--cov'])
-    # rosunit.unitrun(package_name, test_name, test_case_class, sysargs=None, coverage_packages=None)
-    # coverage_packages=['module1.foo', 'module2.bar'] List of packages that should be included in coverage report.
