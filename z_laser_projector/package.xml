@@ -4,11 +4,12 @@
   <version>0.0.0</version>
   <description>
     <p>
-      The z_laser_projector package is a ROS wrapper for ZLP1 Z-LASER Projector, 
-      that makes it fully compatible with all available sensors and devices running 
-      over the ROS-Industrial project. This package provides libraries that allow 
-      the user to operate the device and simplify the task of developing further advanced 
-      features, such as augmented reality applications.
+      The z_laser_projector stack is a set of tools that allow 
+      the user to operate the Z-LASER Projector ZLP1 and simplify 
+      the task of developing further advanced features, such as 
+      augmented reality applications. The stack provides a ROS API 
+      to control the device via topics and services, a visualizer for 
+      laser projections and a graphical interface.
     </p>
   </description>
   <url>http://wiki.ros.org/z_laser_projector</url>

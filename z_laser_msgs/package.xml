@@ -4,10 +4,10 @@
   <version>0.0.0</version>
   <description>
     <p>
-      T
+      z_laser_msgs holds the services description and relevant messages for the z_laser_projector stack.
     </p>
   </description>
-  <url>http://wiki.ros.org/z_laser_projector</url>
+  <url>http://wiki.ros.org/z_laser_msgs</url>
   <author email="rluque@catec.aero">Rafael Luque </author>
   <author email="imlara@catec.aero">Ines M. Lara </author>
   <maintainer email="rluque@catec.aero">Rafael Luque </maintainer>

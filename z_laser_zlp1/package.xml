@@ -4,14 +4,15 @@
   <version>0.0.0</version>
   <description>
     <p>
-      The z_laser_projector package is a ROS wrapper for ZLP1 Z-LASER Projector, 
-      that makes it fully compatible with all available sensors and devices running 
-      over the ROS-Industrial project. This package provides libraries that allow 
-      the user to operate the device and simplify the task of developing further advanced 
-      features, such as augmented reality applications.
+      This package is a ROS wrapper that set up the 
+      communication and control of the ZLP1 Z-LASER Projector, 
+      making it fully compatible with all available sensors and 
+      devices running over the ROS-Industrial project. For that 
+      purpose, it provides a ROS API that expose the different 
+      functionalities offered by the device.
     </p>
   </description>
-  <url>http://wiki.ros.org/z_laser_projector</url>
+  <url>http://wiki.ros.org/z_laser_zlp1</url>
   <author email="rluque@catec.aero">Rafael Luque </author>
   <author email="imlara@catec.aero">Ines M. Lara </author>
   <maintainer email="rluque@catec.aero">Rafael Luque </maintainer>
@@ -20,12 +21,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>python-catkin-pkg</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>z_laser_msgs</build_depend>
-  <build_depend>rostest</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
@@ -38,6 +37,7 @@
   <exec_depend>z_laser_msgs</exec_depend>
 
   <test_depend>rosunit</test_depend>
+  <test_depend>rostest</test_depend>
 
   <export>
     <rosdoc config="rosdoc.yaml"/>    
