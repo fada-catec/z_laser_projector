@@ -6,8 +6,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
 )
 
-catkin_python_setup()
-
 add_message_files(
    FILES
    Figure.msg
@@ -27,11 +25,5 @@ generate_messages(
    geometry_msgs
 )
 
-## CATKIN configuration
 catkin_package(
-)
-
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
 )
