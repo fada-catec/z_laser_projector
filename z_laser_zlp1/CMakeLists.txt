@@ -18,10 +18,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-# catkin_add_nosetests(test/test_manager_connection.py
-#                      DEPENDENCIES ${catkin_EXPORTED_TARGETS})
+catkin_add_nosetests(test/test_manager_connection.py
+                     DEPENDENCIES ${catkin_EXPORTED_TARGETS})
 
-# if(CATKIN_ENABLE_TESTING)
-#   find_package(rostest REQUIRED)
-#   add_rostest(test/define_coordinate_system_test.test)
-# endif()
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/define_coordinate_system_test.test)
+endif()
