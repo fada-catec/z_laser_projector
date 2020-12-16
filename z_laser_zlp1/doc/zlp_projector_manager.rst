@@ -1,7 +1,7 @@
 zlp\_projector\_manager module
 ==============================
 
-.. automodule:: zlp_projector_manager
+.. automodule:: z_laser_zlp1.zlp_projector_manager
     :members:
     :undoc-members:
     :special-members: __init__

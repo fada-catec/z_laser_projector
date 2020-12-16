@@ -6,7 +6,7 @@ Modules
 ########
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 4
 
   zlp_connections
   zlp_coordinate_system

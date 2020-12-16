@@ -1,7 +1,7 @@
 zlp\_gui module
 ===============
 
-.. automodule:: zlp_gui
+.. automodule:: z_laser_gui.zlp_gui
     :members:
     :undoc-members:
     :special-members: __init__

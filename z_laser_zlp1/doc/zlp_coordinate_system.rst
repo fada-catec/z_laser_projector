@@ -1,7 +1,7 @@
 zlp\_coordinate\_system module
 ==============================
 
-.. automodule:: zlp_coordinate_system
+.. automodule:: z_laser_zlp1.zlp_coordinate_system
     :members:
     :undoc-members:
     :special-members: __init__

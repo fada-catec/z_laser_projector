@@ -3,24 +3,26 @@ authors: Rafael Luque <rluque@catec.aero>, Ines M. Lara <imlara@catec.aero>
 brief: ''
 bugtracker: ''
 depends:
-- z_laser_msgs
-- roscpp
-- std_msgs
-- python-catkin-pkg
-- rostest
-- rospy
-- rosunit
 - catkin
-description: "<p>\n      The z_laser_projector package is a ROS wrapper for ZLP1 Z-LASER\
-  \ Projector, \n      that makes it fully compatible with all available sensors and\
-  \ devices running \n      over the ROS-Industrial project. This package provides\
-  \ libraries that allow \n      the user to operate the device and simplify the task\
-  \ of developing further advanced \n      features, such as augmented reality applications.\n\
-  \    </p>"
+- roscpp
+- python3-thriftpy
+- std_msgs
+- python3-nose
+- z_laser_msgs
+- rospy
+- python3-scipy
+- rostest
+- python3-numpy
+- rosunit
+description: "<p>\n      This package is a ROS wrapper that set up the \n      communication\
+  \ and control of the ZLP1 Z-LASER Projector, \n      making it fully compatible\
+  \ with all available sensors and \n      devices running over the ROS-Industrial\
+  \ project. For that \n      purpose, it provides a ROS API that expose the different\
+  \ \n      functionalities offered by the device.\n    </p>"
 license: Apache 2.0
 maintainers: Rafael Luque <rluque@catec.aero>, Ines M. Lara <imlara@catec.aero>
 msgs: []
 package_type: package
 repo_url: ''
 srvs: []
-url: http://wiki.ros.org/z_laser_projector
+url: http://wiki.ros.org/z_laser_zlp1

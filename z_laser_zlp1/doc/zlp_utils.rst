@@ -1,7 +1,7 @@
 zlp\_utils module
 =================
 
-.. automodule:: zlp_utils
+.. automodule:: z_laser_zlp1.zlp_utils
     :members:
     :undoc-members:
     :special-members: __init__
