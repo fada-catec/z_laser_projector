@@ -1,7 +1,7 @@
 zlp\_projector\_ros module
 ==========================
 
-.. automodule:: zlp_projector_ros
+.. automodule:: z_laser_zlp1.zlp_projector_ros
     :members:
     :undoc-members:
     :special-members: __init__

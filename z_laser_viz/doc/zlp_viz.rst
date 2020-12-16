@@ -1,7 +1,7 @@
 zlp\_viz module
 ===============
 
-.. automodule:: zlp_viz
+.. automodule:: z_laser_viz.zlp_viz
     :members:
     :undoc-members:
     :special-members: __init__

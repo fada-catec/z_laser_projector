@@ -1,20 +1,22 @@
 actions: []
-authors: Rafael Luque <rluque@catec.aero>
+authors: Rafael Luque <rluque@catec.aero>, Ines M. Lara <imlara@catec.aero>
 brief: ''
 bugtracker: ''
 depends:
 - catkin
 - roscpp
 - std_msgs
-- python-catkin-pkg
 - z_laser_msgs
 - geometry_msgs
 - rospy
-description: test project simulation
+description: "<p>\n      z_laser_gui provides a graphical interface that improves\
+  \ \n      the user interaction with the ROS API provided by the \n      z_laser_projector\
+  \ stack. It wraps the messages publication \n      and services call which have\
+  \ been arranged to run the \n      functionalities of the device\n    </p>"
 license: Apache 2.0
-maintainers: Rafael Luque <rluque@catec.aero>
+maintainers: Rafael Luque <rluque@catec.aero>, Ines M. Lara <imlara@catec.aero>
 msgs: []
 package_type: package
 repo_url: ''
 srvs: []
-url: ''
+url: http://wiki.ros.org/z_laser_gui

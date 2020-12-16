@@ -1,7 +1,7 @@
 zlp\_projection\_element module
 ===============================
 
-.. automodule:: zlp_projection_element
+.. automodule:: z_laser_zlp1.zlp_projection_element
     :members:
     :undoc-members:
     :special-members: __init__

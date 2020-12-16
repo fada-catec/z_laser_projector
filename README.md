@@ -1,4 +1,4 @@
-![ZLASER](./z_laser_zlp1/images/ZLASER.png)![FADA](./z_laser_zlp1/images/FADA.png)![CATEC](./z_laser_zlp1/images/CATEC.png)
+![ZLASER](./z_laser_projector/images/ZLASER.png)![FADA](./z_laser_projector/images/FADA.png)![CATEC](./z_laser_projector/images/CATEC.png)
 
 # ROS z_laser_projector Stack
 
@@ -42,7 +42,6 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
           sudo apt-get install python3-scipy
           sudo apt-get install python3-pyqt5
           sudo apt-get install python3-nose
-          sudo apt-get install python3-unittest2
 
           sudo apt-get install python3-pip
           pip3 install pynput

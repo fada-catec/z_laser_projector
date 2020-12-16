@@ -1,7 +1,7 @@
 zlp\_keyboard module
 ====================
 
-.. automodule:: zlp_keyboard
+.. automodule:: z_laser_zlp1.zlp_keyboard
     :members:
     :undoc-members:
     :special-members: __init__

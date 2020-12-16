@@ -1,7 +1,7 @@
 zlp\_connections module
 =======================
 
-.. automodule:: zlp_connections
+.. automodule:: z_laser_zlp1.zlp_connections
     :members:
     :undoc-members:
     :special-members: __init__

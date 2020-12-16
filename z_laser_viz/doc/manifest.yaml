@@ -6,18 +6,20 @@ depends:
 - catkin
 - roscpp
 - std_msgs
-- python-catkin-pkg
 - z_laser_msgs
-- geometry_msgs
+- rospy
 - visualization_msgs
 - tf
-- rospy
+- geometry_msgs
 - z_laser_zlp1
-description: test project simulation
+description: "<p>\n      z_laser_viz provides a visualizer for laser projections \n\
+  \      in RViz of the user-defined elements and locates the origin axes of \n  \
+  \    reference systems. This package is used in combination with z_laser_zlp1\n\
+  \      to ease the use and configuration of the projector.\n    </p>"
 license: Apache 2.0
 maintainers: Rafael Luque <rluque@catec.aero>, Ines M. Lara <imlara@catec.aero>
 msgs: []
 package_type: package
 repo_url: ''
 srvs: []
-url: ''
+url: http://wiki.ros.org/z_laser_viz
