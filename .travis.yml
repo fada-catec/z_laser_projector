@@ -31,9 +31,6 @@ before_install:
   - sudo apt-get install -y python3-empy
   - sudo apt-get install -y python3-nose
 
-  # - sudo apt-get install -y python3-pip
-  # - python3 -m pip install pynput
-
 # Create a catkin workspace with the package under integration.
 install:
   - mkdir -p ~/catkin_ws/src
@@ -56,4 +53,4 @@ script:
   - cd ~/catkin_ws
   - catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_VERSION=3.6 --force-cmake
   - source devel/setup.bash
-  - catkin_make run_tests -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_VERSION=3.6 
+  - catkin_make run_tests -j1 -DPYTHON_EXECUTABLE=/usr/bin/python3 -DPYTHON_VERSION=3.6 

@@ -12,14 +12,11 @@ from z_laser_zlp1.zlp_projector_manager import ZLPProjectorManager
 def ip_open(ip,port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(2)
-    
     try:
         s.connect((ip, int(port)))
         success = True
-    
     except:
         success = False
-
     s.close()
     return success
 
@@ -32,7 +29,7 @@ class TestProjectorManager(unittest.TestCase):
 
     # test connection with empty license path should return error
     def test1_no_license_path(self):
-        
+
         projector_manager = ZLPProjectorManager(projector_IP = "192.168.10.10", 
                                                 server_IP = "192.168.10.11", 
                                                 connection_port = 9090, 
@@ -109,4 +106,4 @@ class TestProjectorManager(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    rosunit.unitrun('z_laser_zlp1', 'test_projector_manager', TestProjectorManager,  sysargs=None)
+    rosunit.unitrun('z_laser_zlp1', 'test_manager_connection', TestProjectorManager,  sysargs=None)
