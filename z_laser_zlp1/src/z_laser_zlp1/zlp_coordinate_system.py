@@ -149,6 +149,11 @@ class CoordinateSystem(object):
                 message = "Cordinate system defined correctly"
                 cs = []
 
+        except ZeroDivisionError as e:
+            success = False 
+            message = e
+            cs = []
+
         except Exception as e:
             self.__thrift_client.RemoveGeoTreeElem(cs.name)
             success = False 

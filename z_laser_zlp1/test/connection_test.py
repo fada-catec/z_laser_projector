@@ -10,14 +10,11 @@ import socket
 def ip_open(ip,port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(2)
-    
     try:
         s.connect((ip, int(port)))
         success = True
-    
     except:
         success = False
-
     s.close()
     return success
 

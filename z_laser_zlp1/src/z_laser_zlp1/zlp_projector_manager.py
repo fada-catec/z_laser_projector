@@ -258,9 +258,6 @@ class ZLPProjectorManager(object):
     def show_coordinate_system(self):
         """Project the reference points of the active reference system on the projection surface.
 
-        Args:
-            secs (int): number of projection seconds on the surface 
-
         Raises:
             SystemError
         """
@@ -273,11 +270,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
 
     def hide_coordinate_system(self):
-        """Project the reference points, origin axes and frame of the active reference system, 
-        on the projection surface.
-
-        Args:
-            secs (int): number of projection seconds on the surface 
+        """Project the reference points of the active reference system on the projection surface.
 
         Raises:
             SystemError
