@@ -29,6 +29,7 @@ before_install:
   - sudo apt-get install -y python3-catkin-pkg-modules
   - sudo apt-get install -y python3-rospkg-modules
   - sudo apt-get install -y python3-empy
+  - sudo apt-get install -y python3-defusedxml
   - sudo apt-get install -y python3-nose
 
 # Create a catkin workspace with the package under integration.

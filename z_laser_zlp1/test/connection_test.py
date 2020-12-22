@@ -2,7 +2,6 @@
 
 import unittest
 import rospy
-import psutil
 from std_srvs.srv import Trigger
 
 import socket

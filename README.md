@@ -4,6 +4,7 @@
 
 [![Build Status](https://travis-ci.com/fada-catec/z_laser_projector.svg?token=euTp3jtyEts1qcm7iWeV&branch=melodic)](https://travis-ci.com/fada-catec/z_laser_projector)
 [![License](https://img.shields.io/badge/License-Apache%202-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![codecov](https://codecov.io/gh/fada-catec/z_laser_projector/branch/melodic/graph/badge.svg)](https://codecov.io/gh/fada-catec/z_laser_projector)
 
 The [z_laser_projector stack](http://wiki.ros.org/z_laser_projector) is a set of tools that allow the user to operate the Z-LASER Projector [ZLP1](https://z-laser.com/en/product/laser-projector/zlp1/) and simplify the task of developing further advanced features, such as augmented reality applications. The stack provides a ROS API to control the device via topics and services, a visualizer for laser projections and a graphical interface.
 
