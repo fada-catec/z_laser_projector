@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +22,6 @@ import copy
 from z_laser_msgs.msg import Figure
 
 from z_laser_zlp1.zlp_utils import ProjectionElementParameters, GeometryTool
-# from zlp_utils import ProjectionElementParameters, GeometryTool
-
 
 class ProjectionElement(object):
     """This class implement the functions related with projection elements.
@@ -722,7 +718,7 @@ class ProjectionElement(object):
 
         Args:
             proj_elem_params (object): object with the necessary parameters to identify the projection element
-            rotation_angle (float): rotation angle of the projection element
+            rotation_angle (float): rotation angle of the projection element [degrees]
             
         Returns:
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value is 

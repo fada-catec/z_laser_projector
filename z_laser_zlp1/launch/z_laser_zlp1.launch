@@ -8,6 +8,7 @@
     <!-- Projector node -->
     <group ns="$(arg namespace)">
         <rosparam file="$(find z_laser_zlp1)/config/communication_settings.yaml"/>
+        
         <rosparam if ="$(eval arg('load_user_coordinate_system'))"
                   file="$(find z_laser_zlp1)/config/user_coordinate_system.yaml"/> 
         <rosparam unless ="$(eval arg('load_user_coordinate_system'))"

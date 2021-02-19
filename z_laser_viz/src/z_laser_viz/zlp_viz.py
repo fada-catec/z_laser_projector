@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 # Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +19,9 @@ import math
 import numpy as np
 from math import sin, cos, pi, radians
 from scipy.spatial.transform import Rotation
-from pynput import keyboard
 
 from z_laser_zlp1.zlp_keyboard import KeyboardParameters
 from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
-# from zlp_keyboard import KeyboardParameters
-# from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from geometry_msgs.msg import Point, Quaternion, Vector3, Pose, Quaternion
 from visualization_msgs.msg import Marker, MarkerArray
@@ -51,6 +46,7 @@ class ZLPVisualizer(object):
     """
     def __init__(self):
         """Initialize the ZLPVisualizer object."""
+        
         self.cs_marker_array = MarkerArray()
         self.pe_marker_array = MarkerArray()
 
@@ -59,20 +55,21 @@ class ZLPVisualizer(object):
         self.STD_WAIT_TIME = CoordinateSystemParameters().DEFAULT_SHOW_TIME
 
         self.figures_list = ProjectionElementParameters().figures_list
+        self.scale_factor = 1
 
     def open_services(self):
         """Open ROS services for visualizer."""
-        self.start_proj     = rospy.Service('projection_start', Trigger, self.projection_start_cb)
-        self.stop_proj      = rospy.Service('projection_stop', Trigger, self.projection_stop_cb)
+        self.start_proj = rospy.Service('projection_start', Trigger, self.projection_start_cb)
+        self.stop_proj  = rospy.Service('projection_stop', Trigger, self.projection_stop_cb)
 
-        self.manual_cs      = rospy.Service('define_coordinate_system', CoordinateSystem, self.manual_define_coord_sys_cb)
-        self.set_cs         = rospy.Service('set_coordinate_system', CoordinateSystemName, self.set_coord_sys_cb)
-        self.rem_cs         = rospy.Service('remove_coordinate_system', CoordinateSystemName, self.remove_coord_sys_cb)
-        self.show_cs        = rospy.Service('show_active_coordinate_system', CoordinateSystemShow, self.show_coord_sys_cb)
+        self.manual_cs = rospy.Service('define_coordinate_system', CoordinateSystem, self.manual_define_coord_sys_cb)
+        self.set_cs    = rospy.Service('set_coordinate_system', CoordinateSystemName, self.set_coord_sys_cb)
+        self.rem_cs    = rospy.Service('remove_coordinate_system', CoordinateSystemName, self.remove_coord_sys_cb)
+        self.show_cs   = rospy.Service('show_active_coordinate_system', CoordinateSystemShow, self.show_coord_sys_cb)
 
-        self.hide_proj_elem    = rospy.Service('hide_projection_element', ProjectionElement, self.hide_proj_elem_cb)
-        self.unhide_proj_elem  = rospy.Service('unhide_projection_element', ProjectionElement, self.unhide_proj_elem_cb)
-        self.remove_proj_elem  = rospy.Service('remove_projection_element', ProjectionElement, self.remove_proj_elem_cb)
+        self.hide_proj_elem   = rospy.Service('hide_projection_element', ProjectionElement, self.hide_proj_elem_cb)
+        self.unhide_proj_elem = rospy.Service('unhide_projection_element', ProjectionElement, self.unhide_proj_elem_cb)
+        self.remove_proj_elem = rospy.Service('remove_projection_element', ProjectionElement, self.remove_proj_elem_cb)
 
         self.add_proj_elem   = rospy.Subscriber("add_projection_element", Figure, self.add_fig_cb)
         self.monit_proj_elem = rospy.Subscriber("monitor_projection_element", Figure, self.init_keyboard_listener_cb)
@@ -310,7 +307,7 @@ class ZLPVisualizer(object):
         if msg.figure_type == Figure.POLYLINE:
             length = msg.size[0] * step
             angle = radians(msg.angle[0])
-            # overwrite position for polyline ()
+            # middle point for polyline ()
             marker.pose.position.x += length/2*cos(angle)
             marker.pose.position.y += length/2*sin(angle)
             figure = self.line_eq(length, angle)
@@ -492,7 +489,7 @@ class ZLPVisualizer(object):
 
         Args:
             marker (object): marker object to rotate
-            angle (float): rotation angle
+            angle (float): rotation angle [degrees]
         """
         marker.action = Marker.DELETE
         q = marker.pose.orientation
@@ -625,9 +622,10 @@ class ZLPVisualizer(object):
             tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
             is an information message string
         """
+        from pynput import keyboard
+        
         self.keyboard_params = KeyboardParameters()
         self.current = set()
-        self.scale_factor = 1
         
         name = self.active_cs + "/" + msg.projection_group + self.figures_list[msg.figure_type] + msg.figure_name
 

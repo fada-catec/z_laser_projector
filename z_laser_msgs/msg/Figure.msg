@@ -25,7 +25,7 @@ geometry_msgs/Point position
 #            char spacing (TEXT) 
 float64[] size
 
-# angle is a 2-D array. NOTE: second index only used for ARC figure type
+# angle is a 2-D array expressed on Degrees. NOTE: second index only used for ARC figure type
 #
 #  angle[0] = slope (POLYLINE)
 #             start angle (ARC)

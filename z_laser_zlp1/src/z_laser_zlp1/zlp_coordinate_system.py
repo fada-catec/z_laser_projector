@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +19,6 @@ import sys
 import threading 
 
 from z_laser_zlp1.zlp_utils import UserT, GeometryTool
-# from zlp_utils import UserT, GeometryTool
 
 class CoordinateSystem(object):
     """This class implement the functions related with coordinate systems management.

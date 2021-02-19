@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +22,6 @@ import math
 
 from z_laser_zlp1.zlp_projector_manager import ZLPProjectorManager
 from z_laser_zlp1.zlp_utils import  CoordinateSystemParameters
-# from zlp_projector_manager import ZLPProjectorManager
-# from zlp_utils import  CoordinateSystemParameters
 
 from geometry_msgs.msg import Point
 from std_srvs.srv import Trigger, TriggerResponse
@@ -61,6 +57,8 @@ class ZLPProjectorROS(object):
         self.run_viz = False
 
         self.STD_WAIT_TIME = CoordinateSystemParameters().DEFAULT_SHOW_TIME
+        
+        rospy.set_param('projector_connected', False)
 
     def open_services(self):
         """Open ROS services that allow projector device control."""
@@ -423,26 +421,25 @@ class ZLPProjectorROS(object):
         rospy.loginfo("Received request to add a new projection element to the active coordinate system.")
 
         if not msg.projection_group or not msg.figure_name:
-            return ProjectionElementResponse(False,"projection_group or figure_name request is empty.")
+            rospy.logerr("projection_group or figure_name request is empty.")
+        else:
+            try:
+                if msg.figure_type == Figure.POLYLINE:
+                    self.projector.create_polyline(msg)
+                    rospy.loginfo("Line added correctly.")
+                elif Figure.CIRCLE <= msg.figure_type <= Figure.OVAL:
+                    self.projector.create_curve(msg)
+                    rospy.loginfo("Curve added correctly.")
+                elif msg.figure_type == Figure.TEXT:
+                    self.projector.create_text(msg)
+                    rospy.loginfo("Text added correctly.")
+                else:
+                    rospy.logerr("Figure type does not exist.")
 
-        try:
-            if msg.figure_type == Figure.POLYLINE:
-                self.projector.create_polyline(msg)
-                rospy.loginfo("Line added correctly.")
-            elif Figure.CIRCLE <= msg.figure_type <= Figure.OVAL:
-                self.projector.create_curve(msg)
-                rospy.loginfo("Curve added correctly.")
-            elif msg.figure_type == Figure.TEXT:
-                self.projector.create_text(msg)
-                rospy.loginfo("Text added correctly.")
-            else:
-                return ProjectionElementResponse(False,"Figure type does not exist.")
-
-            return ProjectionElementResponse(True,"Figure added correctly.")
-        
-        except Exception as e:
-            rospy.logerr(e)
-            return ProjectionElementResponse(False,str(e))
+                rospy.loginfo("Figure added correctly.")
+            
+            except Exception as e:
+                rospy.logerr(e)
 
     def hide_proj_elem_cb(self,req):
         """Callback of ROS service to hide specific projection element from active reference system.

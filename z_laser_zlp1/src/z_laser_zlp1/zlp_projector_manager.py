@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +20,6 @@ from z_laser_zlp1.zlp_coordinate_system import CoordinateSystem
 from z_laser_zlp1.zlp_projection_element import ProjectionElement
 from z_laser_zlp1.zlp_keyboard import KeyboardControl
 from z_laser_zlp1.zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
-# from zlp_connections import ProjectorClient
-# from zlp_coordinate_system import CoordinateSystem
-# from zlp_projection_element import ProjectionElement
-# from zlp_keyboard import KeyboardControl
-# from zlp_utils import CoordinateSystemParameters, ProjectionElementParameters
 
 from z_laser_msgs.msg import Figure
 
@@ -222,23 +215,10 @@ class ZLPProjectorManager(object):
             success,message,_ = self.cs_element.define_cs(self.cs_scanned,False)
         
         try:
-            self.register_coordinate_system(cs_params.name)
+            success,message = self.cs_element.register_cs(cs_params.name)
             self.set_coordinate_system(cs_params.name)
         except SystemError as e:
             raise SystemError(e)
-
-    def register_coordinate_system(self, cs_name):
-        """Register new coordinate reference system.
-
-        Args:
-            cs_params (list): list of parameters from the new defined reference system
-
-        Raises:
-            SystemError
-        """
-        success,message = self.cs_element.register_cs(cs_name)
-        if not success:
-            raise SystemError(message)
         
     def set_coordinate_system(self, cs_name):
         """Set the active reference system.
@@ -270,7 +250,7 @@ class ZLPProjectorManager(object):
             raise SystemError(message)
 
     def hide_coordinate_system(self):
-        """Project the reference points of the active reference system on the projection surface.
+        """Hide the reference points of the active reference system.
 
         Raises:
             SystemError

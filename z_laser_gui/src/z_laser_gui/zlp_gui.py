@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +22,6 @@ import rospkg
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from z_laser_gui.main_window import Ui_MainWindow
-# from main_window import Ui_MainWindow
 
 from std_srvs.srv import Trigger, TriggerResponse
 from geometry_msgs.msg import Point

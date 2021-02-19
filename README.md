@@ -24,13 +24,15 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
      
 2. Set the correct network to reach projector:
 
-     Connect projector to PC and set a network on IP `192.168.10.9` and submask `255.255.255.0`
+     Connect projector to PC and set a network on IP range `192.168.10.X` and submask `255.255.255.0`
 
      To consider:
 
      - The internal zService is running inside the projector under `192.168.11.11` on port `9090`.
 
      - Projector is always reachable under `192.168.10.10`. 
+
+3. A device-key license to check the purchase of the device is always required to use the ZLP software. Please, contact your Z-LASER supplier to get a valid license. Save the license file under package directory `z_laser_zlp1/lic` folder. Then, indicate the license file name on the configuration file `z_laser_zlp1/config/communication_settings.yaml`.
 
 ## Dependencies
    
@@ -66,6 +68,14 @@ You can launch the projector node together with [visualizer](https://github.com/
 Additionally, you can also launch the [GUI](https://github.com/fada-catec/z_laser_projector/z_laser_viz) node.
 
      roslaunch z_laser_gui z_laser_gui.launch
+
+### DXF Reader
+
+We have created a functionality capable of reading and interpreting a DXF graphic file. By executing the `/zlp_dxf_reader` node together with the projector node, the elements found in a .dxf file are loaded. Call `~/projection_start` service to project them. Specify custom .dxf file name as argument (this file should be placed in `/dxf` folder from z_laser_zlp1 package). 
+
+     roslaunch z_laser_zlp1 z_laser_dxf_reader.launch dxf_file_name:=dxf_test
+
+NOTE: shape units are read as millimetres
 
 ### Libraries
 

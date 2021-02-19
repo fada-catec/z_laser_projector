@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2020, FADA-CATEC
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +20,6 @@ import math
 from geometry_msgs.msg import Point
 from z_laser_msgs.msg import Figure
 from z_laser_msgs.srv import CoordinateSystemRequest
-
 
 class UserT(object):
     """This class provides a method to calculate the user points T1, T2, T3 from T0 and 
