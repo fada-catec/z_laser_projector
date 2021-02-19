@@ -1,0 +1,10 @@
+<launch>
+
+    <arg name="namespace" default="zlaser"/>
+    <arg name="dxf_file_name" default="dxf_test"/>
+
+    <node name="zlp_dxf_reader" pkg="z_laser_zlp1" type="zlp_dxf_reader.py" ns="$(arg namespace)" output="screen">
+        <param name="dxf_file"  value="$(arg dxf_file_name)" />
+    </node>
+
+</launch>
