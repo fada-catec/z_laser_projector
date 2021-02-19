@@ -21,3 +21,11 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+catkin_add_nosetests(test/test_viz.py)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/define_coordinate_system_test.test)
+  add_rostest(test/projection_element_test.test)
+endif()

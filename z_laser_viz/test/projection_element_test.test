@@ -1,0 +1,11 @@
+<launch>
+
+    <group ns="zlaser_viz">
+
+        <node name="zlp_viz_node" pkg="z_laser_viz" type="zlp_viz_node.py" output="screen"/>
+
+        <test test-name="projection_element_test" pkg="z_laser_viz" type="projection_element_test.py" />
+
+    </group>
+
+</launch>
