@@ -9,7 +9,7 @@
 The [z_laser_projector stack](http://wiki.ros.org/z_laser_projector) is a set of tools that allow the user to operate the Z-LASER Projector [ZLP1](https://z-laser.com/en/product/laser-projector/zlp1/) and simplify the task of developing further advanced features, such as augmented reality applications. The stack provides a ROS API to control the device via topics and services, a visualizer for laser projections and a graphical interface.
 
 
-The code have been tested for **ROS Melodic** on **Ubuntu 18.04**.
+The code have been tested for **ROS Noetic** on **Ubuntu 20.04**.
 
 This project is licensed under the terms of the [**Apache 2.0**](https://www.apache.org/licenses/LICENSE-2.0) license.
 
