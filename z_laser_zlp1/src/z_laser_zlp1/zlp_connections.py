@@ -590,3 +590,38 @@ class ProjectorClient(object):
             is_empty = True 
 
         return is_empty
+
+    def on_reflection_change(self, name, reflection):
+        """Default callback for reflection state change, events handler. It is used for running code when
+        pointer is reflected.
+
+        Args:
+            name (str): name of the pointer that changed state
+            reflection (bool): true if a reflection was detected; False otherwise 
+        """
+        self.stop_project()
+
+    def scan_pointer(self, reflection_callback=None):
+        """Set callback for reflection state change.
+
+        Args:
+            reflection_callback (object): callback function 
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        try:
+            if reflection_callback is None:
+                # use default
+                reflection_callback = self.on_reflection_change
+                
+            self.__thrift_client.set_reflection_state_changed_callback(reflection_callback)
+            success = True
+            message = "Reflection callback set."
+        
+        except Exception as e:
+            success = False
+            message = e
+
+        return success,message

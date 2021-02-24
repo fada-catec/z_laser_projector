@@ -3,6 +3,7 @@ uint8 CIRCLE=1
 uint8 ARC=2
 uint8 OVAL=3
 uint8 TEXT=4
+uint8 POINTER=5
 
 int32 figure_type # Type of figure (0 polyline, 1 circle, 2 arc, 3 oval, 4 text)
 
