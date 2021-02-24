@@ -1,4 +1,5 @@
 sudo: required
+dist: focal
 cache:
   - apt
 language: generic
@@ -6,7 +7,7 @@ language: generic
 matrix:
   include:
   - name: "Focal noetic"
-    dist: focal
+    # dist: focal
     env: ROS_DISTRO=noetic
 
 env:
@@ -23,11 +24,11 @@ before_install:
   - sudo apt-get install -y python3-catkin-pkg python3-rosdep ros-$ROS_DISTRO-desktop-full
   - source /opt/ros/$ROS_DISTRO/setup.bash
 
+  - sudo apt-get install -y python3-pip
+  - python3 -m pip install ezdxf
+
   - sudo rosdep init
   - rosdep update --include-eol-distros
-
-  # - sudo apt-get install -y python3-pip
-  # - python3 -m pip install pynput
 
 # Create a catkin workspace with the package under integration.
 install:
@@ -43,7 +44,7 @@ install:
 # Install package dependencies.
 before_script:
   - cd ~/catkin_ws
-  - rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+  - rosdep install -y -r --from-paths src --ignore-src --rosdistro $ROS_DISTRO --skip-keys=python3-ezdxf
 
 # Compile.
 script:

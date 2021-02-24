@@ -2,9 +2,9 @@
 
 # ROS z_laser_projector Stack
 
-[![Build Status](https://travis-ci.com/fada-catec/z_laser_projector.svg?token=euTp3jtyEts1qcm7iWeV&branch=melodic)](https://travis-ci.com/fada-catec/z_laser_projector)
+[![Build Status](https://travis-ci.com/fada-catec/z_laser_projector.svg?token=euTp3jtyEts1qcm7iWeV&branch=noetic)](https://travis-ci.com/fada-catec/z_laser_projector)
 [![License](https://img.shields.io/badge/License-Apache%202-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![codecov](https://codecov.io/gh/fada-catec/z_laser_projector/branch/melodic/graph/badge.svg)](https://codecov.io/gh/fada-catec/z_laser_projector)
+[![codecov](https://codecov.io/gh/fada-catec/z_laser_projector/branch/noetic/graph/badge.svg)](https://codecov.io/gh/fada-catec/z_laser_projector)
 
 The [z_laser_projector stack](http://wiki.ros.org/z_laser_projector) is a set of tools that allow the user to operate the Z-LASER Projector [ZLP1](https://z-laser.com/en/product/laser-projector/zlp1/) and simplify the task of developing further advanced features, such as augmented reality applications. The stack provides a ROS API to control the device via topics and services, a visualizer for laser projections and a graphical interface.
 
@@ -36,15 +36,23 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
 
 ## Dependencies
    
-- [ROS Melodic](http://wiki.ros.org/melodic/Installation/Ubuntu)
+- [ROS Noetic](http://wiki.ros.org/noetic/Installation/Ubuntu)
 
-- This software runs on **python 3**. Install dependencies:
+- This software runs on **python 3**. You can install dependencies:
+
+          cd ~/catkin_ws
+          rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+
+     or
 
           sudo apt-get install python3-thriftpy
           sudo apt-get install python3-numpy
           sudo apt-get install python3-scipy
+          sudo apt-get install python3-ezdxf
           sudo apt-get install python3-pyqt5
           sudo apt-get install python3-nose
+
+- Install pynput
 
           sudo apt-get install python3-pip
           pip3 install pynput
@@ -75,7 +83,7 @@ We have created a functionality capable of reading and interpreting a DXF graphi
 
      roslaunch z_laser_zlp1 z_laser_dxf_reader.launch dxf_file_name:=dxf_test
 
-NOTE: shape units are read as millimetres
+NOTE: figures' units are read as millimetres
 
 ### Libraries
 
