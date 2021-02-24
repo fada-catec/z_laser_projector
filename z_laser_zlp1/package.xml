@@ -27,6 +27,7 @@
   <build_depend>python3-thriftpy</build_depend>
   <build_depend>python3-numpy</build_depend>
   <build_depend>python3-scipy</build_depend>
+  <build_depend>python3-ezdxf</build_depend>
   <build_depend>z_laser_msgs</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
@@ -35,6 +36,7 @@
   <build_export_depend>python3-thriftpy</build_export_depend>
   <build_export_depend>python3-numpy</build_export_depend>
   <build_export_depend>python3-scipy</build_export_depend>
+  <build_export_depend>python3-ezdxf</build_export_depend>
   <build_export_depend>z_laser_msgs</build_export_depend>
 
   <exec_depend>roscpp</exec_depend>
@@ -43,6 +45,7 @@
   <exec_depend>python3-thriftpy</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-scipy</exec_depend>
+  <exec_depend>python3-ezdxf</exec_depend>
   <exec_depend>z_laser_msgs</exec_depend>
 
   <test_depend>rosunit</test_depend>

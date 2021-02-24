@@ -32,9 +32,9 @@ class TestProjectorManager(unittest.TestCase):
             self.skipTest("projector is not found on network")
         license_path = (os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/lic/1900027652.lic')
         self.projector_manager = ZLPProjectorManager(projector_IP = "192.168.10.10", 
-                                                server_IP = "192.168.10.11", 
-                                                connection_port = 9090, 
-                                                lic_path=license_path)
+                                                     server_IP = "192.168.10.11", 
+                                                     connection_port = 9090, 
+                                                     lic_path=license_path)
 
     def tearDown(self):
         self.projector_manager.deactivate()
@@ -140,13 +140,64 @@ class TestProjectorManager(unittest.TestCase):
                 self.projector_manager.define_coordinate_system(cs_params, False)
                 self.projector_manager.create_polyline(polyline)
                 figure = self.projector_manager.get_proj_elem(proj_elem)
-                self.assertEquals(figure.size[0], polyline.size[0])
-                self.assertEquals(figure.angle[0], polyline.angle[0])
-                self.assertEquals(figure.position.x, polyline.position.x)
+                self.assertEqual(figure.size[0], polyline.size[0])
+                self.assertEqual(figure.angle[0], polyline.angle[0])
+                self.assertEqual(figure.position.x, polyline.position.x)
                 # if figure is ok, do operations
                 self.projector_manager.hide_proj_elem(proj_elem)
                 self.projector_manager.unhide_proj_elem(proj_elem)
                 self.projector_manager.remove_proj_elem(proj_elem)
+            else:
+                self.fail("connection error")
+
+        except Exception as e:
+            self.fail("Exception raised: {}".format(e))
+
+    # test send and read data of pointer projection element
+    def test3_define_pointer(self):
+        
+        # coordinate system
+        cs_params            = CoordinateSystemParameters()
+        cs_params.name       = "coordinate_system_test"
+        cs_params.distance   = 1500
+        cs_params.P[0].x     = -100
+        cs_params.P[0].y     = -100
+        cs_params.P[1].x     =  100
+        cs_params.P[1].y     = -100
+        cs_params.P[2].x     =  100
+        cs_params.P[2].y     =  100
+        cs_params.P[3].x     = -100
+        cs_params.P[3].y     =  100
+        cs_params.T[0].x     =    0
+        cs_params.T[0].y     =    0
+        cs_params.resolution = 1000        
+
+        # pointer
+        pointer = Figure()
+        pointer.figure_type = Figure.POINTER
+        pointer.projection_group = "figure_test"
+        pointer.figure_name = "pointer_test"
+        pointer.position.x = 0.0      
+        pointer.position.y = 0.0        
+        pointer.position.z = 0.0
+        pointer.size.append(5) # height
+        pointer.angle.append(0)
+
+        # proj_elem
+        proj_elem = ProjectionElementRequest()
+        proj_elem.figure_type = Figure.POINTER
+        proj_elem.projection_group = "figure_test"
+        proj_elem.figure_name = "pointer_test"
+
+        try:
+            self.projector_manager.connect_and_setup()
+            status = self.projector_manager.get_connection_status()
+            if status:
+                self.projector_manager.define_coordinate_system(cs_params, False)
+                self.projector_manager.create_pointer(pointer)
+                figure = self.projector_manager.get_proj_elem(proj_elem)
+                self.assertEqual(figure.size[0], pointer.size[0])
+                self.assertEqual(figure.position.x, pointer.position.x)
             else:
                 self.fail("connection error")
 

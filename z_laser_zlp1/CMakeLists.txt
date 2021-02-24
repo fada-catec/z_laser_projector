@@ -22,6 +22,7 @@ catkin_add_nosetests(test/test_utils.py)
 catkin_add_nosetests(test/test_manager_connection.py)
 catkin_add_nosetests(test/test_manager_coordinate_system.py)                     
 catkin_add_nosetests(test/test_manager_projection_element.py)                     
+catkin_add_nosetests(test/test_dxf.py)  
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
