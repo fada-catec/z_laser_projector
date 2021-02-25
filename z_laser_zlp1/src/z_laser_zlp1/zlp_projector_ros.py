@@ -183,10 +183,7 @@ class ZLPProjectorROS(object):
         """
         rospy.loginfo("Received request to stop projection")
         try:
-            self.projector.Set rosparams from given reference system.
-
-        Args:
-            cs_params (object): object with the parameters of a reference systemstop_projection()
+            self.projector.stop_projection()
 
             # Send info to viz
             if self.run_viz:
