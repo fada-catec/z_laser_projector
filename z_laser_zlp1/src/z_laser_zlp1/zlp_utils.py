@@ -128,7 +128,8 @@ class ProjectionElementParameters(object):
                     "/circle/",
                     "/arc/",
                     "/oval/",
-                    "/text/"]
+                    "/text/",
+                    "/pointer/"]
 
     def __init__(self):
         """Initialize the ProjectionElementParameters object."""

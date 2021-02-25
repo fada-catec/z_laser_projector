@@ -81,7 +81,10 @@ class ZLPProjectorROS(object):
         self.remove_proj_elem = rospy.Service('remove_projection_element', ProjectionElement, self.remove_proj_elem_cb)
         self.monit_proj_elem  = rospy.Service('monitor_projection_element', ProjectionElement, self.keyboard_monitor_proj_elem_cb)
         
+        self.scan_pointer  = rospy.Service('scan_pointer', Trigger, self.scan_pointer_cb)
+        
         self.add_proj_elem   = rospy.Subscriber("add_projection_element", Figure, self.add_fig_cb)
+        self.add_pointer     = rospy.Subscriber("add_pointer", Figure, self.add_pointer_cb)
 
         rospy.loginfo("Use ROS Services: \n\t\t\trosservice list")
 
@@ -180,7 +183,10 @@ class ZLPProjectorROS(object):
         """
         rospy.loginfo("Received request to stop projection")
         try:
-            self.projector.stop_projection()
+            self.projector.Set rosparams from given reference system.
+
+        Args:
+            cs_params (object): object with the parameters of a reference systemstop_projection()
 
             # Send info to viz
             if self.run_viz:
@@ -413,10 +419,6 @@ class ZLPProjectorROS(object):
 
         Args:
             msg (object): object with the necessary parameters to define a new projection element
-            
-        Returns:
-            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
-            is an information message string
         """
         rospy.loginfo("Received request to add a new projection element to the active coordinate system.")
 
@@ -433,6 +435,8 @@ class ZLPProjectorROS(object):
                 elif msg.figure_type == Figure.TEXT:
                     self.projector.create_text(msg)
                     rospy.loginfo("Text added correctly.")
+                elif msg.figure_type == Figure.POINTER:
+                    rospy.warn("Pointer has other purpose.")
                 else:
                     rospy.logerr("Figure type does not exist.")
 
@@ -565,6 +569,59 @@ class ZLPProjectorROS(object):
         except Exception as e:
             rospy.logerr(e)
             return ProjectionElementResponse(False,str(e))
+
+    def add_pointer_cb(self, msg):
+        """Callback of ROS topic to define a new pointer.
+
+        Args:
+            msg (object): object with the necessary parameters to define a new pointer
+        """
+        rospy.loginfo("Received request to add a new pointer to the active coordinate system.")
+
+        if msg.figure_type == Figure.POINTER:
+            if not msg.figure_name:
+                rospy.logerr("figure_name request is empty.")
+            else:
+                try:
+                    self.projector.create_pointer(msg)
+                    rospy.loginfo("Pointer added correctly.")
+                
+                except Exception as e:
+                    rospy.logerr(e)
+        else:
+            rospy.logerr("Pointer figure type is required.")
+
+    def pointer_cb_example(self, name, reflection):
+        """Callback example for reflection state change, events handler. It is used for running code when
+        pointer is reflected.
+
+        Args:
+            name (str): name of the pointer that changed state
+            reflection (bool): true if a reflection was detected; False otherwise 
+        """
+        rospy.loginfo("On pointer_cb_example. Detected pointer: %s", name)
+        self.projector.stop_projection()
+
+    def scan_pointer_cb(self, req):
+        """Callback of ROS service to start pointers scanning.
+
+        Args:
+            req (object): trigger request ROS service object 
+
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple 
+            is an information message string
+        """
+        rospy.loginfo("Received request to scan pointer.")
+        
+        try:
+            self.projector.scan_pointer(self.pointer_cb_example)
+            rospy.loginfo("Pointer scanning is active.")
+            return TriggerResponse(True, "Pointer scanning is active.")
+        
+        except Exception as e:
+            rospy.logerr(e)
+            return TriggerResponse(False, str(e))
 
     def set_rosparam_coordinate_system(self, cs_params):
         """Set rosparams from given reference system.

@@ -81,7 +81,7 @@ class ProjectionElement(object):
         polyline.polylineList = []
         return polyline
 
-    def define_polyline(self, cs_name, proj_elem_params):
+    def define_polyline(self, cs_name, proj_elem_params, reflection=False):
         """Create a new line as projection element.
 
         Args:
@@ -99,8 +99,9 @@ class ProjectionElement(object):
             y      = proj_elem_params.position.y
             angle  = proj_elem_params.angle[0]
             length = proj_elem_params.size[0]
+            figure_type  = proj_elem_params.figure_type
 
-            polyline_name = group + "/polyline/" + id
+            polyline_name = group + self.figures_list[figure_type] + id
             polyline = self.create_polyline(polyline_name)
 
             linestring = [ self.__geometry_tool.create_3d_point(x, y),
@@ -108,6 +109,7 @@ class ProjectionElement(object):
             
             polyline.polylineList = [linestring]
             polyline.activated = True
+            polyline.detectReflection = reflection
             polyline.coordinateSystemList = [cs_name]
         
             self.__thrift_client.SetPolyLine(polyline)
@@ -121,7 +123,7 @@ class ProjectionElement(object):
 
         return success,message
 
-    def define_arrow(self, cs_name, proj_elem_params):
+    def define_arrow(self, cs_name, proj_elem_params, reflection=False):
         """Create a new arrow as projection element.
 
         Args:
@@ -164,6 +166,7 @@ class ProjectionElement(object):
             
             arrow.polylineList = [linestring]
             arrow.activated = True
+            arrow.detectReflection = reflection
             arrow.coordinateSystemList = [cs_name]
             
             self.__thrift_client.SetPolyLine(arrow)
@@ -177,7 +180,7 @@ class ProjectionElement(object):
         
         return success,message
 
-    def define_rectangle(self, cs_name, proj_elem_params, points):
+    def define_rectangle(self, cs_name, proj_elem_params, points, reflection=False):
         """Create a new rectangle as projection element.
 
         Args:
@@ -202,6 +205,7 @@ class ProjectionElement(object):
                             
             rectangle.polylineList = [linestring]
             rectangle.activated = True
+            rectangle.detectReflection = reflection
             rectangle.coordinateSystemList = [cs_name]
             
             self.__thrift_client.SetPolyLine(rectangle)
@@ -232,7 +236,7 @@ class ProjectionElement(object):
         curve.name = name
         return curve
 
-    def define_circle(self, cs_name, proj_elem_params):
+    def define_circle(self, cs_name, proj_elem_params, reflection=False):
         """Define a new circle as projection element.
 
         Args:
@@ -245,17 +249,19 @@ class ProjectionElement(object):
             an information message string
         """
         try:
-            group    = proj_elem_params.projection_group
-            id       = proj_elem_params.figure_name
-            center_x = proj_elem_params.position.x
-            center_y = proj_elem_params.position.y
-            radius   = proj_elem_params.size[0]
+            group        = proj_elem_params.projection_group
+            id           = proj_elem_params.figure_name
+            center_x     = proj_elem_params.position.x
+            center_y     = proj_elem_params.position.y
+            radius       = proj_elem_params.size[0]
+            figure_type  = proj_elem_params.figure_type
 
-            circle_name = group + "/circle/" + id
+            circle_name = group + self.figures_list[figure_type] + id
             circle = self.create_curve(circle_name,"circle")
             circle.radius = radius
             circle.center = self.__geometry_tool.create_3d_point(center_x, center_y)
             circle.activated = True
+            circle.detectReflection = reflection
             circle.coordinateSystemList = [cs_name]
 
             self.__thrift_client.SetCircleSegment(circle)
@@ -269,7 +275,7 @@ class ProjectionElement(object):
 
         return success,message
 
-    def define_arc(self, cs_name, proj_elem_params):
+    def define_arc(self, cs_name, proj_elem_params, reflection=False):
         """Create a new arc as projection element.
 
         Args:
@@ -282,21 +288,23 @@ class ProjectionElement(object):
             an information message string
         """
         try:
-            group       = proj_elem_params.projection_group
-            id          = proj_elem_params.figure_name
-            center_x    = proj_elem_params.position.x
-            center_y    = proj_elem_params.position.y
-            radius      = proj_elem_params.size[0]
-            start_angle = proj_elem_params.angle[0]
-            end_angle   = proj_elem_params.angle[1]
+            group        = proj_elem_params.projection_group
+            id           = proj_elem_params.figure_name
+            center_x     = proj_elem_params.position.x
+            center_y     = proj_elem_params.position.y
+            radius       = proj_elem_params.size[0]
+            start_angle  = proj_elem_params.angle[0]
+            end_angle    = proj_elem_params.angle[1]
+            figure_type  = proj_elem_params.figure_type
 
-            arc_name = group + "/arc/" + id
+            arc_name = group + self.figures_list[figure_type] + id
             arc = self.create_curve(arc_name,"arc")
             arc.radius = radius
             arc.center = self.__geometry_tool.create_3d_point(center_x, center_y)
             arc.startAngle = start_angle
             arc.endAngle = end_angle
             arc.activated = True
+            arc.detectReflection = reflection
             arc.coordinateSystemList = [cs_name]
 
             self.__thrift_client.SetCircleSegment(arc)
@@ -310,7 +318,7 @@ class ProjectionElement(object):
 
         return success,message
 
-    def define_oval(self, cs_name, proj_elem_params):
+    def define_oval(self, cs_name, proj_elem_params, reflection=False):
         """Create a new oval as projection element.
 
         Args:
@@ -330,14 +338,16 @@ class ProjectionElement(object):
             angle    = proj_elem_params.angle[0]
             width    = proj_elem_params.size[0]*2
             height   = proj_elem_params.size[1]*2
+            figure_type  = proj_elem_params.figure_type
 
-            oval_name = group + "/oval/" + id
+            oval_name = group + self.figures_list[figure_type] + id
             oval = self.create_curve(oval_name,"oval")
             oval.width = width
             oval.height = height
             oval.center = self.__geometry_tool.create_3d_point(center_x, center_y)
             oval.angle = angle
             oval.activated = True
+            oval.detectReflection = reflection
             oval.coordinateSystemList = [cs_name]
 
             self.__thrift_client.SetOvalSegment(oval)
@@ -365,7 +375,7 @@ class ProjectionElement(object):
         text.name = name
         return text
 
-    def define_text(self, cs_name, proj_elem_params):
+    def define_text(self, cs_name, proj_elem_params, reflection=False):
         """Create a new text as projection element.
 
         Args:
@@ -384,10 +394,11 @@ class ProjectionElement(object):
             y_position   = proj_elem_params.position.y
             angle        = proj_elem_params.angle[0]
             height       = proj_elem_params.size[0]
-            char_spacing = proj_elem_params.size[1]
+            char_spacing = proj_elem_params.size[1] if len(proj_elem_params.size)>1 else 5
             text_proj    = proj_elem_params.text
+            figure_type  = proj_elem_params.figure_type
 
-            text_name = group + "/text/" + id
+            text_name = group + self.figures_list[figure_type] + id
             text = self.create_text(text_name)
             text.text = text_proj
             text.charSpacing = char_spacing
@@ -395,6 +406,7 @@ class ProjectionElement(object):
             text.angle = angle
             text.height = height
             text.activated = True
+            text.detectReflection = reflection
             text.coordinateSystemList = [cs_name]
 
             self.__thrift_client.SetTextElement(text)
@@ -438,7 +450,7 @@ class ProjectionElement(object):
                 figure = self.get_arc(name,proj_elem)
             elif figure_type == Figure.OVAL:
                 figure = self.get_oval(name,proj_elem)
-            elif figure_type == Figure.TEXT:
+            elif figure_type == Figure.TEXT or Figure.POINTER:
                 figure = self.get_text(name,proj_elem)
             else:
                 success = False
@@ -798,4 +810,26 @@ class ProjectionElement(object):
 
         success = True
         message = "Coordinate system frame created."
+        return success,message
+
+    def define_pointer(self, cs_name, pointer):
+        """Create a new pointer as projection element.
+
+        Args:
+            cs_name (str): name of coordinate system which the new projection element will be added
+            pointer (object): object with the necessary parameters to identify and define a pointer as a 
+            new projection figure
+                
+        Returns:
+            tuple[bool, str]: the first value in the returned tuple is a bool success value and the second value in the tuple is 
+            an information message string
+        """
+        pointer.text = "*"
+        success,message = self.define_text(cs_name, pointer, True)
+        if not success:
+            return success,message
+
+        success = True
+        message = "Pointer created."
+
         return success,message

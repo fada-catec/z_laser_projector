@@ -418,6 +418,45 @@ class ZLPProjectorManager(object):
             success,message = self.keyboard_control.init_keyboard_listener(self.__active_coord_sys,params)
             if not success:
                 raise SystemError(message)
+
+    def create_pointer(self, proj_elem_params):
+        """Create a pointer to be scanned as new projection element, associated to the active reference system.
+
+        Args:
+            proj_elem_params (object): object with the necessary parameters to define a new pointer
+
+        Raises:
+            SystemError
+        """
+        if not self.__active_coord_sys:
+            message = "There is not an active coordinate system. Define or set one first."
+            raise SystemError(message)
+        
+        success,message = self.projection_element.define_pointer(self.__active_coord_sys, proj_elem_params)
+        if not success:
+            raise SystemError(message)
+
+    def scan_pointer(self, reflection_callback=None):
+        """Set callback for reflection state change and start pointers scanning.
+
+        Args:
+            reflection_callback (object): callback function 
+
+        Raises:  
+            SystemError
+        """
+        if not self.__active_coord_sys:
+            raise Warning("No Active Coordinate System set yet.")
+        
+        try: 
+            success,message = self.projector_client.scan_pointer(reflection_callback)
+            if not success:
+                raise SystemError(message)
+            
+            self.start_projection()
+
+        except SystemError as e:
+            raise SystemError(e) 
     
     def show_frame(self):
         """Project the origin axes and frame of the active reference system on the projection surface.
