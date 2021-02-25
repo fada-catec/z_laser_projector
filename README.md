@@ -38,13 +38,21 @@ This project is licensed under the terms of the [**Apache 2.0**](https://www.apa
    
 - [ROS Melodic](http://wiki.ros.org/melodic/Installation/Ubuntu)
 
-- This software runs on **python 3**. Install dependencies:
+- This software runs on **python 3**. You can install dependencies:
+
+          cd ~/catkin_ws
+          rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+
+     or
 
           sudo apt-get install python3-thriftpy
           sudo apt-get install python3-numpy
           sudo apt-get install python3-scipy
+          sudo apt-get install python3-ezdxf
           sudo apt-get install python3-pyqt5
           sudo apt-get install python3-nose
+
+- Install pynput
 
           sudo apt-get install python3-pip
           pip3 install pynput
@@ -75,7 +83,7 @@ We have created a functionality capable of reading and interpreting a DXF graphi
 
      roslaunch z_laser_zlp1 z_laser_dxf_reader.launch dxf_file_name:=dxf_test
 
-NOTE: shape units are read as millimetres
+NOTE: figures' units are read as millimetres
 
 ### Libraries
 
