@@ -18,12 +18,13 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-catkin_add_nosetests(test/test_utils.py)
-catkin_add_nosetests(test/test_manager_connection.py)
-catkin_add_nosetests(test/test_manager_coordinate_system.py)                     
-catkin_add_nosetests(test/test_manager_projection_element.py)                     
-
 if(CATKIN_ENABLE_TESTING)
+  catkin_add_nosetests(test/test_utils.py)
+  catkin_add_nosetests(test/test_manager_connection.py)
+  catkin_add_nosetests(test/test_manager_coordinate_system.py)                     
+  catkin_add_nosetests(test/test_manager_projection_element.py)                     
+  catkin_add_nosetests(test/test_dxf.py)  
+
   find_package(rostest REQUIRED)
   add_rostest(test/connection_test.test)
   add_rostest(test/define_coordinate_system_test.test)
